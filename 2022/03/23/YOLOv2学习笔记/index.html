@@ -291,7 +291,16 @@
 
 <p>YOLOv2的损失函数：</p>
 <p><img src="https://pic2.zhimg.com/v2-4d26567e91e0ec4ef46878811c397d91_r.jpg" alt="v2_13"></p>
-<h4 id="1-4-Fine-Grained-Features-细粒度特征"><a href="#1-4-Fine-Grained-Features-细粒度特征" class="headerlink" title="1.4 Fine-Grained Features (细粒度特征)"></a>1.4 Fine-Grained Features (细粒度特征)</h4><p>在最后pooling之前，把特征图分成两路处理：一路进行正常的conv+pooling操作，减小特征图尺寸，增加通道数；另一路将原特征图拆分成四份，在通道维拼接成一个长条（<em>称为passthrough层</em>）；最后再将两路特征拼接在一起。这样能够保留较低层的特征（有点DenseNet的味道）。</p>
+<h4 id="1-4-Direct-location-prediction"><a href="#1-4-Direct-location-prediction" class="headerlink" title="1.4 Direct location prediction"></a>1.4 Direct location prediction</h4><p>通过$\sigma(t_x)$函数（即：sigmoid函数）限制预测框的中心点全图乱窜。$b_x, b_y, b_w, b_h$是预测框中心点和宽高的偏移量。$t_x, t_y, t_w, t_h, t_o$是预测出来的5个值，通过下面的公式来由这5个值计算出中心点和宽高的偏移量，以及预测框的置信度。$c_x, c_y$是预测框所在grid cell的左上角相对于全图左上角的位置。$p_w, p_h$是anchor的宽高。</p>
+<p>这里说明一下anchor（锚框，也称先验框）和预测框的区别：</p>
+<p>（1）anchor是在模型训练之前就生成了的5个先验框，从这5个先验框中，选取一个和Ground Truth的IOU最大的框用来预测物体；</p>
+<p>（2）我们拿着模型预测出来的4个值（$t_x, t_y, t_w, t_h$），计算出来4个偏移量（$b_x, b_y, b_w, b_h$），然后在上面选出的那个先验框的基础上进行偏移所得到的框就叫做预测框。</p>
+<img src="https://pic2.zhimg.com/v2-5f1040bbaf234817e6da171305bb363d_r.jpg" alt="v2_29" style="zoom:40%;" />
+
+<p>下面公式中$Pr(object)$是预测框的置信度。</p>
+<img src="https://pic4.zhimg.com/v2-462620e7df48461d6c7ea0aa1a964277_r.jpg" alt="v2_30" style="zoom:30%;" />
+
+<h4 id="1-5-Fine-Grained-Features-细粒度特征"><a href="#1-5-Fine-Grained-Features-细粒度特征" class="headerlink" title="1.5 Fine-Grained Features (细粒度特征)"></a>1.5 Fine-Grained Features (细粒度特征)</h4><p>在最后pooling之前，把特征图分成两路处理：一路进行正常的conv+pooling操作，减小特征图尺寸，增加通道数；另一路将原特征图拆分成四份，在通道维拼接成一个长条（<em>称为passthrough层</em>）；最后再将两路特征拼接在一起。这样能够保留较低层的特征（有点DenseNet的味道）。</p>
 <img src="https://pic1.zhimg.com/v2-8ccb6557786f1d45078e6790c9af7a1c_r.jpg" alt="v2_14" style="zoom:40%;" />
 
 <p><em>passthrough层</em> 的另一种理解方式：</p>
@@ -299,14 +308,14 @@
 
 <p> 放在整个网络中进行理解：</p>
 <p><img src="https://pic4.zhimg.com/v2-767686bc7619a8ae4ac205f2672b0793_r.jpg" alt="v2_16"></p>
-<h4 id="1-5-Multi-scale-training-1-5-mAP"><a href="#1-5-Multi-scale-training-1-5-mAP" class="headerlink" title="1.5 Multi-scale training (+1.5% mAP)"></a>1.5 Multi-scale training (+1.5% mAP)</h4><p>同一个模型，每10步就选取一个新的输入图像大小，以使得模型能够适应不同大小的图像输入。为什么可以这样做呢？这是因为使用了Global Average Pooling （全局平均池化，GAP）操作。虽然模型最后输出的feature map大小不同了，但是使用了GAP之后，不同尺度的feature map都变成了相同的大小（即：1）。</p>
+<h4 id="1-6-Multi-scale-training-1-5-mAP"><a href="#1-6-Multi-scale-training-1-5-mAP" class="headerlink" title="1.6 Multi-scale training (+1.5% mAP)"></a>1.6 Multi-scale training (+1.5% mAP)</h4><p>同一个模型，每10步就选取一个新的输入图像大小，以使得模型能够适应不同大小的图像输入。为什么可以这样做呢？这是因为使用了Global Average Pooling （全局平均池化，GAP）操作。虽然模型最后输出的feature map大小不同了，但是使用了GAP之后，不同尺度的feature map都变成了相同的大小（即：1）。</p>
 <img src="https://pic3.zhimg.com/v2-6af78ca9932bb586e73def030766ab12_r.jpg" alt="v2_17" style="zoom:48%;" />
 
 <p>这个操作还有一个副作用：如果输入的是一张大图片，模型会预测得比较慢，但是很准；如果输入的是一张小图片，模型会预测得比较快，但是不太准。因此可以通过选择不同尺寸的输入来进行“精度-速度”的权衡。</p>
 <p>论文中得到的输入不同尺寸图片下的结果：</p>
 <img src="https://pic1.zhimg.com/v2-a581a1fecff9fdddd80594cb9f059a78_r.jpg" alt="v2_18" style="zoom:40%;" />
 
-<h4 id="1-6-Better部分小结"><a href="#1-6-Better部分小结" class="headerlink" title="1.6 Better部分小结"></a>1.6 Better部分小结</h4><p>YOLOv1 演变到 YOLOv2 的过程。从表中可以看出，加了Anchor boxes之后mAP反而下降了，为什么还要采用呢？因为加了Anchor之后可以大大增加Recall，所以是值得的；另外换了new network之后也没有很大的提升，那为什么要换呢？这是因为DarkNet相对于YOLOv1的骨干网络可以大大降低计算量，所以也是值得的。</p>
+<h4 id="1-7-Better部分小结"><a href="#1-7-Better部分小结" class="headerlink" title="1.7 Better部分小结"></a>1.7 Better部分小结</h4><p>YOLOv1 演变到 YOLOv2 的过程。从表中可以看出，加了Anchor boxes之后mAP反而下降了，为什么还要采用呢？因为加了Anchor之后可以大大增加Recall，所以是值得的；另外换了new network之后也没有很大的提升，那为什么要换呢？这是因为DarkNet相对于YOLOv1的骨干网络可以大大降低计算量，所以也是值得的。</p>
 <p><img src="https://pic4.zhimg.com/v2-f29a96a120a004beb7d4cfb6753d1163_r.jpg" alt="v2_19"></p>
 <h3 id="2-Faster"><a href="#2-Faster" class="headerlink" title="2. Faster"></a>2. Faster</h3><p>YOLOv2变更快的主要原因是换了新的骨干网络。下面是使用不同的骨干网络的速度、精度对比。</p>
 <img src="https://pic1.zhimg.com/v2-e4e898867c8efa0cb9449843bf489f9c_r.jpg" alt="v2_20" style="zoom:40%;" />
