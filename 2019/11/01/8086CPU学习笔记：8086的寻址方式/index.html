@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <meta name="author" content="Jorwnpay">
+
+
+
+
+
+<title>8086CPU学习笔记：8086的寻址方式 | Mr.Duck</title>
+
+
+
+    <link rel="icon" href="/icon.png">
+
+
+
+
+    <!-- stylesheets list from _config.yml -->
+    
+    <link rel="stylesheet" href="/css/style.css">
+    
+
+
+
+    <!-- scripts list from _config.yml -->
+    
+    <script src="/js/script.js"></script>
+    
+    <script src="/js/tocbot.min.js"></script>
+    
+
+
+
+    
+    
+        <!-- MathJax配置，可通过单美元符号书写行内公式等 -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+    "HTML-CSS": {
+        preferredFont: "TeX",
+        availableFonts: ["STIX","TeX"],
+        linebreaks: { automatic:true },
+        EqnChunk: (MathJax.Hub.Browser.isMobile ? 10 : 50)
+    },
+    tex2jax: {
+        inlineMath: [ ["$", "$"], ["\\(","\\)"] ],
+        processEscapes: true,
+        ignoreClass: "tex2jax_ignore|dno",
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    },
+    TeX: {
+        equationNumbers: { autoNumber: "AMS" },
+        noUndefined: { attributes: { mathcolor: "red", mathbackground: "#FFEEEE", mathsize: "90%" } },
+        Macros: { href: "{}" }
+    },
+    messageStyle: "none"
+    });
+</script>
+<!-- 给MathJax元素添加has-jax class -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for(i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+<!-- 通过连接CDN加载MathJax的js代码 -->
+<script type="text/javascript" async
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+
+
+    
+
+
+<meta name="generator" content="Hexo 5.4.1"></head>
+
+<body>
+    <script>
+        // this function is used to check current theme before page loaded.
+        (() => {
+            const currentTheme = window.localStorage && window.localStorage.getItem('theme') || '';
+            const isDark = currentTheme === 'dark';
+            const pagebody = document.getElementsByTagName('body')[0]
+            if (isDark) {
+                pagebody.classList.add('dark-theme');
+                // mobile
+                document.getElementById("mobile-toggle-theme").innerText = "· Dark"
+            } else {
+                pagebody.classList.remove('dark-theme');
+                // mobile
+                document.getElementById("mobile-toggle-theme").innerText = "· Light"
+            }
+        })();
+    </script>
+
+
+    <div class="wrapper">
+        <header>
+    <nav class="navbar">
+        <div class="container">
+            <div class="navbar-header header-logo"><a href="/">Jorwnpay&#39;s Blog</a></div>
+            <div class="menu navbar-right">
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                    <a class="menu-item" href="/category">Categories</a>
+                
+                    <a class="menu-item" href="/tag">Tags</a>
+                
+                    <a class="menu-item" href="/about">About</a>
+                
+                <input id="switch_default" type="checkbox" class="switch_default">
+                <label for="switch_default" class="toggleBtn"></label>
+            </div>
+        </div>
+    </nav>
+
+    
+    <nav class="navbar-mobile" id="nav-mobile">
+        <div class="container">
+            <div class="navbar-header">
+                <div>
+                    <a href="/">Jorwnpay&#39;s Blog</a><a id="mobile-toggle-theme">·&nbsp;Light</a>
+                </div>
+                <div class="menu-toggle" onclick="mobileBtn()">&#9776; Menu</div>
+            </div>
+            <div class="menu" id="mobile-menu">
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                    <a class="menu-item" href="/category">Categories</a>
+                
+                    <a class="menu-item" href="/tag">Tags</a>
+                
+                    <a class="menu-item" href="/about">About</a>
+                
+            </div>
+        </div>
+    </nav>
+
+</header>
+<script>
+    var mobileBtn = function f() {
+        var toggleMenu = document.getElementsByClassName("menu-toggle")[0];
+        var mobileMenu = document.getElementById("mobile-menu");
+        if(toggleMenu.classList.contains("active")){
+           toggleMenu.classList.remove("active")
+            mobileMenu.classList.remove("active")
+        }else{
+            toggleMenu.classList.add("active")
+            mobileMenu.classList.add("active")
+        }
+    }
+</script>
+            <div class="main">
+                <div class="container">
+    
+    
+        <div class="post-toc">
+    <div class="tocbot-list">
+    </div>
+    <div class="tocbot-list-menu">
+        <a class="tocbot-toc-expand" onclick="expand_toc()">Expand all</a>
+        <a onclick="go_top()">Back to top</a>
+        <a onclick="go_bottom()">Go to bottom</a>
+    </div>
+</div>
+
+<script>
+    document.ready(
+        function () {
+            tocbot.init({
+                tocSelector: '.tocbot-list',
+                contentSelector: '.post-content',
+                headingSelector: 'h1, h2, h3, h4, h5',
+                collapseDepth: 1,
+                orderedList: false,
+                scrollSmooth: true,
+            })
+        }
+    )
+
+    function expand_toc() {
+        var b = document.querySelector(".tocbot-toc-expand");
+        tocbot.init({
+            tocSelector: '.tocbot-list',
+            contentSelector: '.post-content',
+            headingSelector: 'h1, h2, h3, h4, h5',
+            collapseDepth: 6,
+            orderedList: false,
+            scrollSmooth: true,
+        });
+        b.setAttribute("onclick", "collapse_toc()");
+        b.innerHTML = "Collapse all"
+    }
+
+    function collapse_toc() {
+        var b = document.querySelector(".tocbot-toc-expand");
+        tocbot.init({
+            tocSelector: '.tocbot-list',
+            contentSelector: '.post-content',
+            headingSelector: 'h1, h2, h3, h4, h5',
+            collapseDepth: 1,
+            orderedList: false,
+            scrollSmooth: true,
+        });
+        b.setAttribute("onclick", "expand_toc()");
+        b.innerHTML = "Expand all"
+    }
+
+    function go_top() {
+        window.scrollTo(0, 0);
+    }
+
+    function go_bottom() {
+        window.scrollTo(0, document.body.scrollHeight);
+    }
+
+</script>
+    
+
+    
+    <article class="post-wrap">
+        <header class="post-header">
+            <h1 class="post-title">8086CPU学习笔记：8086的寻址方式</h1>
+            
+                <div class="post-meta">
+                    
+                        Author: <a itemprop="author" rel="author" href="/">Jorwnpay</a>
+                    
+
+                    
+                        <span class="post-time">
+                        Date: <a href="#">November 1, 2019&nbsp;&nbsp;22:21:27</a>
+                        </span>
+                    
+                    
+                        <span class="post-category">
+                    Category:
+                            
+                                <a href="/categories/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/">学习笔记</a>
+                            
+                        </span>
+                    
+                </div>
+            
+        </header>
+
+        <div class="post-content">
+            <blockquote>
+<p>认真写好一篇文章</p>
+</blockquote>
+<h2 id="前言：8086汇编指令概述"><a href="#前言：8086汇编指令概述" class="headerlink" title="前言：8086汇编指令概述"></a>前言：8086汇编指令概述</h2><p>计算机的指令通常包含操作码和操作数两部分。指令有单操作数、双操作数和无操作数三种，其中双操作数的两个操作数要用逗号隔开，逗号左边是目的操作数，逗号右边是源操作数。<br><strong>例如:</strong>  MOV AX,CX<br>该指令将CX寄存器中的数值放到AX寄存器中，其中MOV为操作码，AX为目的操作数，CX为源操作数。</p>
+<p>@[toc]</p>
+<h2 id="1-立即寻址方式"><a href="#1-立即寻址方式" class="headerlink" title="1.立即寻址方式"></a>1.立即寻址方式</h2><p>在立即寻址方式下，操作数直接包含在指令中，即源操作数是立即数。<br>立即数：8位或16位的常数。<br><strong>例1：</strong> MOV AL,26H<br>该指令将一个8位立即数26H送到AL寄存器中。<br><strong>例2：</strong> MOV CX,2A50H<br>该指令将一个16位立即数2A50H送到CX寄存器中。其中2AH为高8位，放在高位地址；50H为低8位，放在低位地址。<br>如下图所示.(代码段从上到下地址越来越高)<br><img src="https://img-blog.csdnimg.cn/20191101193638592.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQxNzQ4OTAw,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"><br><strong>注意：</strong></p>
+<ul>
+<li>在所有的指令中，立即数只能作源操作数，不能作目的操作数。</li>
+<li>以A~F开头的数字出现在指令中时，前面要加一个数字0，以免与其它符号相混淆。例如，MOV AX,0FF00H</li>
+</ul>
+<h2 id="2-寄存器寻址方式"><a href="#2-寄存器寻址方式" class="headerlink" title="2.寄存器寻址方式"></a>2.寄存器寻址方式</h2><p>在寄存器寻址方式下，操作数包含在寄存器中，由指令指定寄存器的名称，即源操作数是寄存器。对于16位源操作数，寄存器可以是AX、BX、CX、DX、SI、DI、SP、和BP；对于8位操作数，寄存器可以是AH、AL、BH、BL、CH、CL、DH、DL。</p>
+<blockquote>
+<ul>
+<li>插一个知识点：8086CPU内部的寄存器们<br>左边是我为了记住这几种寄存器编出来的方法，死（si）对应S、吧（ba）对应B。。。<del>话糙理不糙。</del><br><img src="https://img-blog.csdnimg.cn/20191101195000719.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQxNzQ4OTAw,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></li>
+</ul>
+</blockquote>
+<p><strong>例1：</strong> MOV DX,AX<br>该指令将AX寄存器里存放的16位数据送到DX寄存器中。<br><strong>例2：</strong> MOV DL,AH<br>该指令将AH寄存器里存放的8位数据送到DL寄存器中。<br><strong>注意：</strong></p>
+<ul>
+<li>源操作数长度必须与目的操作数一致，否则会出错。<br>例如：MOV DX,AL 不正确，虽然16位的DX存得下8位的AL，但是汇编程序不知道将AL存在高8位还是低8位；<br>再如：MOV AL,DX 这种显然不正确，因为8位的AL存不下16位的DX。<h2 id="3-存储器寻址方式"><a href="#3-存储器寻址方式" class="headerlink" title="3.存储器寻址方式"></a>3.存储器寻址方式</h2>我们知道，8086有20根地址总线，可寻址2的20次方也就是1M的存储器空间，但是8086的寄存器只有16位，只能表示出2的16次方等于64k的存储空间，于是工程师把1M的存储空间分成几段，每段最大为64k，采用段地址加偏移地址的方式进行寻址，比如在数据段寄存器（设DS=2000H）中偏移地址为200H处存放了一个8位数据23H，实际上在物理内存里的地址是2000H * 10H + 200H = 20200H，该处存放的数据为（20200H）=23H。<br>在存储器寻址方式下，指令的源操作数存放在存储器中，根据不同的使用需要，可以选择以下5种寻址的方式：<h3 id="（1）直接寻址方式"><a href="#（1）直接寻址方式" class="headerlink" title="（1）直接寻址方式"></a>（1）直接寻址方式</h3>所谓直接寻址，跟立即数寻址有一点点相似，所不同的是立即数寻址是把一个<strong>常数</strong>赋给一个寄存器，直接寻址是把一个<strong>常数地址</strong>所表示的<strong>存储空间里存放的数</strong>赋给一个寄存器。这点其实可以类比C语言中常数和常数指针之间的关系，下面举例说明。</li>
+<li>MOV AX,[2000H]<br>该指令将DS:2000H、DS:2001H地址处存放的<strong>两个字节</strong>数据分别送给AX寄存器的低位AL和高位AH。<br>上面已经说过，要想在存储器中找到一个位置，必须要有段地址和偏移地址，该指令没有指明段地址，只给出了偏移地址，这时计算机会<strong>默认为使用的段寄存器为数据段寄存器DS</strong>。对比指令MOV AX,2000H，这个指令则是将一个常数2000H赋给AX寄存器。<br>从C语言的角度理解：前一条指令“相当”于 int a = *(指针常量) ，后一条指令“相当”于int a = 2000；</li>
+<li>  MOV AL,[2000H]<br>该指令与上面指令的唯一区别是，该指令将DS:2000H地址处存放的<strong>一个字节</strong>数据送给AL。</li>
+<li>MOV AX,ES:[500H]<br>上面两个指令都是使用的默认的数据段寄存器DS，如果要想寻址其他段寄存器所指出的存储区进行寻址，需要用ES:[500H]这样的表示方法。<br>其实上面的指令就相当于MOV AX,DS:[2000H].</li>
+<li>MOV AX,SIGN<br>这里的SIGN是一个符号地址，需要先把地址赋给这个符号SIGN，有两种方法进行赋值，第一种：SIGN EQU 2000H，这个方法可以近似理解成C语言里的宏定义：#define SIGN 2000;第二种：SIGN DW 2000H，这种方法可以近似理解成C语言里的变量定义：int SIGN = 2000;（其实他们之间有本质的区别，这样类比只是方便理解）。<br>采用符号地址的好处：一是方便程序中多次出现同一地址时的修改，只需要改一处就可以改变所有用到的地方的值，不用到处改来改去；二是用符号表示方便阅读。</li>
+</ul>
+<p><strong>小结：</strong> 从上面几种指令方法可以看到一个共同点，就是所有的源操作数都是立即数或是变量，是直接存放在代码段里的，这也是这种方式跟以下几种方式的区别。 </p>
+<h3 id="（2）寄存器间接寻址方式"><a href="#（2）寄存器间接寻址方式" class="headerlink" title="（2）寄存器间接寻址方式"></a>（2）寄存器间接寻址方式</h3><p>寄存器间接寻址方式跟直接寻址方式唯一的区别就是，把直接寻址方式中用立即数表示的源操作数[2000H]换成了<strong>基址或变址寄存器</strong>BX、BP、SI或DI，寄存器里存的还是一个地址常数，可以说是新壶装旧酒，给地址常数穿了件衣服。</p>
+<ul>
+<li>MOV AX,[SI]<br>设SI=2000H。<br>该指令将DS:2000H、DS:2001H地址处存放的<strong>两个字节</strong>数据分别送给AX寄存器的低位AL和高位AH。跟MOV AX,[2000H]的作用完全没差。</li>
+<li>MOV AX,ES:[SI]<br>设SI=2000H。<br>不啰嗦了，这个跟MOV AX,ES:[2000H]的作用又是完全没差。</li>
+</ul>
+<p><strong>小结：</strong> 从上面两种指令方法也可以看到一个共同点，就是所有的源操作数都是存放在基址或变址寄存器里的。</p>
+<h3 id="（3）寄存器相对寻址方式"><a href="#（3）寄存器相对寻址方式" class="headerlink" title="（3）寄存器相对寻址方式"></a>（3）寄存器相对寻址方式</h3><p>相对寻址的概念相对晦涩，咱直接上例子</p>
+<ul>
+<li>MOV AX,COUNT[SI]<br>这个方式跟前面的寄存器间接寻址方式唯一的一个区别就是，在偏移地址[SI]的基础上，再偏上一个COUNT。<br>设SI=2000H，COUNT=400H，那么该指令就是将DS:[2000H+400H]地址处存放的数据送给AX。<br>其实就相当于MOV AX,[SI+COUNT]。</li>
+<li>MOV AX,ES:COUNT[SI]<br>还是一样的配方，还是熟悉的味道，不多说了。</li>
+</ul>
+<p><strong>小结：</strong> 从上面两种指令方法又可以看到一个共同点，就是所有的源操作数都是基址或变址寄存器里的存放的数值的基础上加了一个COUNT，当然，COUNT也可以是其他表示，比如HAHAHA。</p>
+<h3 id="（4）基址变址寻址方式"><a href="#（4）基址变址寻址方式" class="headerlink" title="（4）基址变址寻址方式"></a>（4）基址变址寻址方式</h3><p>这种方式，也没有什么奇淫巧技，无聊的很，不说概念了，看例子。</p>
+<ul>
+<li>MOV AX, [BX][SI]<br>这个就相当于把上一种方式里的COUNT换成了[BX]。<br>设BX=400H，那么该指令就是将DS:[2000H+400H]地址处存放的数据送给AX。<h3 id="（5）相对基址变址寻址方式"><a href="#（5）相对基址变址寻址方式" class="headerlink" title="（5）相对基址变址寻址方式"></a>（5）相对基址变址寻址方式</h3>像贪吃蛇一样，再给源操作数加上一节。。。</li>
+<li>MOV AX,COUNT[BX][SI]<br>猜也能猜出来，这条指令的作用是：将DS:[COUNT+BX+SI]地址处存放的数据送给AX。<br>设COUNT=40H，BX=2000H，SI=400H，那么该指令就是将DS:[2000H+400H+40H]地址处存放的数据送给AX。</li>
+</ul>
+<p><strong>大注意：</strong> 以上五种方式在使用中要注意<br><img src="https://img-blog.csdnimg.cn/20191101220456178.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQxNzQ4OTAw,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"><img src="https://img-blog.csdnimg.cn/20191101220822835.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQxNzQ4OTAw,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<h2 id="4-其他寻址方式"><a href="#4-其他寻址方式" class="headerlink" title="4.其他寻址方式"></a>4.其他寻址方式</h2><h3 id="（1）隐含寻址"><a href="#（1）隐含寻址" class="headerlink" title="（1）隐含寻址"></a>（1）隐含寻址</h3><p>指令中不指明操作数，但隐含规定的寻址方式。例如指令DAA，它的含义是对寄存器AL中的数据进行十进制数调整，结果仍留在AL中。</p>
+<h3 id="（2）I-O端口寻址"><a href="#（2）I-O端口寻址" class="headerlink" title="（2）I/O端口寻址"></a>（2）I/O端口寻址</h3><p>8086有直接端口和间接端口两种寻址方式。</p>
+<ul>
+<li>直接端口寻址，端口地址由指令提供，它是一个8位立即数，因此能寻址256个端口。</li>
+<li><em>例如：</em>* IN AL,63H<br>表示将端口63H中的内容送进AL寄存器。</li>
+<li>间接端口寻址，端口地址由DX寄存器提供，能寻址2的16次方等于64k个I/O端口。</li>
+<li><em>例如：</em>*<br>MOV DX,233H<br>IN AL,DX<br>表示将端口233H中的内容送进AL寄存器。</li>
+</ul>
+
+        </div>
+
+        
+            <section class="post-copyright">
+                
+                    <p class="copyright-item">
+                        <span>Author:</span>
+                        <span>Jorwnpay</span>
+                    </p>
+                
+                
+                
+                    <p class="copyright-item">
+                        <span>License:</span>
+                        <span>Copyright (c) 2019 <a target="_blank" rel="noopener" href="http://creativecommons.org/licenses/by-nc/4.0/">CC-BY-NC-4.0</a> LICENSE</span>
+                    </p>
+                
+                
+                     <p class="copyright-item">
+                         <span>Slogan:</span>
+                         <span>I think it is possible for ordinary people to choose to be extraordinary.</span>
+                     </p>
+                
+
+            </section>
+        
+        <section class="post-tags">
+            <div>
+                <span>Tag(s):</span>
+                <span class="tag">
+                    
+                    
+                        <a href="/tags/8086/"># 8086</a>
+                    
+                        <a href="/tags/%E6%B1%87%E7%BC%96/"># 汇编</a>
+                    
+                        
+                </span>
+            </div>
+            <div>
+                <a href="javascript:window.history.back();">back</a>
+                <span>· </span>
+                <a href="/">home</a>
+            </div>
+        </section>
+        <section class="post-nav">
+            
+                <a class="prev" rel="prev" href="/2019/11/08/matlab%E7%BB%99%E9%9F%B3%E9%A2%91%E4%BF%A1%E5%8F%B7%E5%8A%A0%E5%99%AA%E5%B9%B6%E8%AE%BE%E8%AE%A1IIR%E6%BB%A4%E6%B3%A2%E5%99%A8%E6%BB%A4%E5%8E%BB%E5%99%AA%E5%A3%B0/">matlab给音频信号加噪并设计IIR滤波器滤去噪声</a>
+            
+            
+            <a class="next" rel="next" href="/2019/10/20/%E4%B8%80%E7%A7%8D%E5%8F%8C%E7%81%B0%E5%BA%A6%E4%BC%A0%E6%84%9F%E5%99%A8%E5%B7%A1%E9%BB%91%E7%BA%BF%E6%96%B9%E6%A1%88%EF%BC%9A%E5%AE%8C%E7%BE%8E%E8%A7%A3%E5%86%B3%E5%B0%8F%E8%BD%A6%E5%BE%AA%E8%BF%B9%E6%97%B6%E5%B7%A6%E5%8F%B3%E6%91%87%E6%91%86%E7%9A%84%E9%97%AE%E9%A2%98/">一种双灰度传感器巡黑线方案：完美解决小车循迹时左右摇摆的问题</a>
+            
+        </section>
+
+
+    </article>
+</div>
+
+            </div>
+            <footer id="footer" class="footer">
+    <div class="copyright">
+        <span>© Jorwnpay | Powered by <a href="https://hexo.io" target="_blank">Hexo</a> & <a href="https://github.com/Siricee/hexo-theme-Chic" target="_blank">Chic</a></span>
+    </div>
+</footer>
+
+    </div>
+</body>
+
+</html>

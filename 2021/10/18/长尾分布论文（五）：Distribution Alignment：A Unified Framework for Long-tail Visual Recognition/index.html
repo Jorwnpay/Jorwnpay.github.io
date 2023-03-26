@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <meta name="author" content="Jorwnpay">
+
+
+
+
+
+<title>长尾分布论文（五）：Distribution Alignment | Mr.Duck</title>
+
+
+
+    <link rel="icon" href="/icon.png">
+
+
+
+
+    <!-- stylesheets list from _config.yml -->
+    
+    <link rel="stylesheet" href="/css/style.css">
+    
+
+
+
+    <!-- scripts list from _config.yml -->
+    
+    <script src="/js/script.js"></script>
+    
+    <script src="/js/tocbot.min.js"></script>
+    
+
+
+
+    
+    
+        <!-- MathJax配置，可通过单美元符号书写行内公式等 -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+    "HTML-CSS": {
+        preferredFont: "TeX",
+        availableFonts: ["STIX","TeX"],
+        linebreaks: { automatic:true },
+        EqnChunk: (MathJax.Hub.Browser.isMobile ? 10 : 50)
+    },
+    tex2jax: {
+        inlineMath: [ ["$", "$"], ["\\(","\\)"] ],
+        processEscapes: true,
+        ignoreClass: "tex2jax_ignore|dno",
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    },
+    TeX: {
+        equationNumbers: { autoNumber: "AMS" },
+        noUndefined: { attributes: { mathcolor: "red", mathbackground: "#FFEEEE", mathsize: "90%" } },
+        Macros: { href: "{}" }
+    },
+    messageStyle: "none"
+    });
+</script>
+<!-- 给MathJax元素添加has-jax class -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for(i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+<!-- 通过连接CDN加载MathJax的js代码 -->
+<script type="text/javascript" async
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+
+
+    
+
+
+<meta name="generator" content="Hexo 5.4.1"></head>
+
+<body>
+    <script>
+        // this function is used to check current theme before page loaded.
+        (() => {
+            const currentTheme = window.localStorage && window.localStorage.getItem('theme') || '';
+            const isDark = currentTheme === 'dark';
+            const pagebody = document.getElementsByTagName('body')[0]
+            if (isDark) {
+                pagebody.classList.add('dark-theme');
+                // mobile
+                document.getElementById("mobile-toggle-theme").innerText = "· Dark"
+            } else {
+                pagebody.classList.remove('dark-theme');
+                // mobile
+                document.getElementById("mobile-toggle-theme").innerText = "· Light"
+            }
+        })();
+    </script>
+
+
+    <div class="wrapper">
+        <header>
+    <nav class="navbar">
+        <div class="container">
+            <div class="navbar-header header-logo"><a href="/">Jorwnpay&#39;s Blog</a></div>
+            <div class="menu navbar-right">
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                    <a class="menu-item" href="/category">Categories</a>
+                
+                    <a class="menu-item" href="/tag">Tags</a>
+                
+                    <a class="menu-item" href="/about">About</a>
+                
+                <input id="switch_default" type="checkbox" class="switch_default">
+                <label for="switch_default" class="toggleBtn"></label>
+            </div>
+        </div>
+    </nav>
+
+    
+    <nav class="navbar-mobile" id="nav-mobile">
+        <div class="container">
+            <div class="navbar-header">
+                <div>
+                    <a href="/">Jorwnpay&#39;s Blog</a><a id="mobile-toggle-theme">·&nbsp;Light</a>
+                </div>
+                <div class="menu-toggle" onclick="mobileBtn()">&#9776; Menu</div>
+            </div>
+            <div class="menu" id="mobile-menu">
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                    <a class="menu-item" href="/category">Categories</a>
+                
+                    <a class="menu-item" href="/tag">Tags</a>
+                
+                    <a class="menu-item" href="/about">About</a>
+                
+            </div>
+        </div>
+    </nav>
+
+</header>
+<script>
+    var mobileBtn = function f() {
+        var toggleMenu = document.getElementsByClassName("menu-toggle")[0];
+        var mobileMenu = document.getElementById("mobile-menu");
+        if(toggleMenu.classList.contains("active")){
+           toggleMenu.classList.remove("active")
+            mobileMenu.classList.remove("active")
+        }else{
+            toggleMenu.classList.add("active")
+            mobileMenu.classList.add("active")
+        }
+    }
+</script>
+            <div class="main">
+                <div class="container">
+    
+    
+        <div class="post-toc">
+    <div class="tocbot-list">
+    </div>
+    <div class="tocbot-list-menu">
+        <a class="tocbot-toc-expand" onclick="expand_toc()">Expand all</a>
+        <a onclick="go_top()">Back to top</a>
+        <a onclick="go_bottom()">Go to bottom</a>
+    </div>
+</div>
+
+<script>
+    document.ready(
+        function () {
+            tocbot.init({
+                tocSelector: '.tocbot-list',
+                contentSelector: '.post-content',
+                headingSelector: 'h1, h2, h3, h4, h5',
+                collapseDepth: 1,
+                orderedList: false,
+                scrollSmooth: true,
+            })
+        }
+    )
+
+    function expand_toc() {
+        var b = document.querySelector(".tocbot-toc-expand");
+        tocbot.init({
+            tocSelector: '.tocbot-list',
+            contentSelector: '.post-content',
+            headingSelector: 'h1, h2, h3, h4, h5',
+            collapseDepth: 6,
+            orderedList: false,
+            scrollSmooth: true,
+        });
+        b.setAttribute("onclick", "collapse_toc()");
+        b.innerHTML = "Collapse all"
+    }
+
+    function collapse_toc() {
+        var b = document.querySelector(".tocbot-toc-expand");
+        tocbot.init({
+            tocSelector: '.tocbot-list',
+            contentSelector: '.post-content',
+            headingSelector: 'h1, h2, h3, h4, h5',
+            collapseDepth: 1,
+            orderedList: false,
+            scrollSmooth: true,
+        });
+        b.setAttribute("onclick", "expand_toc()");
+        b.innerHTML = "Expand all"
+    }
+
+    function go_top() {
+        window.scrollTo(0, 0);
+    }
+
+    function go_bottom() {
+        window.scrollTo(0, document.body.scrollHeight);
+    }
+
+</script>
+    
+
+    
+    <article class="post-wrap">
+        <header class="post-header">
+            <h1 class="post-title">长尾分布论文（五）：Distribution Alignment</h1>
+            
+                <div class="post-meta">
+                    
+                        Author: <a itemprop="author" rel="author" href="/">Jorwnpay</a>
+                    
+
+                    
+                        <span class="post-time">
+                        Date: <a href="#">October 18, 2021&nbsp;&nbsp;18:53:00</a>
+                        </span>
+                    
+                    
+                        <span class="post-category">
+                    Category:
+                            
+                                <a href="/categories/%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB/">论文阅读</a>
+                            
+                        </span>
+                    
+                </div>
+            
+        </header>
+
+        <div class="post-content">
+            <p>本文提出了两种应对长尾分布的方法：</p>
+<p>1.提出了一种自适应校准函数对分类器的输出得分进行调整；</p>
+<p>2.提出了一种广义重加权校准通过数据集分布的先验信息对损失函数进行了修改；</p>
+<p>本文的实验比较充分，做了在图像分类、语义分割、目标检测的实验，均取得了进步。</p>
+<p><a target="_blank" rel="noopener" href="https://openaccess.thecvf.com/content/CVPR2021/papers/Zhang_Distribution_Alignment_A_Unified_Framework_for_Long-Tail_Visual_Recognition_CVPR_2021_paper.pdf">论文地址</a><br><a target="_blank" rel="noopener" href="https://github.com/Megvii-BaseDetection/DisAlign">代码地址</a></p>
+<h4 id="3-1-Motivation"><a href="#3-1-Motivation" class="headerlink" title="3.1 Motivation"></a>3.1 Motivation</h4><p>本文首先通过消融实验探讨了两阶段学习框架的性能瓶颈。下图中黄线使用backbone直接训练得到，绿线先使用backbone训练特征表示器，随后再用平衡的完整数据集重新训练模型的分类器。<em>（具体的平衡的数据集是是怎么采样得到的待与作者确认）</em></p>
+<img src="https://pic4.zhimg.com/80/v2-94dec22c1110c53fb6fa7b5ebceb4bd3_1440w.jpg" alt="p3-1" style="zoom:50%;" />
+
+<p>从图中可以看出绿线是比黄线的准确率高的，这说明在第一阶段不平衡数据训练出了良好的表示器，但是第二阶段的分类器训练还有很大的改进空间。</p>
+<blockquote>
+<p>这里的思想实际上就是把BBN里将表示器和分类器解耦的思想换了一种说法。</p>
+</blockquote>
+<p>随后做了这样一个实验：使用三种不同的采样方法（IB、CB、SR）对不平衡的ImageNet-LT进行处理，然后在第一阶段训练特征提取器；随后在第二阶段，同样地使用平衡的ImageNet数据集对分类器进行重新训练，得到下图左边的结果。这个图意在证明即便使用了现有的数据集平衡采样方法，依然跟理想的情况有较大差距。</p>
+<p>在下图右边的图中，作者对比了目前最新的一种长尾分布问题的解决方法*(cRT，from CVPR2020)*，并用实验说明了这种方法距离bottle neck是有一定差距的，因此本文的研究是有必要的。</p>
+<img src="https://pic2.zhimg.com/80/v2-6c07440e4e89b24d24e68f9faa324cf1_1440w.jpg" alt="0" style="zoom:50%;" />
+
+<p>从实验结果中，作者得到了一个结论：<strong>在第一阶段特征提取器产生了一个强大的特征表示，而现有长尾方法的性能瓶颈在于特征空间中有偏差的决策边界</strong>。</p>
+<h4 id="3-2-分布校准"><a href="#3-2-分布校准" class="headerlink" title="3.2 分布校准"></a>3.2 分布校准</h4><p>本文提出的方法首先用原始不平衡数据集对模型进行训练；</p>
+<p>随后固定特征提取器$f()$不变，对原始分类器头部$h_0()$​进行了两种平衡方法（自适应校准函数、广义重加权）以调整分类器的决策边界。</p>
+<p>1.自适应校准函数</p>
+<p>论文提出了一个自适应校准函数，可以调整每个数据点的分值，具体方法如下：</p>
+<p>（1）首先将原始分类器$h_0(*)$输出的类别分数表示为$[z_1^0,\ldots,z_K^0]$​，引入了校准参数$\alpha_j、\beta_j$对每个类别的原始分数$z_j^0$进行加权得到$s_j$；</p>
+<img src="https://pic3.zhimg.com/80/v2-d2f2619fb87893ab57cedd93dc9d2472_1440w.jpg" alt="p3-3" style="zoom:50%;" />
+
+<p>（2）随后用一个置信度得分函数对原始分数$z_j^0$和调整后的分数进行加权：</p>
+<img src="https://pic4.zhimg.com/80/v2-51b8cd77fffca7590a80b993c6de44f7_1440w.jpg" alt="p3-4" style="zoom:50%;" />
+
+<p>​          其中置信度σ（x）控制特定输入x需要多少校准，由一个linear层跟一个non-linear层来实现。</p>
+<p>（3）之后用softmax函数对新的分数$\hat{z_j}$计算概率分布：</p>
+<img src="https://pic2.zhimg.com/80/v2-38210653a8c164f827dabef538f19401_1440w.jpg" alt="p3-5" style="zoom:50%;" />
+
+<p>2.广义重加权校准</p>
+<p>为了便于理解论文改进了个啥，这里首先复习一下多分类情况下的交叉熵损失的定义：<br>$$<br>H(p||q)=-\sum_{y\in C}^{} {p(y)log(q(y))}<br>$$<br>其中p(y)是真实概率值（ground truth），q(y)是预测概率值。</p>
+<p>而论文中使用了模型预测概率$p_m(*)$和有利于均衡预测的类的参考分布$p_r(y|x)$​之间的KL散度作为损失，形式如下：</p>
+<img src="https://pic2.zhimg.com/80/v2-b8e6551cdb8b6f47965aef2684bb8ba5_1440w.jpg" alt="p3-6" style="zoom:50%;" />
+
+<blockquote>
+<p>可以看到上面约等的形式其实就还是交叉熵损失函数，加上了一个常数C，把原来的真实概率值换成了下面的形式，并不是KL散度呀（个人理解）。</p>
+</blockquote>
+<p>其中$p_r(y|x)$的定义为：</p>
+<img src="https://pic2.zhimg.com/80/v2-69610dbf161d9780479fdc4eb7e67209_1440w.png" alt="p3-7" style="zoom:50%;" />
+
+<p>$\delta_c(*)$是一个Kronecker delta函数（当$y_i=c$时值为1，否则值为0）；</p>
+<p>$w_c$的定义为：</p>
+<img src="https://pic2.zhimg.com/80/v2-4a6000b1704697ceae601764129cd849_1440w.jpg" alt="p3-8" style="zoom:50%;" />
+
+<p>其中ρ是一个比例超参数，用于在编码类之前提供更大的灵活性。注意，当ρ=0时，我们的方案退化为的实例平衡重加权方法；当ρ=1时，退化为类平衡重加权方法。$[r_c,\ldots,r_K]$是作者定义的基于经验类频率的参考权重。</p>
+<h4 id="3-3-实验结果"><a href="#3-3-实验结果" class="headerlink" title="3.3 实验结果"></a>3.3 实验结果</h4><p>1.图像分类</p>
+<p>在ImageNet-LT上的实验结果：</p>
+<p>backbone：ResNet50、ResNeXt50</p>
+<p><img src="https://pic3.zhimg.com/80/v2-ff2aa81ec7a18c53d9ffde278a4afcc2_1440w.jpg" alt="p3-9"></p>
+<p>在iNaturalist-2018上的实验结果：</p>
+<p>backbone：ResNet50、ResNet152</p>
+<p><img src="https://pic4.zhimg.com/80/v2-e7c85c4115f2ac5eb784846e322c56eb_1440w.jpg" alt="p3-10"></p>
+<p>在Place365-LT上的实验结果：</p>
+<p>backbone：ResNet-152</p>
+<p><img src="https://pic3.zhimg.com/80/v2-fb91e6e9f3ea7f363143c31d5b45170a_1440w.jpg" alt="p3-11"></p>
+<p>2.语义分割</p>
+<p>在ADE-20K上的实验结果：</p>
+<p>backbone：ResNet-50、ResNet-101、ResNeSt-101</p>
+<p><img src="https://pic1.zhimg.com/80/v2-656bb281091ca143a65f718df6e50d30_1440w.jpg" alt="p3-12"></p>
+<p>3.目标检测</p>
+<p>在LVIS v0.5上的实验结果：</p>
+<p><img src="https://pic4.zhimg.com/80/v2-e465e1b6e53de841ed7a349d49d2ee47_1440w.jpg" alt="p3-13"></p>
+<p>在LVIS v1.0上的实验结果：</p>
+<p><img src="https://pic2.zhimg.com/80/v2-5d98ef8c435ac9d98e3a4880224c033d_1440w.jpg" alt="p3-14"></p>
+
+        </div>
+
+        
+            <section class="post-copyright">
+                
+                    <p class="copyright-item">
+                        <span>Author:</span>
+                        <span>Jorwnpay</span>
+                    </p>
+                
+                
+                
+                    <p class="copyright-item">
+                        <span>License:</span>
+                        <span>Copyright (c) 2019 <a target="_blank" rel="noopener" href="http://creativecommons.org/licenses/by-nc/4.0/">CC-BY-NC-4.0</a> LICENSE</span>
+                    </p>
+                
+                
+                     <p class="copyright-item">
+                         <span>Slogan:</span>
+                         <span>I think it is possible for ordinary people to choose to be extraordinary.</span>
+                     </p>
+                
+
+            </section>
+        
+        <section class="post-tags">
+            <div>
+                <span>Tag(s):</span>
+                <span class="tag">
+                    
+                    
+                        <a href="/tags/%E9%95%BF%E5%B0%BE%E5%AD%A6%E4%B9%A0/"># 长尾学习</a>
+                    
+                        
+                </span>
+            </div>
+            <div>
+                <a href="javascript:window.history.back();">back</a>
+                <span>· </span>
+                <a href="/">home</a>
+            </div>
+        </section>
+        <section class="post-nav">
+            
+                <a class="prev" rel="prev" href="/2022/03/23/YOLOv2%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/">YOLOv2学习笔记</a>
+            
+            
+            <a class="next" rel="next" href="/2021/10/10/%E9%95%BF%E5%B0%BE%E5%88%86%E5%B8%83%E8%AE%BA%E6%96%87%EF%BC%88%E5%9B%9B%EF%BC%89%EF%BC%9AImproving%20Calibration%20for%20Long-Tailed%20Recognition/">长尾分布论文（四）：Improving Calibration for Long-Tailed Recognition</a>
+            
+        </section>
+
+
+    </article>
+</div>
+
+            </div>
+            <footer id="footer" class="footer">
+    <div class="copyright">
+        <span>© Jorwnpay | Powered by <a href="https://hexo.io" target="_blank">Hexo</a> & <a href="https://github.com/Siricee/hexo-theme-Chic" target="_blank">Chic</a></span>
+    </div>
+</footer>
+
+    </div>
+</body>
+
+</html>

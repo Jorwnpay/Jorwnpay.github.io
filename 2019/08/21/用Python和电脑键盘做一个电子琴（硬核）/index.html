@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <meta name="author" content="Jorwnpay">
+
+
+
+
+
+<title>用Python和电脑键盘做一个电子琴（硬核） | Mr.Duck</title>
+
+
+
+    <link rel="icon" href="/icon.png">
+
+
+
+
+    <!-- stylesheets list from _config.yml -->
+    
+    <link rel="stylesheet" href="/css/style.css">
+    
+
+
+
+    <!-- scripts list from _config.yml -->
+    
+    <script src="/js/script.js"></script>
+    
+    <script src="/js/tocbot.min.js"></script>
+    
+
+
+
+    
+    
+        <!-- MathJax配置，可通过单美元符号书写行内公式等 -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+    "HTML-CSS": {
+        preferredFont: "TeX",
+        availableFonts: ["STIX","TeX"],
+        linebreaks: { automatic:true },
+        EqnChunk: (MathJax.Hub.Browser.isMobile ? 10 : 50)
+    },
+    tex2jax: {
+        inlineMath: [ ["$", "$"], ["\\(","\\)"] ],
+        processEscapes: true,
+        ignoreClass: "tex2jax_ignore|dno",
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    },
+    TeX: {
+        equationNumbers: { autoNumber: "AMS" },
+        noUndefined: { attributes: { mathcolor: "red", mathbackground: "#FFEEEE", mathsize: "90%" } },
+        Macros: { href: "{}" }
+    },
+    messageStyle: "none"
+    });
+</script>
+<!-- 给MathJax元素添加has-jax class -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for(i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+<!-- 通过连接CDN加载MathJax的js代码 -->
+<script type="text/javascript" async
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+
+
+    
+
+
+<meta name="generator" content="Hexo 5.4.1"></head>
+
+<body>
+    <script>
+        // this function is used to check current theme before page loaded.
+        (() => {
+            const currentTheme = window.localStorage && window.localStorage.getItem('theme') || '';
+            const isDark = currentTheme === 'dark';
+            const pagebody = document.getElementsByTagName('body')[0]
+            if (isDark) {
+                pagebody.classList.add('dark-theme');
+                // mobile
+                document.getElementById("mobile-toggle-theme").innerText = "· Dark"
+            } else {
+                pagebody.classList.remove('dark-theme');
+                // mobile
+                document.getElementById("mobile-toggle-theme").innerText = "· Light"
+            }
+        })();
+    </script>
+
+
+    <div class="wrapper">
+        <header>
+    <nav class="navbar">
+        <div class="container">
+            <div class="navbar-header header-logo"><a href="/">Jorwnpay&#39;s Blog</a></div>
+            <div class="menu navbar-right">
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                    <a class="menu-item" href="/category">Categories</a>
+                
+                    <a class="menu-item" href="/tag">Tags</a>
+                
+                    <a class="menu-item" href="/about">About</a>
+                
+                <input id="switch_default" type="checkbox" class="switch_default">
+                <label for="switch_default" class="toggleBtn"></label>
+            </div>
+        </div>
+    </nav>
+
+    
+    <nav class="navbar-mobile" id="nav-mobile">
+        <div class="container">
+            <div class="navbar-header">
+                <div>
+                    <a href="/">Jorwnpay&#39;s Blog</a><a id="mobile-toggle-theme">·&nbsp;Light</a>
+                </div>
+                <div class="menu-toggle" onclick="mobileBtn()">&#9776; Menu</div>
+            </div>
+            <div class="menu" id="mobile-menu">
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                    <a class="menu-item" href="/category">Categories</a>
+                
+                    <a class="menu-item" href="/tag">Tags</a>
+                
+                    <a class="menu-item" href="/about">About</a>
+                
+            </div>
+        </div>
+    </nav>
+
+</header>
+<script>
+    var mobileBtn = function f() {
+        var toggleMenu = document.getElementsByClassName("menu-toggle")[0];
+        var mobileMenu = document.getElementById("mobile-menu");
+        if(toggleMenu.classList.contains("active")){
+           toggleMenu.classList.remove("active")
+            mobileMenu.classList.remove("active")
+        }else{
+            toggleMenu.classList.add("active")
+            mobileMenu.classList.add("active")
+        }
+    }
+</script>
+            <div class="main">
+                <div class="container">
+    
+    
+        <div class="post-toc">
+    <div class="tocbot-list">
+    </div>
+    <div class="tocbot-list-menu">
+        <a class="tocbot-toc-expand" onclick="expand_toc()">Expand all</a>
+        <a onclick="go_top()">Back to top</a>
+        <a onclick="go_bottom()">Go to bottom</a>
+    </div>
+</div>
+
+<script>
+    document.ready(
+        function () {
+            tocbot.init({
+                tocSelector: '.tocbot-list',
+                contentSelector: '.post-content',
+                headingSelector: 'h1, h2, h3, h4, h5',
+                collapseDepth: 1,
+                orderedList: false,
+                scrollSmooth: true,
+            })
+        }
+    )
+
+    function expand_toc() {
+        var b = document.querySelector(".tocbot-toc-expand");
+        tocbot.init({
+            tocSelector: '.tocbot-list',
+            contentSelector: '.post-content',
+            headingSelector: 'h1, h2, h3, h4, h5',
+            collapseDepth: 6,
+            orderedList: false,
+            scrollSmooth: true,
+        });
+        b.setAttribute("onclick", "collapse_toc()");
+        b.innerHTML = "Collapse all"
+    }
+
+    function collapse_toc() {
+        var b = document.querySelector(".tocbot-toc-expand");
+        tocbot.init({
+            tocSelector: '.tocbot-list',
+            contentSelector: '.post-content',
+            headingSelector: 'h1, h2, h3, h4, h5',
+            collapseDepth: 1,
+            orderedList: false,
+            scrollSmooth: true,
+        });
+        b.setAttribute("onclick", "expand_toc()");
+        b.innerHTML = "Expand all"
+    }
+
+    function go_top() {
+        window.scrollTo(0, 0);
+    }
+
+    function go_bottom() {
+        window.scrollTo(0, document.body.scrollHeight);
+    }
+
+</script>
+    
+
+    
+    <article class="post-wrap">
+        <header class="post-header">
+            <h1 class="post-title">用Python和电脑键盘做一个电子琴（硬核）</h1>
+            
+                <div class="post-meta">
+                    
+                        Author: <a itemprop="author" rel="author" href="/">Jorwnpay</a>
+                    
+
+                    
+                        <span class="post-time">
+                        Date: <a href="#">August 21, 2019&nbsp;&nbsp;17:46:10</a>
+                        </span>
+                    
+                    
+                        <span class="post-category">
+                    Category:
+                            
+                                <a href="/categories/%E5%AE%9E%E8%B7%B5%E7%AC%94%E8%AE%B0/">实践笔记</a>
+                            
+                        </span>
+                    
+                </div>
+            
+        </header>
+
+        <div class="post-content">
+            <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>有一天突然发现电脑上键这么多，刚好可以用来弹琴！<br>这个是我很早之前就有的一个想法，终于准备着手做。<br>一开始打算用c++做，在网上搜了一下c++怎么调用电脑的扬声器模块，发现比较难搞；<br>于是转而考虑使用python，发现好像还蛮简单的。<br>我的思路是，先找到do，re，mi，fa，so，la，xi音调对应的音频，然后根据输入的不同按键来播放不同的音频文件就可以啦。</p>
+<h2 id="那么第一步，先找音频"><a href="#那么第一步，先找音频" class="headerlink" title="那么第一步，先找音频~"></a>那么第一步，先找音频~</h2><p><img src="https://img-blog.csdnimg.cn/20190819152039912.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQxNzQ4OTAw,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"><br>苦苦寻找<br><img src="https://img-blog.csdnimg.cn/20190819152227384.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQxNzQ4OTAw,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"><br><img src="https://img-blog.csdnimg.cn/20190819152317547.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQxNzQ4OTAw,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"><br>唉，不好找啊:(<br><img src="https://img-blog.csdnimg.cn/20190819152546404.png" alt="在这里插入图片描述"><br>去百度网盘康康！</p>
+<p><img src="https://img-blog.csdnimg.cn/20190819152904647.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQxNzQ4OTAw,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"><br>。。。<br>再去网易云<br><img src="https://img-blog.csdnimg.cn/20190819153409987.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQxNzQ4OTAw,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"><br>怎么办呐QAQ<br>终于。。。！<br><img src="https://img-blog.csdnimg.cn/20190819154030372.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQxNzQ4OTAw,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"><br>找到了！！！<br>csdn上好多<br><a target="_blank" rel="noopener" href="https://download.csdn.net/download/qq_41748900/11579736">下载链接，一键直达</a><br>这么多资源，是不是有人做过?！<br><img src="https://img-blog.csdnimg.cn/20190819161140418.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQxNzQ4OTAw,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"><br>下载了音频文件，接下来开始写代码</p>
+<h2 id="用python实现"><a href="#用python实现" class="headerlink" title="用python实现"></a>用python实现</h2><h3 id="首先找了下，用playsound库可以实现播放wav文件"><a href="#首先找了下，用playsound库可以实现播放wav文件" class="headerlink" title="首先找了下，用playsound库可以实现播放wav文件"></a>首先找了下，用playsound库可以实现播放wav文件</h3><p><a target="_blank" rel="noopener" href="https://pypi.org/project/playsound/1.2.1/">详细用法见playsound官方文档</a><br>以及一篇中文的博客<br><a target="_blank" rel="noopener" href="https://blog.csdn.net/gzyicg/article/details/92804736">如何利用Python播放和录制声音</a><br>两行代码，播放刚才下好的文件，好用</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">from playsound import playsound</span><br><span class="line">playsound(&#x27;tone (1).wav&#x27;)</span><br></pre></td></tr></table></figure>
+<h3 id="再用键盘控制"><a href="#再用键盘控制" class="headerlink" title="再用键盘控制"></a>再用键盘控制</h3><p>python中捕获键盘事件的方法有很多<br>我用的是pygame里的方法<br>下面是代码<br>实现的是按下z键播放一个钢琴按键声</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">from playsound import playsound</span><br><span class="line">import pygame</span><br><span class="line"></span><br><span class="line">pygame.init()</span><br><span class="line">screen = pygame.display.set_mode((600, 400))</span><br><span class="line">pygame.display.set_caption(&#x27;pygame event&#x27;)</span><br><span class="line">while True:</span><br><span class="line">    for event in pygame.event.get():</span><br><span class="line">        if event.type == pygame.QUIT:</span><br><span class="line">            pygame.quit()</span><br><span class="line">        elif event.type == pygame.KEYDOWN:</span><br><span class="line">            if event.key == pygame.K_z:</span><br><span class="line">                playsound(&#x27;tone (10).wav&#x27;)</span><br><span class="line">    pygame.display.update()</span><br></pre></td></tr></table></figure>
+<p>有几个小的坑：</p>
+<ul>
+<li>导入播放声音的库必须得这样写<blockquote>
+<p>from playsound import playsound</p>
+</blockquote>
+</li>
+</ul>
+<p>不能直接写import playsound</p>
+<ul>
+<li><p>键盘事件需要创建窗口才会有用<br>即必须包含</p>
+<blockquote>
+<p>screen = pygame.display.set_mode((600, 400))<br>pygame.display.set_caption(‘pygame event’)</p>
+</blockquote>
+</li>
+<li><p>必须有</p>
+<blockquote>
+<p>pygame.init()</p>
+</blockquote>
+</li>
+</ul>
+<p>否则会报错pygame.error: video system not initialized</p>
+<p>这样就实现了基本的按键控制钢琴，但是有个不完美的地方（应该叫体验极差）<br>每个录音文件后面都有一段不短的无声<br>但必须要等待这个文件播放完毕才会进行下一步的操作<br>造成这个钢琴很不跟手啊。。。<br>第一个键按完半天，才能按下一个<br>真实的钢琴声音应该是一个音未落，另一个音就能弹出来</p>
+<h3 id="于是考虑，使用多线程"><a href="#于是考虑，使用多线程" class="headerlink" title="于是考虑，使用多线程"></a>于是考虑，使用多线程</h3><p>这样可以按完一个键，不用等文件播放完，就能播放下一个键，甚至可以多个键一起按，更符合真实钢琴的亚子<br>那么再去找找怎么实现Python多线程。。。<br>参考几篇博客<br><a target="_blank" rel="noopener" href="https://blog.csdn.net/somezz/article/details/80963760">Python 多线程操作</a>  &lt;–这篇特别棒<br><a target="_blank" rel="noopener" href="https://www.cnblogs.com/chbo/p/7043660.html">python之多线程</a><br><a target="_blank" rel="noopener" href="https://www.liaoxuefeng.com/wiki/897692888725344/923056337842176">多线程：廖雪峰的官方网站</a><br>看了很多文章，发现python的多线程不能并行处理多个任务，因为python解释器在执行代码时，有一个GIL锁，这个锁的作用是保证同一时刻只有一个线程在工作，哭了</p>
+<h3 id="哭完发现，还可以使用多进程"><a href="#哭完发现，还可以使用多进程" class="headerlink" title="哭完发现，还可以使用多进程"></a>哭完发现，还可以使用多进程</h3><p>又是几篇好文章<br><a target="_blank" rel="noopener" href="https://www.liaoxuefeng.com/wiki/1016959663602400/1017628290184064">多进程：廖雪峰的官方网站</a><br><a target="_blank" rel="noopener" href="https://www.cnblogs.com/fanglingen/p/7447959.html">第 10 章 python进程与多进程</a><br>经过很长时间的学习和尝试，用python自带的multiprocessing库实现了可以先按一个键，再马上按下一个键，代码如下：<br>实现的是用两个进程运行控制键盘播放录音的程序：<br>当按下z时，播放第60个音阶<br>当按下x时，播放第20个音阶<br>无需等待</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line">from playsound import playsound</span><br><span class="line">import pygame</span><br><span class="line">from multiprocessing import Process</span><br><span class="line"></span><br><span class="line">def window_init():</span><br><span class="line">    pygame.init()</span><br><span class="line">    screen = pygame.display.set_mode((600, 400))</span><br><span class="line">    pygame.display.set_caption(&#x27;keyboardpiano&#x27;)</span><br><span class="line"></span><br><span class="line">def k_control(key_param):</span><br><span class="line">    window_init()</span><br><span class="line">    while True:</span><br><span class="line">        for event in pygame.event.get():</span><br><span class="line">            if event.type == pygame.QUIT:</span><br><span class="line">                pygame.quit()</span><br><span class="line">            elif event.type == pygame.KEYDOWN:</span><br><span class="line">                if event.key == key_param:</span><br><span class="line">                    if key_param == pygame.K_z:</span><br><span class="line">                        playsound(&#x27;tone (60).wav&#x27;)</span><br><span class="line">                    elif key_param == pygame.K_x:</span><br><span class="line">                        playsound(&#x27;tone (20).wav&#x27;)</span><br><span class="line">        pygame.display.update()</span><br><span class="line">        </span><br><span class="line">def main():</span><br><span class="line">    p1 = Process(target=k_control, args=(pygame.K_z,))</span><br><span class="line">    p2 = Process(target=k_control, args=(pygame.K_x,))</span><br><span class="line">    p1.start()</span><br><span class="line">    p2.start()</span><br><span class="line">    p1.join()</span><br><span class="line">    p2.join()</span><br><span class="line">    </span><br><span class="line">if __name__ == &#x27;__main__&#x27;:</span><br><span class="line">    main()</span><br></pre></td></tr></table></figure>
+
+<p><strong>但是仍然存在两个问题：</strong></p>
+<ul>
+<li><p>问题一<br>pygame获取键盘事件必须要创建一个窗口，否则会报错<br>于是当使用多进程时，就需要打开多个窗口<br>这样只有鼠标选中窗口1时，按下该进程所对应的按键才会有用<br>即选中哪个窗口才会执行哪个窗口对应的进程<br>ps:<br>{<br>  点住窗口一<br>  按下z键<br>  “噔”的一声<br>  瞬间再点住窗口二<br>  按下x键<br>  “Duang”的一声<br>  。。。<br>}<br><img src="https://img-blog.csdnimg.cn/20190821133332461.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQxNzQ4OTAw,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+</li>
+<li><p>问题二<br>有的音乐是几个相同的音阶连在一起的，比如<br><del>mi mi mi</del>  re mi ，do re do la so<br>那这个程序还是会按下第一个mi等很长时间才可以按第二个</p>
+</li>
+</ul>
+<p><strong>解决思路：</strong><br>对于第一个问题，可以尝试一下换用其他的获取键盘事件的方法；<br>对于第二个问题，可以尝试批量把录音文件剪短；</p>
+<h3 id="尝试其他方法获得键盘事件"><a href="#尝试其他方法获得键盘事件" class="headerlink" title="尝试其他方法获得键盘事件"></a>尝试其他方法获得键盘事件</h3><p>找了三种方法<br><a target="_blank" rel="noopener" href="https://www.nuoweb.com/scripts/1581.html">pyhook</a><br><a target="_blank" rel="noopener" href="https://jingyan.baidu.com/article/86112f13a205fe27379787b6.html">tkinter</a><br><a target="_blank" rel="noopener" href="https://www.jianshu.com/p/3cc402e64042">curses</a></p>
+<p>这三个都可以读取键盘事件，<strong>可是无一例外的都需要一个GUI窗口</strong><br>我想可能想要获取键盘事件必须要有一个window才行<br>因为电脑同时有很多进程在工作，有很多窗口例如浏览器、word文档、IDE，这些窗口都需要获得键盘事件。如果不选中某一个确定的窗口，计算机无法知道当前的键盘事件哪个进程调用的。<br>也将会出现一些奇奇怪怪的事情，比如你打开着跟你妈聊天的QQ界面，同时在浏览器上输入了可以描述的东西，按下enter键，嗖的一下，消息就到了你妈眼里。。。</p>
+<p>于是放弃了这个方案</p>
+<h3 id="把音频文件剪短"><a href="#把音频文件剪短" class="headerlink" title="把音频文件剪短"></a>把音频文件剪短</h3><p>之前做过一点音频的处理，用的软件叫Cool Edit Pro，还蛮好用的<br>因为有88个文件，得批量处理<br>先批量导入音频文件<br><img src="https://img-blog.csdnimg.cn/2019082114031134.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQxNzQ4OTAw,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"><br>从音频的波形图可以看出，钢琴声后面很大一部分都是很微弱甚至没有声音，剪之<br><img src="https://img-blog.csdnimg.cn/20190821141131645.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQxNzQ4OTAw,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述">经过裁剪，发现对于高音效果很好，像上面的低音如果剪断会在结束的时候很突兀，从有声一瞬间变到无声，有一声小小的突变“砰~”</p>
+<p>那该怎么办呢？？？</p>
+<h3 id="黔驴技穷的我问了问带佬们，果然有了新的方法"><a href="#黔驴技穷的我问了问带佬们，果然有了新的方法" class="headerlink" title="黔驴技穷的我问了问带佬们，果然有了新的方法"></a>黔驴技穷的我问了问带佬们，果然有了新的方法</h3><p>用pygame里的一个方法</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">pygame.mixer.init()</span><br><span class="line">tone_1 = pygame.mixer.Sound(&#x27;tone (1).wav&#x27;)</span><br><span class="line">tone_1.play()</span><br></pre></td></tr></table></figure>
+<p>啥问题都没有<br>按一下响一下<br>完事了，<del>去您妈的多进程，去您妈的playsound</del>，pygame牛批！</p>
+<p>pygame.mixer.music模块的一些链接<br><a target="_blank" rel="noopener" href="https://blog.csdn.net/qq_41556318/article/details/86305046">Pygame详解（十四）：music 模块</a><br><a target="_blank" rel="noopener" href="https://www.xuebuyuan.com/824396.html">[BUG]pygame.mixer.music.play</a></p>
+<p>最终代码</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br></pre></td><td class="code"><pre><span class="line">import pygame</span><br><span class="line"></span><br><span class="line">def window_init():</span><br><span class="line">    pygame.init()</span><br><span class="line">    pygame.mixer.init()</span><br><span class="line">    screen = pygame.display.set_mode((600, 400))</span><br><span class="line">    pygame.display.set_caption(&#x27;keyboardpiano&#x27;)</span><br><span class="line"></span><br><span class="line">window_init()</span><br><span class="line"></span><br><span class="line">tone_3 = pygame.mixer.Sound(&#x27;tone (3).wav&#x27;)</span><br><span class="line">tone_6 = pygame.mixer.Sound(&#x27;tone (6).wav&#x27;)</span><br><span class="line">tone_9 = pygame.mixer.Sound(&#x27;tone (9).wav&#x27;)</span><br><span class="line">tone_12 = pygame.mixer.Sound(&#x27;tone (12).wav&#x27;)</span><br><span class="line">tone_15 = pygame.mixer.Sound(&#x27;tone (15).wav&#x27;)</span><br><span class="line">tone_18 = pygame.mixer.Sound(&#x27;tone (18).wav&#x27;)</span><br><span class="line">tone_21 = pygame.mixer.Sound(&#x27;tone (21).wav&#x27;)</span><br><span class="line">tone_24 = pygame.mixer.Sound(&#x27;tone (24).wav&#x27;)</span><br><span class="line">tone_27 = pygame.mixer.Sound(&#x27;tone (27).wav&#x27;)</span><br><span class="line">tone_30 = pygame.mixer.Sound(&#x27;tone (30).wav&#x27;)</span><br><span class="line">tone_33 = pygame.mixer.Sound(&#x27;tone (33).wav&#x27;)</span><br><span class="line">tone_36 = pygame.mixer.Sound(&#x27;tone (36).wav&#x27;)</span><br><span class="line">tone_39 = pygame.mixer.Sound(&#x27;tone (39).wav&#x27;)</span><br><span class="line">tone_42 = pygame.mixer.Sound(&#x27;tone (42).wav&#x27;)</span><br><span class="line">tone_45 = pygame.mixer.Sound(&#x27;tone (45).wav&#x27;)</span><br><span class="line">tone_48 = pygame.mixer.Sound(&#x27;tone (48).wav&#x27;)</span><br><span class="line">tone_51 = pygame.mixer.Sound(&#x27;tone (51).wav&#x27;)</span><br><span class="line">tone_54 = pygame.mixer.Sound(&#x27;tone (54).wav&#x27;)</span><br><span class="line">tone_57 = pygame.mixer.Sound(&#x27;tone (57).wav&#x27;)</span><br><span class="line">tone_60 = pygame.mixer.Sound(&#x27;tone (60).wav&#x27;)</span><br><span class="line">tone_63 = pygame.mixer.Sound(&#x27;tone (63).wav&#x27;)</span><br><span class="line">tone_66 = pygame.mixer.Sound(&#x27;tone (66).wav&#x27;)</span><br><span class="line">tone_69 = pygame.mixer.Sound(&#x27;tone (69).wav&#x27;)</span><br><span class="line">tone_72 = pygame.mixer.Sound(&#x27;tone (72).wav&#x27;)</span><br><span class="line">tone_75 = pygame.mixer.Sound(&#x27;tone (75).wav&#x27;)</span><br><span class="line">tone_78 = pygame.mixer.Sound(&#x27;tone (78).wav&#x27;)</span><br><span class="line"></span><br><span class="line">def k_control():</span><br><span class="line">    while True:</span><br><span class="line">        print(&#x27;true&#x27;)</span><br><span class="line">        for event in pygame.event.get():</span><br><span class="line">            print(&#x27;event in?&#x27;)</span><br><span class="line">            if event.type == pygame.QUIT:</span><br><span class="line">                pygame.quit()</span><br><span class="line">            elif event.type == pygame.KEYDOWN:</span><br><span class="line">                print(&#x27;key down?&#x27;)</span><br><span class="line">                if event.key == pygame.K_q:</span><br><span class="line">                    tone_3.play()</span><br><span class="line">                elif event.key == pygame.K_a:</span><br><span class="line">                    tone_6.play()</span><br><span class="line">                elif event.key == pygame.K_z:</span><br><span class="line">                    tone_9.play()</span><br><span class="line">                elif event.key == pygame.K_w:</span><br><span class="line">                    tone_12.play()</span><br><span class="line">                elif event.key == pygame.K_s:</span><br><span class="line">                    tone_15.play()</span><br><span class="line">                elif event.key == pygame.K_x:</span><br><span class="line">                    tone_18.play()</span><br><span class="line">                elif event.key == pygame.K_e:</span><br><span class="line">                    tone_21.play()</span><br><span class="line">                elif event.key == pygame.K_d:</span><br><span class="line">                    tone_24.play()</span><br><span class="line">                elif event.key == pygame.K_c:</span><br><span class="line">                    tone_27.play()</span><br><span class="line">                elif event.key == pygame.K_r:</span><br><span class="line">                    tone_30.play()</span><br><span class="line">                elif event.key == pygame.K_f:</span><br><span class="line">                    tone_33.play()</span><br><span class="line">                elif event.key == pygame.K_v:</span><br><span class="line">                    tone_36.play()</span><br><span class="line">                elif event.key == pygame.K_t:</span><br><span class="line">                    tone_39.play()</span><br><span class="line">                elif event.key == pygame.K_g:</span><br><span class="line">                    tone_42.play()</span><br><span class="line">                elif event.key == pygame.K_b:</span><br><span class="line">                    tone_45.play()</span><br><span class="line">                elif event.key == pygame.K_y:</span><br><span class="line">                    tone_48.play()</span><br><span class="line">                elif event.key == pygame.K_h:</span><br><span class="line">                    tone_51.play()</span><br><span class="line">                elif event.key == pygame.K_n:</span><br><span class="line">                    tone_54.play()</span><br><span class="line">                elif event.key == pygame.K_u:</span><br><span class="line">                    tone_57.play()</span><br><span class="line">                elif event.key == pygame.K_j:</span><br><span class="line">                    tone_60.play()</span><br><span class="line">                elif event.key == pygame.K_m:</span><br><span class="line">                    tone_63.play()</span><br><span class="line">                elif event.key == pygame.K_i:</span><br><span class="line">                    tone_66.play()</span><br><span class="line">                elif event.key == pygame.K_k:</span><br><span class="line">                    tone_69.play()</span><br><span class="line">                elif event.key == pygame.K_o:</span><br><span class="line">                    tone_72.play()</span><br><span class="line">                elif event.key == pygame.K_l:</span><br><span class="line">                    tone_75.play()</span><br><span class="line">                elif event.key == pygame.K_p:</span><br><span class="line">                    tone_78.play()</span><br><span class="line">        pygame.display.update()</span><br><span class="line"></span><br><span class="line">def main():</span><br><span class="line">    k_control()</span><br><span class="line"></span><br><span class="line">if __name__ == &#x27;__main__&#x27;:</span><br><span class="line">    main()</span><br></pre></td></tr></table></figure>
+<p>可以开心地弹琴啦！<br><img src="https://img-blog.csdnimg.cn/20190821213049329.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQxNzQ4OTAw,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<h2 id="追加一些问题记录"><a href="#追加一些问题记录" class="headerlink" title="追加一些问题记录"></a>追加一些问题记录</h2><ul>
+<li><p>问题：pygame.key.get_pressed()不工作，一开始用的这个方法，困扰了很久<br>在<a target="_blank" rel="noopener" href="https://stackoverflow.com/questions/17938170/pygame-key-get-pressed-is-not-working">stack overflow</a>找到了答案<br>原因及解决方法：The problem is that you don’t process pygame’s event queue. You should simple call pygame.event.pump() at the end of your loop and then your code works fine。（在循环的最后面加一句pygame.event.pump）</p>
+</li>
+<li><p>还有一个问题，pygame虽然好用，但仍有瑕疵，在用pygame.mixer.music播放音乐时，连续按五六下按键，还是会出现停顿，要等一会才能继续按，可能是音乐播放的任务是有上限的<br>我想了一个办法，用一个list存放最近5次的播放记录，每次有新的键盘事件产生时，关闭除最近5次记录外的所有正在播放的进程。<br>试了下<br>果然解决了问题！！！<br>代码如下<br>def stop_too_early(tone_now):这个函数关闭了当前按键的五个之前的所有播放进程</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br></pre></td><td class="code"><pre><span class="line">import pygame</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">def window_init():</span><br><span class="line">    pygame.init()</span><br><span class="line">    pygame.mixer.init()</span><br><span class="line">    screen = pygame.display.set_mode((1200, 600))</span><br><span class="line">    pygame.display.set_caption(&#x27;keyboardpiano&#x27;)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"># init pygame</span><br><span class="line">window_init()</span><br><span class="line"># load tunes</span><br><span class="line">tone = []</span><br><span class="line">for i in range(1, 27):</span><br><span class="line">    name_str = &#x27;tone (&#x27; + &#x27;%d&#x27; % (i*3) + &#x27;).wav&#x27;</span><br><span class="line">    print(name_str)</span><br><span class="line">    tone.append(pygame.mixer.Sound(name_str))</span><br><span class="line"># save keys</span><br><span class="line">key = [pygame.K_q, pygame.K_a, pygame.K_z, pygame.K_w, pygame.K_s, pygame.K_x, pygame.K_e, pygame.K_d, pygame.K_c, pygame.K_r, pygame.K_f, pygame.K_v, pygame.K_t, pygame.K_g, pygame.K_b, pygame.K_y, pygame.K_h, pygame.K_n, pygame.K_u, pygame.K_j, pygame.K_m, pygame.K_i, pygame.K_k, pygame.K_o, pygame.K_l, pygame.K_p]</span><br><span class="line"># save play history</span><br><span class="line">play_history = []</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"># stop early tune, incase play jam</span><br><span class="line">def stop_too_early(tone_now):</span><br><span class="line">    if len(play_history) &lt; 5:</span><br><span class="line">        play_history.append(tone_now)</span><br><span class="line">    else:</span><br><span class="line">        play_history.pop(0)</span><br><span class="line">        play_history.append(tone_now)</span><br><span class="line">    for t in tone:</span><br><span class="line">        if len(play_history) &lt; 5:</span><br><span class="line">            break</span><br><span class="line">        else:</span><br><span class="line">            if t == tone_now:</span><br><span class="line">                continue</span><br><span class="line">            elif t == play_history[0]:</span><br><span class="line">                continue</span><br><span class="line">            elif t == play_history[1]:</span><br><span class="line">                continue</span><br><span class="line">            elif t == play_history[2]:</span><br><span class="line">                continue</span><br><span class="line">            elif t == play_history[3]:</span><br><span class="line">                continue</span><br><span class="line">            else:</span><br><span class="line">                print(&#x27;stop&#x27;)</span><br><span class="line">                t.stop()</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"># use event.type == pygame.KEYDOWN to get keyboard input</span><br><span class="line">def k_control():</span><br><span class="line">    while True:</span><br><span class="line">        # print(&#x27;true&#x27;)</span><br><span class="line">        for event in pygame.event.get():</span><br><span class="line">            if event.type == pygame.QUIT:</span><br><span class="line">                pygame.quit()</span><br><span class="line">            elif event.type == pygame.KEYDOWN:</span><br><span class="line">                print(event.key)</span><br><span class="line">                for e in key:</span><br><span class="line">                    if e == event.key:</span><br><span class="line">                        tone[key.index(e)].play()</span><br><span class="line">                        stop_too_early(tone[key.index(e)])</span><br><span class="line">                        break</span><br><span class="line">        pygame.display.update()</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">def main():</span><br><span class="line">    k_control()</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">if __name__ == &#x27;__main__&#x27;:</span><br><span class="line">    main()</span><br></pre></td></tr></table></figure>
+<p>ps：这里的代码没有专门性能优化，只是简单地实现了功能，有什么问题可以留言讨论哈~</p>
+</li>
+</ul>
+
+        </div>
+
+        
+            <section class="post-copyright">
+                
+                    <p class="copyright-item">
+                        <span>Author:</span>
+                        <span>Jorwnpay</span>
+                    </p>
+                
+                
+                
+                    <p class="copyright-item">
+                        <span>License:</span>
+                        <span>Copyright (c) 2019 <a target="_blank" rel="noopener" href="http://creativecommons.org/licenses/by-nc/4.0/">CC-BY-NC-4.0</a> LICENSE</span>
+                    </p>
+                
+                
+                     <p class="copyright-item">
+                         <span>Slogan:</span>
+                         <span>I think it is possible for ordinary people to choose to be extraordinary.</span>
+                     </p>
+                
+
+            </section>
+        
+        <section class="post-tags">
+            <div>
+                <span>Tag(s):</span>
+                <span class="tag">
+                    
+                    
+                        <a href="/tags/python/"># python</a>
+                    
+                        <a href="/tags/idea/"># idea</a>
+                    
+                        
+                </span>
+            </div>
+            <div>
+                <a href="javascript:window.history.back();">back</a>
+                <span>· </span>
+                <a href="/">home</a>
+            </div>
+        </section>
+        <section class="post-nav">
+            
+                <a class="prev" rel="prev" href="/2019/08/21/pygame.key.get_pressed()%E4%B8%8D%E5%B7%A5%E4%BD%9C/">pygame.key.get_pressed()不工作</a>
+            
+            
+            <a class="next" rel="next" href="/2019/08/17/ubuntu16.04%E4%BD%BF%E7%94%A8doxygen%EF%BC%88%E5%B8%A6%E7%94%9F%E6%88%90%E6%96%87%E6%A1%A3%E7%9A%84%E6%96%B9%E6%B3%95%EF%BC%89/">ubuntu16.04使用doxygen（带生成文档的方法）</a>
+            
+        </section>
+
+
+    </article>
+</div>
+
+            </div>
+            <footer id="footer" class="footer">
+    <div class="copyright">
+        <span>© Jorwnpay | Powered by <a href="https://hexo.io" target="_blank">Hexo</a> & <a href="https://github.com/Siricee/hexo-theme-Chic" target="_blank">Chic</a></span>
+    </div>
+</footer>
+
+    </div>
+</body>
+
+</html>

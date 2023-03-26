@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <meta name="author" content="Jorwnpay">
+
+
+
+
+
+<title>长尾分布论文（三）：Equalization Loss v2 | Mr.Duck</title>
+
+
+
+    <link rel="icon" href="/icon.png">
+
+
+
+
+    <!-- stylesheets list from _config.yml -->
+    
+    <link rel="stylesheet" href="/css/style.css">
+    
+
+
+
+    <!-- scripts list from _config.yml -->
+    
+    <script src="/js/script.js"></script>
+    
+    <script src="/js/tocbot.min.js"></script>
+    
+
+
+
+    
+    
+        <!-- MathJax配置，可通过单美元符号书写行内公式等 -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+    "HTML-CSS": {
+        preferredFont: "TeX",
+        availableFonts: ["STIX","TeX"],
+        linebreaks: { automatic:true },
+        EqnChunk: (MathJax.Hub.Browser.isMobile ? 10 : 50)
+    },
+    tex2jax: {
+        inlineMath: [ ["$", "$"], ["\\(","\\)"] ],
+        processEscapes: true,
+        ignoreClass: "tex2jax_ignore|dno",
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    },
+    TeX: {
+        equationNumbers: { autoNumber: "AMS" },
+        noUndefined: { attributes: { mathcolor: "red", mathbackground: "#FFEEEE", mathsize: "90%" } },
+        Macros: { href: "{}" }
+    },
+    messageStyle: "none"
+    });
+</script>
+<!-- 给MathJax元素添加has-jax class -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for(i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+<!-- 通过连接CDN加载MathJax的js代码 -->
+<script type="text/javascript" async
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+
+
+    
+
+
+<meta name="generator" content="Hexo 5.4.1"></head>
+
+<body>
+    <script>
+        // this function is used to check current theme before page loaded.
+        (() => {
+            const currentTheme = window.localStorage && window.localStorage.getItem('theme') || '';
+            const isDark = currentTheme === 'dark';
+            const pagebody = document.getElementsByTagName('body')[0]
+            if (isDark) {
+                pagebody.classList.add('dark-theme');
+                // mobile
+                document.getElementById("mobile-toggle-theme").innerText = "· Dark"
+            } else {
+                pagebody.classList.remove('dark-theme');
+                // mobile
+                document.getElementById("mobile-toggle-theme").innerText = "· Light"
+            }
+        })();
+    </script>
+
+
+    <div class="wrapper">
+        <header>
+    <nav class="navbar">
+        <div class="container">
+            <div class="navbar-header header-logo"><a href="/">Jorwnpay&#39;s Blog</a></div>
+            <div class="menu navbar-right">
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                    <a class="menu-item" href="/category">Categories</a>
+                
+                    <a class="menu-item" href="/tag">Tags</a>
+                
+                    <a class="menu-item" href="/about">About</a>
+                
+                <input id="switch_default" type="checkbox" class="switch_default">
+                <label for="switch_default" class="toggleBtn"></label>
+            </div>
+        </div>
+    </nav>
+
+    
+    <nav class="navbar-mobile" id="nav-mobile">
+        <div class="container">
+            <div class="navbar-header">
+                <div>
+                    <a href="/">Jorwnpay&#39;s Blog</a><a id="mobile-toggle-theme">·&nbsp;Light</a>
+                </div>
+                <div class="menu-toggle" onclick="mobileBtn()">&#9776; Menu</div>
+            </div>
+            <div class="menu" id="mobile-menu">
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                    <a class="menu-item" href="/category">Categories</a>
+                
+                    <a class="menu-item" href="/tag">Tags</a>
+                
+                    <a class="menu-item" href="/about">About</a>
+                
+            </div>
+        </div>
+    </nav>
+
+</header>
+<script>
+    var mobileBtn = function f() {
+        var toggleMenu = document.getElementsByClassName("menu-toggle")[0];
+        var mobileMenu = document.getElementById("mobile-menu");
+        if(toggleMenu.classList.contains("active")){
+           toggleMenu.classList.remove("active")
+            mobileMenu.classList.remove("active")
+        }else{
+            toggleMenu.classList.add("active")
+            mobileMenu.classList.add("active")
+        }
+    }
+</script>
+            <div class="main">
+                <div class="container">
+    
+    
+        <div class="post-toc">
+    <div class="tocbot-list">
+    </div>
+    <div class="tocbot-list-menu">
+        <a class="tocbot-toc-expand" onclick="expand_toc()">Expand all</a>
+        <a onclick="go_top()">Back to top</a>
+        <a onclick="go_bottom()">Go to bottom</a>
+    </div>
+</div>
+
+<script>
+    document.ready(
+        function () {
+            tocbot.init({
+                tocSelector: '.tocbot-list',
+                contentSelector: '.post-content',
+                headingSelector: 'h1, h2, h3, h4, h5',
+                collapseDepth: 1,
+                orderedList: false,
+                scrollSmooth: true,
+            })
+        }
+    )
+
+    function expand_toc() {
+        var b = document.querySelector(".tocbot-toc-expand");
+        tocbot.init({
+            tocSelector: '.tocbot-list',
+            contentSelector: '.post-content',
+            headingSelector: 'h1, h2, h3, h4, h5',
+            collapseDepth: 6,
+            orderedList: false,
+            scrollSmooth: true,
+        });
+        b.setAttribute("onclick", "collapse_toc()");
+        b.innerHTML = "Collapse all"
+    }
+
+    function collapse_toc() {
+        var b = document.querySelector(".tocbot-toc-expand");
+        tocbot.init({
+            tocSelector: '.tocbot-list',
+            contentSelector: '.post-content',
+            headingSelector: 'h1, h2, h3, h4, h5',
+            collapseDepth: 1,
+            orderedList: false,
+            scrollSmooth: true,
+        });
+        b.setAttribute("onclick", "expand_toc()");
+        b.innerHTML = "Expand all"
+    }
+
+    function go_top() {
+        window.scrollTo(0, 0);
+    }
+
+    function go_bottom() {
+        window.scrollTo(0, document.body.scrollHeight);
+    }
+
+</script>
+    
+
+    
+    <article class="post-wrap">
+        <header class="post-header">
+            <h1 class="post-title">长尾分布论文（三）：Equalization Loss v2</h1>
+            
+                <div class="post-meta">
+                    
+                        Author: <a itemprop="author" rel="author" href="/">Jorwnpay</a>
+                    
+
+                    
+                        <span class="post-time">
+                        Date: <a href="#">October 7, 2021&nbsp;&nbsp;21:27:00</a>
+                        </span>
+                    
+                    
+                        <span class="post-category">
+                    Category:
+                            
+                                <a href="/categories/%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB/">论文阅读</a>
+                            
+                        </span>
+                    
+                </div>
+            
+        </header>
+
+        <div class="post-content">
+            <p>最近在长尾问题上一个比较流行的方法是将深度学习模型的特征表示器和分类器解耦，这种两阶段的方法的缺点在于需要额外的微调阶段，将表示器和分类器分开优化可能导致次优结果；并且这种方法虽然效果很不错，但是无法解释为什么要把两个训练过程分开。</p>
+<p>本文揭示了长尾目标检测的主要问题是正负梯度不平衡。为了解决梯度不平衡的问题，本文引入了一种新版本的均衡损失（EQL v2）。这是一种新颖的梯度引导的重新加权机制，可以独立、平等地重新平衡每个类别的训练过程。</p>
+<p><a target="_blank" rel="noopener" href="https://openaccess.thecvf.com/content/CVPR2021/papers/Tan_Equalization_Loss_v2_A_New_Gradient_Balance_Approach_for_Long-Tailed_CVPR_2021_paper.pdf">论文地址</a></p>
+<p><a target="_blank" rel="noopener" href="https://github.com/tztztztztz/eqlv2">代码地址</a></p>
+<h4 id="7-1-EQL-v2的思想和方法"><a href="#7-1-EQL-v2的思想和方法" class="headerlink" title="7.1 EQL v2的思想和方法"></a>7.1 EQL v2的思想和方法</h4><p>该损失函数的思想如下。</p>
+<p>假设我们有一批实例 I 及其表示。为了输出C个类别的logits：Z，我们使用权重矩阵W来对特征表示进行线性变换。W中的每个权重向量，我们称之为类别分类器，负责一个特定的类别，即：一个task。然后通过sigmoid函数将输出logit转换为预测概率分布P。我们期望对于每个实例，只有相应的分类器给出高分，而其他分类器给出低分。也就是说，一个训练实例对1个task来说是正例，而对其余C-1个tasks来说是负例。</p>
+<p>因此，可以计算出对于第 j 个task来说实际的正例数和负例数分别为：</p>
+<img src="https://pic1.zhimg.com/80/v2-22e78d05345b8be6959a2c9861bfc8f8_1440w.jpg" alt="p7-1" style="zoom:50%;" />
+
+<p>数据集上正样本和负样本的期望比率为：</p>
+<blockquote>
+<p>虽然看起来形式很花里胡哨，实际上就是$m^{pos}_j$和$m^{neg}_j$的比值。</p>
+</blockquote>
+<img src="https://pic4.zhimg.com/80/v2-20c06db6f1a5e8f7f1656feef72c646f_1440w.jpg" alt="p7-2" style="zoom:30%;" />
+
+<p>其中$n_j$是类别$j$所含有的实例数；$N$​是数据集中的实例总数。</p>
+<p>每个task的输出$z_j$​关于损失$L$​的累积正梯度和负梯度如下：</p>
+<img src="https://pic1.zhimg.com/80/v2-265aac24da26f9c1405932ff41ecc3cc_1440w.jpg" alt="p7-3" style="zoom:38%;" />
+
+<p>其中$p_j^i$表示第$i$​个实例在第$j$类上的估计概率。</p>
+<p>梯度引导平衡重加权的基本思想是，根据每个分类器累积的正负梯度比，分别对正梯度和负梯度进行加权和减权。</p>
+<blockquote>
+<p>下面直接给出了公式，并没有解释为什么要这样，懵逼警告。</p>
+</blockquote>
+<p>首先定义$g_j^{(t)}$作为第$ t $次迭代之前task $j$​​ 的累积正梯度与负梯度之比。下面给出了正梯度的权重$q_j^t$和负梯度的权重$r_j^t$的计算公式：</p>
+<img src="https://pic1.zhimg.com/80/v2-09a7a9d8438a64603e20414cf1c73360_1440w.png" alt="p7-4" style="zoom:50%;" />
+
+<p>其中$f(*)$是一个映射函数：</p>
+<img src="https://pic2.zhimg.com/80/v2-2d8fffef4e808dd2a2db49292c8f1c25_1440w.jpg" alt="p7-5" style="zoom:67%;" />
+
+<p>得到了$q_j^t$和$r_j^t$之后，把它们用到当前批次的正梯度和负梯度上，得到：</p>
+<img src="https://pic3.zhimg.com/80/v2-4178299e48eb9cc7247cf3022f6bbf02_1440w.jpg" alt="p7-6" style="zoom:50%;" />
+
+<p>最后，更新下次迭代的累积的正梯度与负梯度之比：</p>
+<img src="https://pic4.zhimg.com/80/v2-17992f2fa699d82d29fb730d80c41e1f_1440w.jpg" alt="p7-7" style="zoom:68%;" />
+
+<h4 id="7-2-实验"><a href="#7-2-实验" class="headerlink" title="7.2 实验"></a>7.2 实验</h4><p>在LVIS v0.5上与最新方法的比较：</p>
+<p><img src="https://pic2.zhimg.com/80/v2-bba42b6b75d9e12d851c3193ef0d77a5_1440w.jpg" alt="p7-8"></p>
+<p>从表中可以看出，本文所提方法有一定提升；</p>
+<p>在LVIS v1.0上与最新方法的比较：</p>
+<p><img src="https://pic1.zhimg.com/80/v2-f24ee1ad75681af5cf99a09b4bc07cb4_1440w.jpg" alt="p7-9"></p>
+<p>从表中可以看出，本文所提方法仍有一定提升；</p>
+<blockquote>
+<p>存疑：这里为什么不跟BAGS比了呢？</p>
+</blockquote>
+<p>在Open Images上的结果：</p>
+<img src="https://pic3.zhimg.com/80/v2-ea59f1a8869a6067e443fcc718088eee_1440w.jpg" alt="p7-10" style="zoom:67%;" />
+
+<blockquote>
+<p>奇怪，参与对比的方法怎么越来越少了？</p>
+</blockquote>
+<p><strong>总结：EQL v2的整个步骤：</strong>（我的理解）</p>
+<p>1）计算每个task的输出$z_j$​关于损失$L$​​的累积正梯度和负梯度；</p>
+<p>2）计算第$ t $​次迭代之前task $j$​ 的累积正梯度与负梯度之比$g_j^{(t)}$​；</p>
+<p>3）计算出正梯度权重$q_j^t$和负梯度权重$r_j^t$；</p>
+<p>4）将$q_j^t$、$r_j^t$分别和累积正梯度、累积负梯度相乘得到加权后的结果；</p>
+<p>5）更新累积正梯度与负梯度之比$g_j^{t+1}$以备下次使用；</p>
+<p>6）重复步骤3) - 5) ；</p>
+<blockquote>
+<p>为什么要这样做？No idea. 如果理解有错误的地方，还请帮忙指出。</p>
+</blockquote>
+
+        </div>
+
+        
+            <section class="post-copyright">
+                
+                    <p class="copyright-item">
+                        <span>Author:</span>
+                        <span>Jorwnpay</span>
+                    </p>
+                
+                
+                
+                    <p class="copyright-item">
+                        <span>License:</span>
+                        <span>Copyright (c) 2019 <a target="_blank" rel="noopener" href="http://creativecommons.org/licenses/by-nc/4.0/">CC-BY-NC-4.0</a> LICENSE</span>
+                    </p>
+                
+                
+                     <p class="copyright-item">
+                         <span>Slogan:</span>
+                         <span>I think it is possible for ordinary people to choose to be extraordinary.</span>
+                     </p>
+                
+
+            </section>
+        
+        <section class="post-tags">
+            <div>
+                <span>Tag(s):</span>
+                <span class="tag">
+                    
+                    
+                        <a href="/tags/%E9%95%BF%E5%B0%BE%E5%AD%A6%E4%B9%A0/"># 长尾学习</a>
+                    
+                        
+                </span>
+            </div>
+            <div>
+                <a href="javascript:window.history.back();">back</a>
+                <span>· </span>
+                <a href="/">home</a>
+            </div>
+        </section>
+        <section class="post-nav">
+            
+                <a class="prev" rel="prev" href="/2021/10/10/%E9%95%BF%E5%B0%BE%E5%88%86%E5%B8%83%E8%AE%BA%E6%96%87%EF%BC%88%E5%9B%9B%EF%BC%89%EF%BC%9AImproving%20Calibration%20for%20Long-Tailed%20Recognition/">长尾分布论文（四）：Improving Calibration for Long-Tailed Recognition</a>
+            
+            
+            <a class="next" rel="next" href="/2021/10/03/%E9%95%BF%E5%B0%BE%E5%88%86%E5%B8%83%E8%AE%BA%E6%96%87%EF%BC%88%E4%BA%8C%EF%BC%89%EF%BC%9AAdaptive%20Class%20Suppression%20Loss%20for%20Long-Tail%20Object%20Detection/">长尾分布论文（二）：Adaptive Class Suppression Loss for Long-Tail Object Detection</a>
+            
+        </section>
+
+
+    </article>
+</div>
+
+            </div>
+            <footer id="footer" class="footer">
+    <div class="copyright">
+        <span>© Jorwnpay | Powered by <a href="https://hexo.io" target="_blank">Hexo</a> & <a href="https://github.com/Siricee/hexo-theme-Chic" target="_blank">Chic</a></span>
+    </div>
+</footer>
+
+    </div>
+</body>
+
+</html>

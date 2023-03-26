@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <meta name="author" content="Jorwnpay">
+
+
+
+
+
+<title>matlab给音频信号加噪并设计IIR滤波器滤去噪声 | Mr.Duck</title>
+
+
+
+    <link rel="icon" href="/icon.png">
+
+
+
+
+    <!-- stylesheets list from _config.yml -->
+    
+    <link rel="stylesheet" href="/css/style.css">
+    
+
+
+
+    <!-- scripts list from _config.yml -->
+    
+    <script src="/js/script.js"></script>
+    
+    <script src="/js/tocbot.min.js"></script>
+    
+
+
+
+    
+    
+        <!-- MathJax配置，可通过单美元符号书写行内公式等 -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+    "HTML-CSS": {
+        preferredFont: "TeX",
+        availableFonts: ["STIX","TeX"],
+        linebreaks: { automatic:true },
+        EqnChunk: (MathJax.Hub.Browser.isMobile ? 10 : 50)
+    },
+    tex2jax: {
+        inlineMath: [ ["$", "$"], ["\\(","\\)"] ],
+        processEscapes: true,
+        ignoreClass: "tex2jax_ignore|dno",
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    },
+    TeX: {
+        equationNumbers: { autoNumber: "AMS" },
+        noUndefined: { attributes: { mathcolor: "red", mathbackground: "#FFEEEE", mathsize: "90%" } },
+        Macros: { href: "{}" }
+    },
+    messageStyle: "none"
+    });
+</script>
+<!-- 给MathJax元素添加has-jax class -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for(i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+<!-- 通过连接CDN加载MathJax的js代码 -->
+<script type="text/javascript" async
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+
+
+    
+
+
+<meta name="generator" content="Hexo 5.4.1"></head>
+
+<body>
+    <script>
+        // this function is used to check current theme before page loaded.
+        (() => {
+            const currentTheme = window.localStorage && window.localStorage.getItem('theme') || '';
+            const isDark = currentTheme === 'dark';
+            const pagebody = document.getElementsByTagName('body')[0]
+            if (isDark) {
+                pagebody.classList.add('dark-theme');
+                // mobile
+                document.getElementById("mobile-toggle-theme").innerText = "· Dark"
+            } else {
+                pagebody.classList.remove('dark-theme');
+                // mobile
+                document.getElementById("mobile-toggle-theme").innerText = "· Light"
+            }
+        })();
+    </script>
+
+
+    <div class="wrapper">
+        <header>
+    <nav class="navbar">
+        <div class="container">
+            <div class="navbar-header header-logo"><a href="/">Jorwnpay&#39;s Blog</a></div>
+            <div class="menu navbar-right">
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                    <a class="menu-item" href="/category">Categories</a>
+                
+                    <a class="menu-item" href="/tag">Tags</a>
+                
+                    <a class="menu-item" href="/about">About</a>
+                
+                <input id="switch_default" type="checkbox" class="switch_default">
+                <label for="switch_default" class="toggleBtn"></label>
+            </div>
+        </div>
+    </nav>
+
+    
+    <nav class="navbar-mobile" id="nav-mobile">
+        <div class="container">
+            <div class="navbar-header">
+                <div>
+                    <a href="/">Jorwnpay&#39;s Blog</a><a id="mobile-toggle-theme">·&nbsp;Light</a>
+                </div>
+                <div class="menu-toggle" onclick="mobileBtn()">&#9776; Menu</div>
+            </div>
+            <div class="menu" id="mobile-menu">
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                    <a class="menu-item" href="/category">Categories</a>
+                
+                    <a class="menu-item" href="/tag">Tags</a>
+                
+                    <a class="menu-item" href="/about">About</a>
+                
+            </div>
+        </div>
+    </nav>
+
+</header>
+<script>
+    var mobileBtn = function f() {
+        var toggleMenu = document.getElementsByClassName("menu-toggle")[0];
+        var mobileMenu = document.getElementById("mobile-menu");
+        if(toggleMenu.classList.contains("active")){
+           toggleMenu.classList.remove("active")
+            mobileMenu.classList.remove("active")
+        }else{
+            toggleMenu.classList.add("active")
+            mobileMenu.classList.add("active")
+        }
+    }
+</script>
+            <div class="main">
+                <div class="container">
+    
+    
+        <div class="post-toc">
+    <div class="tocbot-list">
+    </div>
+    <div class="tocbot-list-menu">
+        <a class="tocbot-toc-expand" onclick="expand_toc()">Expand all</a>
+        <a onclick="go_top()">Back to top</a>
+        <a onclick="go_bottom()">Go to bottom</a>
+    </div>
+</div>
+
+<script>
+    document.ready(
+        function () {
+            tocbot.init({
+                tocSelector: '.tocbot-list',
+                contentSelector: '.post-content',
+                headingSelector: 'h1, h2, h3, h4, h5',
+                collapseDepth: 1,
+                orderedList: false,
+                scrollSmooth: true,
+            })
+        }
+    )
+
+    function expand_toc() {
+        var b = document.querySelector(".tocbot-toc-expand");
+        tocbot.init({
+            tocSelector: '.tocbot-list',
+            contentSelector: '.post-content',
+            headingSelector: 'h1, h2, h3, h4, h5',
+            collapseDepth: 6,
+            orderedList: false,
+            scrollSmooth: true,
+        });
+        b.setAttribute("onclick", "collapse_toc()");
+        b.innerHTML = "Collapse all"
+    }
+
+    function collapse_toc() {
+        var b = document.querySelector(".tocbot-toc-expand");
+        tocbot.init({
+            tocSelector: '.tocbot-list',
+            contentSelector: '.post-content',
+            headingSelector: 'h1, h2, h3, h4, h5',
+            collapseDepth: 1,
+            orderedList: false,
+            scrollSmooth: true,
+        });
+        b.setAttribute("onclick", "expand_toc()");
+        b.innerHTML = "Expand all"
+    }
+
+    function go_top() {
+        window.scrollTo(0, 0);
+    }
+
+    function go_bottom() {
+        window.scrollTo(0, document.body.scrollHeight);
+    }
+
+</script>
+    
+
+    
+    <article class="post-wrap">
+        <header class="post-header">
+            <h1 class="post-title">matlab给音频信号加噪并设计IIR滤波器滤去噪声</h1>
+            
+                <div class="post-meta">
+                    
+                        Author: <a itemprop="author" rel="author" href="/">Jorwnpay</a>
+                    
+
+                    
+                        <span class="post-time">
+                        Date: <a href="#">November 8, 2019&nbsp;&nbsp;22:10:34</a>
+                        </span>
+                    
+                    
+                        <span class="post-category">
+                    Category:
+                            
+                                <a href="/categories/%E5%AE%9E%E8%B7%B5%E7%AC%94%E8%AE%B0/">实践笔记</a>
+                            
+                        </span>
+                    
+                </div>
+            
+        </header>
+
+        <div class="post-content">
+            <p>@[toc]<br>先记录一些MATLAB的常用指令，方便看后面代码时参考。</p>
+<h2 id="matlab的一些常用指令"><a href="#matlab的一些常用指令" class="headerlink" title="matlab的一些常用指令"></a>matlab的一些常用指令</h2><p><a target="_blank" rel="noopener" href="https://ww2.mathworks.cn/help/matlab/ref/subplot.html?searchHighlight=subplot&s_tid=doc_srchtitle">matlab官方网站</a>上给出了所有指令的详细文档，这里只列出一丢丢代码里用到的：），需要用到时去上面查就可以啦。</p>
+<ul>
+<li><strong>audioread()</strong><blockquote>
+<p>[y,Fs] = audioread(filename) 从名为 filename 的文件中读取数据，并返回样本数据 y 以及该数据的采样率 Fs。</p>
+</blockquote>
+</li>
+<li><strong>fft()</strong><blockquote>
+<p>Y = fft(X,n) 返回 n 点 DFT。如果未指定任何值，则 Y 的大小与 X 相同。</p>
+<ul>
+<li>如果 X 是向量且 X 的长度小于 n，则为 X 补上尾零以达到长度 n。</li>
+<li>如果 X 是向量且 X 的长度大于 n，则对 X 进行截断以达到长度 n。</li>
+<li>如果 X 是矩阵，则每列的处理与在向量情况下相同。</li>
+<li>如果 X 为多维数组，则大小不等于 1 的第一个数组维度的处理与在向量情况下相同。</li>
+</ul>
+</blockquote>
+</li>
+<li><strong>figure()</strong><blockquote>
+<p>figure(n) 查找 Number 属性等于 n 的图窗，并将其作为当前图窗。如果不存在具有该属性值的图窗，MATLAB® 将创建一个新图窗并将其 Number 属性设置为 n。</p>
+</blockquote>
+</li>
+<li><strong>subplot()</strong><blockquote>
+<p>subplot(m,n,p) 将当前图窗划分为 m×n 网格，并在 p 指定的位置创建坐标区。MATLAB® 按行号对子图位置进行编号。第一个子图是第一行的第一列，第二个子图是第一行的第二列，依此类推。如果指定的位置已存在坐标区，则此命令会将该坐标区设为当前坐标区。</p>
+</blockquote>
+</li>
+<li><strong>plot()</strong><blockquote>
+<p>plot(X,Y) 创建 Y 中数据对 X 中对应值的二维线图。</p>
+<ul>
+<li>如果 X 和 Y 都是向量，则它们的长度必须相同。plot 函数绘制 Y 对 X 的图。</li>
+<li>如果 X 和 Y 均为矩阵，则它们的大小必须相同。plot 函数绘制 Y 的列对 X 的列的图。</li>
+<li>如果 X 或 Y 中的一个是向量而另一个是矩阵，则矩阵的各维中必须有一维与向量的长度相等。如果矩阵的行数等于向量长度，则 plot 函数绘制矩阵中的每一列对向量的图。如果矩阵的列数等于向量长度，则该函数绘制矩阵中的每一行对向量的图。如果矩阵为方阵，则该函数绘制每一列对向量的图。</li>
+<li>如果 X 或 Y 之一为标量，而另一个为标量或向量，则 plot 函数会绘制离散点。但是，要查看这些点，您必须指定标记符号，例如 plot(X,Y,’o’)。</li>
+</ul>
+</blockquote>
+</li>
+<li><strong>title()</strong><blockquote>
+<p>title(txt) 将指定的标题添加到 gca 命令返回的坐标区或图中。重新发出 title 命令可使新标题替换旧标题。</p>
+</blockquote>
+</li>
+<li><strong>xlabel() &amp; ylabel()</strong><blockquote>
+<p>xlabel(txt) 将为 gca 命令返回的当前坐标区或图的 x 轴添加标签。重新发出 xlabel 命令会将旧标签替换为新标签。<br>ylabel(txt) 将为 gca 命令返回的当前坐标区或图形的 y 轴添加标签。重新发出 ylabel 命令可使新标签替换旧标签。</p>
+</blockquote>
+</li>
+<li><strong>sound()</strong><blockquote>
+<p>sound(y,Fs) 以采样率 Fs 向扬声器发送音频信号 y。</p>
+</blockquote>
+</li>
+<li><strong>buttord()</strong><blockquote>
+<ul>
+<li>[n,Wn] = buttord(Wp,Ws,Rp,Rs)返回数字巴特沃斯滤波器的最低阶n，其通带纹波不超过Rp dB，阻带衰减至少为Rs dB。Wp和Ws分别滤波器的通带和阻带边缘频率,规范化从0到1,1对应于πrad /样品。相应截止频率的标量(或向量)Wn也被返回。要设计一个Butterworth过滤器，使用输出参数n和Wn作为butter的输入。</li>
+<li>[n,Wn] = buttord(Wp,Ws,Rp,Rs，’s’)求出模拟巴特沃思滤波器的最小阶n和截止频率。指定频率Wp和Ws(以弧度/秒为单位)。通带和阻带可以是无限的。</li>
+</ul>
+</blockquote>
+</li>
+<li><strong>butter()</strong><blockquote>
+<p>[b,a] = butter(n,Wn)返回具有归一化截止频率Wn的n阶低通数字巴特沃思滤波器的传递函数系数。</p>
+</blockquote>
+</li>
+<li><strong>bilinear()</strong><blockquote>
+<p>[numd,dend] =bilinear(num,den,fs)将分子num和分母den指定的s域传递函数转换为离散的等价函数。</p>
+</blockquote>
+</li>
+<li><strong>freqz()</strong><blockquote>
+<p>数字滤波器的频率响应<br>[h,w] = freqz(b,a,n)返回存储在b和a中的传递函数系数的数字滤波器的n点频响向量h和对应的角频率向量w。</p>
+</blockquote>
+</li>
+<li><strong>randn()</strong><blockquote>
+<p>X = randn(sz1,…,szN) 返回由随机数组成的 sz1×…×szN 数组，其中 sz1,…,szN 指示每个维度的大小。例如：randn(3,4) 返回一个 3×4 的矩阵。</p>
+</blockquote>
+</li>
+</ul>
+<h2 id="直接给出代码（最近考试略多，以后有时间再详细解释）"><a href="#直接给出代码（最近考试略多，以后有时间再详细解释）" class="headerlink" title="直接给出代码（最近考试略多，以后有时间再详细解释）"></a>直接给出代码（最近考试略多，以后有时间再详细解释）</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br></pre></td><td class="code"><pre><span class="line">%% read audio from file</span><br><span class="line">filename = &#x27;D:\matlab_exercise\audio_proc\testaudio.wav&#x27;;</span><br><span class="line">[y,fs] = audioread(filename); % read audio from file, return sample data y and sampling rate fs </span><br><span class="line">%sound(y,fs); % play the audio</span><br><span class="line"></span><br><span class="line">%% show the time domain waveform of the original signal</span><br><span class="line">N = length(y); % number of samples </span><br><span class="line">time = 1/fs * (0:N-1); % 1/fs is sample interval</span><br><span class="line">figure(1)</span><br><span class="line">subplot(4,2,1);</span><br><span class="line">plot(time,y);</span><br><span class="line">title(&#x27;The sampled time domain waveform of original signal&#x27;);</span><br><span class="line">grid on;</span><br><span class="line">xlabel(&#x27;Time/s&#x27;);</span><br><span class="line">ylabel(&#x27;Amplitude&#x27;);</span><br><span class="line"></span><br><span class="line">%% show the frequency domain waveform of the original signal</span><br><span class="line">y_FFT = fft(y,N); % returns the n-point DFT</span><br><span class="line">f_p = fs / N * (0:N/2-1);</span><br><span class="line">subplot(4,2,2);</span><br><span class="line">plot(f_p,y_FFT(1:N/2));</span><br><span class="line">title(&#x27;The sampled frequency domain waveform of original signal&#x27;);</span><br><span class="line">grid on;</span><br><span class="line">xlabel(&#x27;f/Hz&#x27;);</span><br><span class="line">ylabel(&#x27;X(f)&#x27;);</span><br><span class="line"></span><br><span class="line">%% add noise</span><br><span class="line">noise = 0.01 * randn(N,1); % generate random noise of equal length</span><br><span class="line">y_mix = y + noise; % mix original audio and noise</span><br><span class="line">%sound(y_mix,fs);</span><br><span class="line"></span><br><span class="line">%% show the time domain waveform of the mixed signal</span><br><span class="line">subplot(4,2,3);</span><br><span class="line">plot(time,y_mix);</span><br><span class="line">title(&#x27;The sampled time domain waveform of mixed signal&#x27;);</span><br><span class="line">grid on;</span><br><span class="line">xlabel(&#x27;Time/s&#x27;);</span><br><span class="line">ylabel(&#x27;Amplitude&#x27;);</span><br><span class="line"></span><br><span class="line">%% show the frequency domain waveform of the mixed signal</span><br><span class="line">y_mix_FFT = fft(y_mix,N);</span><br><span class="line">subplot(4,2,4);</span><br><span class="line">plot(f_p,y_mix_FFT(1:N/2));</span><br><span class="line">title(&#x27;The sampled frequency domain waveform of mixed signal&#x27;);</span><br><span class="line">grid on;</span><br><span class="line">xlabel(&#x27;f/Hz&#x27;);</span><br><span class="line">ylabel(&#x27;X(f)&#x27;);</span><br><span class="line"></span><br><span class="line">%% digital low-pass technical index</span><br><span class="line">Ft = fs / N;</span><br><span class="line">Fp = 3000 * Ft; % 0.8*10^(4)</span><br><span class="line">Fs = 3600 * Ft; % 0.85*10^(4)</span><br><span class="line">Wp = 2 * pi * Fp;</span><br><span class="line">Ws = 2 * pi * Fs;</span><br><span class="line">wp = Wp / fs;</span><br><span class="line">ws = Ws / fs;</span><br><span class="line">alpha_p = 1;</span><br><span class="line">alpha_s = 10;</span><br><span class="line"></span><br><span class="line">%% analog low-pass technical index</span><br><span class="line">T = 1;</span><br><span class="line">omega_p = 2/T * tan(wp / 2);</span><br><span class="line">omega_s = 2/T * tan(ws / 2);</span><br><span class="line"></span><br><span class="line">%% design analog filter</span><br><span class="line">[n_order,wc] = buttord(omega_p,omega_s,alpha_p,alpha_s,&#x27;s&#x27;); % wc : 3dB cut-off frequency</span><br><span class="line">[B,A] = butter(n_order,wc,&#x27;s&#x27;);</span><br><span class="line"></span><br><span class="line">%% convert to digital filter</span><br><span class="line">[Bz,Az] = bilinear(B,A,1/T);</span><br><span class="line">[Hz,wk] = freqz(Bz,Az,N);</span><br><span class="line"></span><br><span class="line">%% show filter</span><br><span class="line">subplot(4,2,5);</span><br><span class="line">plot(wk,abs(Hz));</span><br><span class="line">%plot(wk/pi,20*log10(abs(Hz)));</span><br><span class="line">grid on;</span><br><span class="line">xlabel(&#x27;\omega/\pi&#x27;);</span><br><span class="line">ylabel(&#x27;Amplitude(dB)&#x27;);</span><br><span class="line">%axis([0,1,-100,5]);</span><br><span class="line">title(&#x27;filter&#x27;);</span><br><span class="line"></span><br><span class="line">%% filter out the noise</span><br><span class="line">y_filt = filter(Bz,Az,y_mix);</span><br><span class="line">sound(y_filt,fs);</span><br><span class="line"></span><br><span class="line">%% show the time domain waveform after filter</span><br><span class="line">subplot(4,2,7);</span><br><span class="line">plot(time,y_filt);</span><br><span class="line">title(&#x27;The sampled time domain waveform of mixed signal&#x27;);</span><br><span class="line">grid on;</span><br><span class="line">xlabel(&#x27;Time/s&#x27;);</span><br><span class="line">ylabel(&#x27;Amplitude&#x27;);</span><br><span class="line"></span><br><span class="line">%% show the frequency domain waveform after filter</span><br><span class="line">y_filt_FFT = fft(y_filt,N);</span><br><span class="line">subplot(4,2,8);</span><br><span class="line">plot(f_p,y_filt_FFT(1:N/2));</span><br><span class="line">title(&#x27;The sampled frequency domain waveform of mixed signal&#x27;);</span><br><span class="line">grid on;</span><br><span class="line">xlabel(&#x27;f/Hz&#x27;);</span><br><span class="line">ylabel(&#x27;X(f)&#x27;);</span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+        </div>
+
+        
+            <section class="post-copyright">
+                
+                    <p class="copyright-item">
+                        <span>Author:</span>
+                        <span>Jorwnpay</span>
+                    </p>
+                
+                
+                
+                    <p class="copyright-item">
+                        <span>License:</span>
+                        <span>Copyright (c) 2019 <a target="_blank" rel="noopener" href="http://creativecommons.org/licenses/by-nc/4.0/">CC-BY-NC-4.0</a> LICENSE</span>
+                    </p>
+                
+                
+                     <p class="copyright-item">
+                         <span>Slogan:</span>
+                         <span>I think it is possible for ordinary people to choose to be extraordinary.</span>
+                     </p>
+                
+
+            </section>
+        
+        <section class="post-tags">
+            <div>
+                <span>Tag(s):</span>
+                <span class="tag">
+                    
+                    
+                        <a href="/tags/matlab/"># matlab</a>
+                    
+                        <a href="/tags/%E6%95%B0%E5%AD%97%E4%BF%A1%E5%8F%B7%E5%A4%84%E7%90%86/"># 数字信号处理</a>
+                    
+                        
+                </span>
+            </div>
+            <div>
+                <a href="javascript:window.history.back();">back</a>
+                <span>· </span>
+                <a href="/">home</a>
+            </div>
+        </section>
+        <section class="post-nav">
+            
+                <a class="prev" rel="prev" href="/2020/01/20/python%E8%B0%83%E7%94%A8.so%E6%96%87%E4%BB%B6%E5%87%BA%E7%8E%B0%E6%8A%A5%E9%94%99%EF%BC%9AOSError_%20._xx.so_%20invalid%20ELF%20header%EF%BC%88Linux%E7%8E%AF%E5%A2%83%EF%BC%89/">python调用.so文件出现报错：OSError：./xx.so：invalid ELF header（Linux环境）</a>
+            
+            
+            <a class="next" rel="next" href="/2019/11/01/8086CPU%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%EF%BC%9A8086%E7%9A%84%E5%AF%BB%E5%9D%80%E6%96%B9%E5%BC%8F/">8086CPU学习笔记：8086的寻址方式</a>
+            
+        </section>
+
+
+    </article>
+</div>
+
+            </div>
+            <footer id="footer" class="footer">
+    <div class="copyright">
+        <span>© Jorwnpay | Powered by <a href="https://hexo.io" target="_blank">Hexo</a> & <a href="https://github.com/Siricee/hexo-theme-Chic" target="_blank">Chic</a></span>
+    </div>
+</footer>
+
+    </div>
+</body>
+
+</html>

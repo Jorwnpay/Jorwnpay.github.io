@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <meta name="author" content="Jorwnpay">
+
+
+
+
+
+<title>YOLOv2学习笔记 | Mr.Duck</title>
+
+
+
+    <link rel="icon" href="/icon.png">
+
+
+
+
+    <!-- stylesheets list from _config.yml -->
+    
+    <link rel="stylesheet" href="/css/style.css">
+    
+
+
+
+    <!-- scripts list from _config.yml -->
+    
+    <script src="/js/script.js"></script>
+    
+    <script src="/js/tocbot.min.js"></script>
+    
+
+
+
+    
+    
+        <!-- MathJax配置，可通过单美元符号书写行内公式等 -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+    "HTML-CSS": {
+        preferredFont: "TeX",
+        availableFonts: ["STIX","TeX"],
+        linebreaks: { automatic:true },
+        EqnChunk: (MathJax.Hub.Browser.isMobile ? 10 : 50)
+    },
+    tex2jax: {
+        inlineMath: [ ["$", "$"], ["\\(","\\)"] ],
+        processEscapes: true,
+        ignoreClass: "tex2jax_ignore|dno",
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    },
+    TeX: {
+        equationNumbers: { autoNumber: "AMS" },
+        noUndefined: { attributes: { mathcolor: "red", mathbackground: "#FFEEEE", mathsize: "90%" } },
+        Macros: { href: "{}" }
+    },
+    messageStyle: "none"
+    });
+</script>
+<!-- 给MathJax元素添加has-jax class -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for(i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+<!-- 通过连接CDN加载MathJax的js代码 -->
+<script type="text/javascript" async
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+
+
+    
+
+
+<meta name="generator" content="Hexo 5.4.1"></head>
+
+<body>
+    <script>
+        // this function is used to check current theme before page loaded.
+        (() => {
+            const currentTheme = window.localStorage && window.localStorage.getItem('theme') || '';
+            const isDark = currentTheme === 'dark';
+            const pagebody = document.getElementsByTagName('body')[0]
+            if (isDark) {
+                pagebody.classList.add('dark-theme');
+                // mobile
+                document.getElementById("mobile-toggle-theme").innerText = "· Dark"
+            } else {
+                pagebody.classList.remove('dark-theme');
+                // mobile
+                document.getElementById("mobile-toggle-theme").innerText = "· Light"
+            }
+        })();
+    </script>
+
+
+    <div class="wrapper">
+        <header>
+    <nav class="navbar">
+        <div class="container">
+            <div class="navbar-header header-logo"><a href="/">Jorwnpay&#39;s Blog</a></div>
+            <div class="menu navbar-right">
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                    <a class="menu-item" href="/category">Categories</a>
+                
+                    <a class="menu-item" href="/tag">Tags</a>
+                
+                    <a class="menu-item" href="/about">About</a>
+                
+                <input id="switch_default" type="checkbox" class="switch_default">
+                <label for="switch_default" class="toggleBtn"></label>
+            </div>
+        </div>
+    </nav>
+
+    
+    <nav class="navbar-mobile" id="nav-mobile">
+        <div class="container">
+            <div class="navbar-header">
+                <div>
+                    <a href="/">Jorwnpay&#39;s Blog</a><a id="mobile-toggle-theme">·&nbsp;Light</a>
+                </div>
+                <div class="menu-toggle" onclick="mobileBtn()">&#9776; Menu</div>
+            </div>
+            <div class="menu" id="mobile-menu">
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                    <a class="menu-item" href="/category">Categories</a>
+                
+                    <a class="menu-item" href="/tag">Tags</a>
+                
+                    <a class="menu-item" href="/about">About</a>
+                
+            </div>
+        </div>
+    </nav>
+
+</header>
+<script>
+    var mobileBtn = function f() {
+        var toggleMenu = document.getElementsByClassName("menu-toggle")[0];
+        var mobileMenu = document.getElementById("mobile-menu");
+        if(toggleMenu.classList.contains("active")){
+           toggleMenu.classList.remove("active")
+            mobileMenu.classList.remove("active")
+        }else{
+            toggleMenu.classList.add("active")
+            mobileMenu.classList.add("active")
+        }
+    }
+</script>
+            <div class="main">
+                <div class="container">
+    
+    
+        <div class="post-toc">
+    <div class="tocbot-list">
+    </div>
+    <div class="tocbot-list-menu">
+        <a class="tocbot-toc-expand" onclick="expand_toc()">Expand all</a>
+        <a onclick="go_top()">Back to top</a>
+        <a onclick="go_bottom()">Go to bottom</a>
+    </div>
+</div>
+
+<script>
+    document.ready(
+        function () {
+            tocbot.init({
+                tocSelector: '.tocbot-list',
+                contentSelector: '.post-content',
+                headingSelector: 'h1, h2, h3, h4, h5',
+                collapseDepth: 1,
+                orderedList: false,
+                scrollSmooth: true,
+            })
+        }
+    )
+
+    function expand_toc() {
+        var b = document.querySelector(".tocbot-toc-expand");
+        tocbot.init({
+            tocSelector: '.tocbot-list',
+            contentSelector: '.post-content',
+            headingSelector: 'h1, h2, h3, h4, h5',
+            collapseDepth: 6,
+            orderedList: false,
+            scrollSmooth: true,
+        });
+        b.setAttribute("onclick", "collapse_toc()");
+        b.innerHTML = "Collapse all"
+    }
+
+    function collapse_toc() {
+        var b = document.querySelector(".tocbot-toc-expand");
+        tocbot.init({
+            tocSelector: '.tocbot-list',
+            contentSelector: '.post-content',
+            headingSelector: 'h1, h2, h3, h4, h5',
+            collapseDepth: 1,
+            orderedList: false,
+            scrollSmooth: true,
+        });
+        b.setAttribute("onclick", "expand_toc()");
+        b.innerHTML = "Expand all"
+    }
+
+    function go_top() {
+        window.scrollTo(0, 0);
+    }
+
+    function go_bottom() {
+        window.scrollTo(0, document.body.scrollHeight);
+    }
+
+</script>
+    
+
+    
+    <article class="post-wrap">
+        <header class="post-header">
+            <h1 class="post-title">YOLOv2学习笔记</h1>
+            
+                <div class="post-meta">
+                    
+                        Author: <a itemprop="author" rel="author" href="/">Jorwnpay</a>
+                    
+
+                    
+                        <span class="post-time">
+                        Date: <a href="#">March 23, 2022&nbsp;&nbsp;12:51:40</a>
+                        </span>
+                    
+                    
+                        <span class="post-category">
+                    Category:
+                            
+                                <a href="/categories/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/">学习笔记</a>
+                            
+                        </span>
+                    
+                </div>
+            
+        </header>
+
+        <div class="post-content">
+            <h2 id="YOLOv2-学习笔记"><a href="#YOLOv2-学习笔记" class="headerlink" title="YOLOv2 学习笔记"></a>YOLOv2 学习笔记</h2><h3 id="0-前言"><a href="#0-前言" class="headerlink" title="0. 前言"></a>0. 前言</h3><p>本文是看b站<a target="_blank" rel="noopener" href="https://space.bilibili.com/1900783/">同济子豪兄</a>的视频<a target="_blank" rel="noopener" href="https://www.bilibili.com/video/BV1Q64y1s74K?spm_id_from=333.999.0.0">【精读AI论文】YOLO V2目标检测算法</a>的笔记。强烈推荐<a target="_blank" rel="noopener" href="https://space.bilibili.com/1900783/">同济子豪兄</a>的各种视频，讲得详细准确又生动。本文中的部分插图来自原文[2]，也非常建议阅读一下原文。</p>
+<h3 id="1-Better"><a href="#1-Better" class="headerlink" title="1.Better"></a>1.Better</h3><p>相对于YOLOv1增加的了：</p>
+<p><img src="https://pic3.zhimg.com/80/v2-68dfa74ab11ba77278bba5d9b3bff5ea_720w.jpg" alt="v2_1"></p>
+<h4 id="1-1-Batch-Normalization"><a href="#1-1-Batch-Normalization" class="headerlink" title="1.1 Batch Normalization"></a>1.1 Batch Normalization</h4><p>Batch Normalization做了啥：</p>
+<p><img src="https://pic2.zhimg.com/80/v2-3e703d1c0691d3dcb653fc756c8bbc81_720w.jpg" alt="v2_2"></p>
+<p>具体的算法流程（来自论文[1]）：</p>
+<img src="https://pic3.zhimg.com/80/v2-c6eac2c79e8239ed519516b1f5716bda_720w.jpg" alt="v2_3" style="zoom:70%;" />
+
+<p>Batch Normalization的目的：使得数据分布在0附近（以0为均值，以1为标准差的分布），从而使数据落在激活函数（如双曲正切函数、sigmoid函数）的非饱和区。如下图所示：</p>
+<img src="https://pic2.zhimg.com/80/v2-185c09d707965c3776ab4cc2e6b6911d_720w.jpg" alt="v2_4" style="zoom:70%;" />
+
+<p>Batch Normalization的好处（来自斯坦福CS231N课程）：</p>
+<img src="https://pic2.zhimg.com/80/v2-d7abd716622458d6b8cf5dbb6aed0aa5_720w.jpg" alt="v2_5" style="zoom:100%;" />
+
+<h4 id="1-2-High-Resolution-Classifier"><a href="#1-2-High-Resolution-Classifier" class="headerlink" title="1.2 High Resolution Classifier"></a>1.2 High Resolution Classifier</h4><p>由于目标检测的数据集中图片大小是448x448，而ImageNet数据集的尺寸大小是224x224。用224x224的图片训练出来的骨干网络直接用到448x448的图片上是不合理的。因此先用224x224的图片训练一段时间，之后将其resize到448x448，再fine-tune 10个epoch，然后再进行目标检测训练。</p>
+<p><img src="https://pic3.zhimg.com/80/v2-422e52a1c16667225bdbcb211ffbca86_720w.jpg" alt="v2_6"></p>
+<h4 id="1-3-Anchor"><a href="#1-3-Anchor" class="headerlink" title="1.3 Anchor"></a>1.3 Anchor</h4><p>YOLOv2加入了锚框。事先指定了5种不同长宽、大小、尺度的先验框。首先将图片划分为13x13的grid cell，然后边界框（Ground Truth）的中心点落在哪个grid cell，就由哪个grid cell生成的5个Anchor种的一个进行预测。5个中的哪一个呢？和边界框的IOU最大的那一个。然后输出这个先验框相对于边界框的偏移量就可以了。</p>
+<p><img src="https://pic1.zhimg.com/80/v2-4ba7cfb80be166644d8d5134de72f5b4_720w.jpg" alt="v2_7"></p>
+<p>一个小技巧：在YOLOv2中把模型输出的feature map的长宽设置成了奇数。因为奇数的长宽有一个中心的grid cell，这样当目标位于图片的中心时（事实上很多图片的目标都在图片中心位置），就能以中心的一个grid cell进行预测；而当feature map为偶数时，需要4个grid cell进行预测，这样很不优雅。</p>
+<img src="https://pic4.zhimg.com/80/v2-b3e880bbb6734bae9ec33a9d3c8b2f93_720w.jpg" alt="v2_8" style="zoom:100%;" />
+
+<p>这样一来，YOLOv2的的输出就变成了：</p>
+<img src="https://pic4.zhimg.com/v2-320eb1ecae7951d7b9d660ebd97e931b_r.jpg" alt="v2_9" style="zoom:50%;" />
+
+<p>YOLOv2整体的输入输出：</p>
+<img src="https://pic2.zhimg.com/v2-edbf879038ba871a267c3747814e307d_r.jpg" alt="v2_10" style="zoom:50%;" />
+
+<p>YOLOv2预设的5个长宽、大小、尺度的先验框是通过对数据集中的边界框聚类得到的。使用k-means聚类算法，左边是聚类数量k和平均IOU之间的关系，考虑到准确度和模型复杂度之间的权衡，选择k=5. 右边是在VOC和COCO数据集上的5个先验框的可视化结果。COCO数据集有更大的尺寸变化。</p>
+<img src="https://pic2.zhimg.com/v2-b87cab83ff82418a084cb6763537b0b1_r.jpg" alt="v2_11" style="zoom:38%;" />
+
+<p>通过聚类的方法和手工选Anchor的方法得到的候选框的平均IOU结果如下，可以看出聚类的方法得到的结果要比手工好得多。（SSE：欧氏距离；Anchor Boxes：手工选取Anchor）</p>
+<img src="https://pic4.zhimg.com/v2-e1a05a2862d83a7292d6938cc4f73243_r.jpg" alt="v2_12" style="zoom:38%;" />
+
+<p>YOLOv2的损失函数：</p>
+<p><img src="https://pic2.zhimg.com/v2-4d26567e91e0ec4ef46878811c397d91_r.jpg" alt="v2_13"></p>
+<h4 id="1-4-Direct-location-prediction"><a href="#1-4-Direct-location-prediction" class="headerlink" title="1.4 Direct location prediction"></a>1.4 Direct location prediction</h4><p>通过$\sigma(t_x)$函数（即：sigmoid函数）限制预测框的中心点全图乱窜。$b_x, b_y, b_w, b_h$是预测框中心点和宽高的偏移量。$t_x, t_y, t_w, t_h, t_o$是预测出来的5个值，通过下面的公式来由这5个值计算出中心点和宽高的偏移量，以及预测框的置信度。$c_x, c_y$是预测框所在grid cell的左上角相对于全图左上角的位置。$p_w, p_h$是anchor的宽高。</p>
+<p>这里说明一下anchor（锚框，也称先验框）和预测框的区别：</p>
+<p>（1）anchor是在模型训练之前就生成了的5个先验框，从这5个先验框中，选取一个和Ground Truth的IOU最大的框用来预测物体；</p>
+<p>（2）我们拿着模型预测出来的4个值（$t_x, t_y, t_w, t_h$），计算出来4个偏移量（$b_x, b_y, b_w, b_h$），然后在上面选出的那个先验框的基础上进行偏移所得到的框就叫做预测框。</p>
+<img src="https://pic2.zhimg.com/v2-5f1040bbaf234817e6da171305bb363d_r.jpg" alt="v2_29" style="zoom:40%;" />
+
+<p>下面公式中$Pr(object)$是预测框的置信度。</p>
+<img src="https://pic4.zhimg.com/v2-462620e7df48461d6c7ea0aa1a964277_r.jpg" alt="v2_30" style="zoom:30%;" />
+
+<h4 id="1-5-Fine-Grained-Features-细粒度特征"><a href="#1-5-Fine-Grained-Features-细粒度特征" class="headerlink" title="1.5 Fine-Grained Features (细粒度特征)"></a>1.5 Fine-Grained Features (细粒度特征)</h4><p>在最后pooling之前，把特征图分成两路处理：一路进行正常的conv+pooling操作，减小特征图尺寸，增加通道数；另一路将原特征图拆分成四份，在通道维拼接成一个长条（<em>称为passthrough层</em>）；最后再将两路特征拼接在一起。这样能够保留较低层的特征（有点DenseNet的味道）。</p>
+<img src="https://pic1.zhimg.com/v2-8ccb6557786f1d45078e6790c9af7a1c_r.jpg" alt="v2_14" style="zoom:40%;" />
+
+<p><em>passthrough层</em> 的另一种理解方式：</p>
+<img src="https://pic4.zhimg.com/v2-8b52f03c68ba1adebd0387747a7ecb7f_r.jpg" alt="v2_15" style="zoom:40%;" />
+
+<p> 放在整个网络中进行理解：</p>
+<p><img src="https://pic4.zhimg.com/v2-767686bc7619a8ae4ac205f2672b0793_r.jpg" alt="v2_16"></p>
+<h4 id="1-6-Multi-scale-training-1-5-mAP"><a href="#1-6-Multi-scale-training-1-5-mAP" class="headerlink" title="1.6 Multi-scale training (+1.5% mAP)"></a>1.6 Multi-scale training (+1.5% mAP)</h4><p>同一个模型，每10步就选取一个新的输入图像大小，以使得模型能够适应不同大小的图像输入。为什么可以这样做呢？这是因为使用了Global Average Pooling （全局平均池化，GAP）操作。虽然模型最后输出的feature map大小不同了，但是使用了GAP之后，不同尺度的feature map都变成了相同的大小（即：1）。</p>
+<img src="https://pic3.zhimg.com/v2-6af78ca9932bb586e73def030766ab12_r.jpg" alt="v2_17" style="zoom:48%;" />
+
+<p>这个操作还有一个副作用：如果输入的是一张大图片，模型会预测得比较慢，但是很准；如果输入的是一张小图片，模型会预测得比较快，但是不太准。因此可以通过选择不同尺寸的输入来进行“精度-速度”的权衡。</p>
+<p>论文中得到的输入不同尺寸图片下的结果：</p>
+<img src="https://pic1.zhimg.com/v2-a581a1fecff9fdddd80594cb9f059a78_r.jpg" alt="v2_18" style="zoom:40%;" />
+
+<h4 id="1-7-Better部分小结"><a href="#1-7-Better部分小结" class="headerlink" title="1.7 Better部分小结"></a>1.7 Better部分小结</h4><p>YOLOv1 演变到 YOLOv2 的过程。从表中可以看出，加了Anchor boxes之后mAP反而下降了，为什么还要采用呢？因为加了Anchor之后可以大大增加Recall，所以是值得的；另外换了new network之后也没有很大的提升，那为什么要换呢？这是因为DarkNet相对于YOLOv1的骨干网络可以大大降低计算量，所以也是值得的。</p>
+<p><img src="https://pic4.zhimg.com/v2-f29a96a120a004beb7d4cfb6753d1163_r.jpg" alt="v2_19"></p>
+<h3 id="2-Faster"><a href="#2-Faster" class="headerlink" title="2. Faster"></a>2. Faster</h3><p>YOLOv2变更快的主要原因是换了新的骨干网络。下面是使用不同的骨干网络的速度、精度对比。</p>
+<img src="https://pic1.zhimg.com/v2-e4e898867c8efa0cb9449843bf489f9c_r.jpg" alt="v2_20" style="zoom:40%;" />
+
+<p>Darknet19网络结构如下，左边是分类的网络，右边是检测的网络。</p>
+<p><img src="https://pic3.zhimg.com/v2-523d866eae8ab12f04037e7fc67e929e_r.jpg" alt="v2_21"></p>
+<h3 id="3-Stronger（类别更多）"><a href="#3-Stronger（类别更多）" class="headerlink" title="3. Stronger（类别更多）"></a>3. Stronger（类别更多）</h3><p>这个技巧并没有在后面的论文中用的特别多，但可以作为一个开脑洞的想法来了解一下。</p>
+<p>COCO里面只有80个类别，而ImageNet里有22k个类别。因此，作者考虑将COCO数据集和ImageNet数据集结合起来训练YOLOv2，让模型既进行分类的训练又进行目标检测的训练，使得模型能进行细粒度的目标检测，能够检测出更多类别的物体。</p>
+<p>但是强行将这两个数据集结合起来是很困难的。例如在ImageNet中美洲黑熊和亚洲黑熊是两个不同的类别，这是更细粒度的标签；而在COCO数据集中只有黑熊这一种相对来说粗粒度的标签。那么怎么将这两个数据集结合起来呢？</p>
+<img src="https://pic4.zhimg.com/v2-ccee030d2ceedbc204443ad0bc740b77_r.jpg" alt="v2_22" style="zoom:50%;" />
+
+<img src="C:\Users\17616\Desktop\目标检测学习笔记\YOLO系列\v2_23.png" alt="v2_23" style="zoom:38%;" />
+
+<p>在YOLOv2中采用了将分类标签变成树状结构的方法，逐层使用softmax进行分类，这样就能将粗粒度的COCO和细粒度的ImageNet放在一起训练了。</p>
+<img src="https://pic3.zhimg.com/v2-4bb12ca3adb350567705cc6fac82de6a_r.jpg" alt="v2_24" style="zoom:50%;" />
+
+<p>下面是树状标签结构和逐层softmax分类的另一种表示方法。</p>
+<p><img src="https://pic4.zhimg.com/v2-b761578b002b5f9d01e677f8f402d973_r.jpg" alt="v2_25"></p>
+<p>从而要计算一个节点的绝对概率，就可以通过计算其一系列父节点的条件概率的乘积。例如要计算一张图片是卡车的概率，就可以这样计算：<br>$$<br>P(卡车) = P(交通工具|object) * P(车辆|交通工具) * P(卡车|车辆)<br>$$<br>在论文中也给出了一个计算一张图片是否是Norfolk terrier类别的例子：</p>
+<img src="https://pic2.zhimg.com/v2-8905ccd526739e85c223f2e214604551_r.jpg" alt="v2_26" style="zoom:38%;" />
+
+<p>在训练过程中，如果输入一张目标检测的图片，就反向传播目标检测的误差；如果输入的是一张分类的图片，就反向传播分类的误差。这样就可以让模型既学习到目标检测画框框的能力，又学习了ImageNet海量数据细粒度分类的能力。</p>
+<img src="https://pic1.zhimg.com/v2-c9c01808c1c11b5b009d589b855bf308_r.jpg" alt="v2_27" style="zoom:50%;" />
+
+<p>作者在COCO数据集和ImageNet分类数据集中进行了联合训练，在ImageNet目标检测数据集中进行了测试，得到的结果如下。从结果中发现，这样训练得到的动物的准确率是不错的，但是衣服和装备这些类别的效果是不好的。</p>
+<img src="https://pic2.zhimg.com/v2-886b045c566be5de769364fa8f800611_r.jpg" alt="v2_28" style="zoom:33%;" />
+
+<hr>
+<p>[1] Ioffe S, Szegedy C. Batch normalization: Accelerating deep network training by reducing internal covariate shift[C]//International conference on machine learning. PMLR, 2015: 448-456.</p>
+<p>[2] Redmon J, Farhadi A. YOLO9000: better, faster, stronger[C]//Proceedings of the IEEE conference on computer vision and pattern recognition. 2017: 7263-7271.</p>
+<p>另外附上同济子豪兄视频中的推荐观看：</p>
+<p><a target="_blank" rel="noopener" href="https://www.bilibili.com/video/BV1sb411P7pQ?spm_id_from=333.788.b_636f6d6d656e74.19">大白话讲解卷积神经网络工作原理_哔哩哔哩_bilibili</a></p>
+<p><a target="_blank" rel="noopener" href="https://www.bilibili.com/video/BV1K7411W7So?p=5&spm_id_from=333.788.b_636f6d6d656e74.20">【子豪兄】精讲CS231N斯坦福计算机视觉公开课（2020最新）_哔哩哔哩_bilibili</a></p>
+<p><a target="_blank" rel="noopener" href="https://www.bilibili.com/video/BV15w411Z7LG?spm_id_from=333.788.b_636f6d6d656e74.22">【精读AI论文】YOLO V1目标检测，看我就够了_哔哩哔哩_bilibili</a></p>
+
+        </div>
+
+        
+            <section class="post-copyright">
+                
+                    <p class="copyright-item">
+                        <span>Author:</span>
+                        <span>Jorwnpay</span>
+                    </p>
+                
+                
+                
+                    <p class="copyright-item">
+                        <span>License:</span>
+                        <span>Copyright (c) 2019 <a target="_blank" rel="noopener" href="http://creativecommons.org/licenses/by-nc/4.0/">CC-BY-NC-4.0</a> LICENSE</span>
+                    </p>
+                
+                
+                     <p class="copyright-item">
+                         <span>Slogan:</span>
+                         <span>I think it is possible for ordinary people to choose to be extraordinary.</span>
+                     </p>
+                
+
+            </section>
+        
+        <section class="post-tags">
+            <div>
+                <span>Tag(s):</span>
+                <span class="tag">
+                    
+                    
+                        <a href="/tags/%E7%9B%AE%E6%A0%87%E6%A3%80%E6%B5%8B/"># 目标检测</a>
+                    
+                        <a href="/tags/YOLO/"># YOLO</a>
+                    
+                        
+                </span>
+            </div>
+            <div>
+                <a href="javascript:window.history.back();">back</a>
+                <span>· </span>
+                <a href="/">home</a>
+            </div>
+        </section>
+        <section class="post-nav">
+            
+                <a class="prev" rel="prev" href="/2022/06/25/Lightroom%E4%BF%AE%E5%9B%BE%E6%80%9D%E8%B7%AF/">Lightroom修图思路</a>
+            
+            
+            <a class="next" rel="next" href="/2021/10/18/%E9%95%BF%E5%B0%BE%E5%88%86%E5%B8%83%E8%AE%BA%E6%96%87%EF%BC%88%E4%BA%94%EF%BC%89%EF%BC%9ADistribution%20Alignment%EF%BC%9AA%20Unified%20Framework%20for%20Long-tail%20Visual%20Recognition/">长尾分布论文（五）：Distribution Alignment</a>
+            
+        </section>
+
+
+    </article>
+</div>
+
+            </div>
+            <footer id="footer" class="footer">
+    <div class="copyright">
+        <span>© Jorwnpay | Powered by <a href="https://hexo.io" target="_blank">Hexo</a> & <a href="https://github.com/Siricee/hexo-theme-Chic" target="_blank">Chic</a></span>
+    </div>
+</footer>
+
+    </div>
+</body>
+
+</html>

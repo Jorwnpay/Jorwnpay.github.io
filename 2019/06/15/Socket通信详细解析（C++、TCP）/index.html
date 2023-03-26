@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <meta name="author" content="Jorwnpay">
+
+
+
+
+
+<title>Socket通信详细解析（C++、TCP） | Mr.Duck</title>
+
+
+
+    <link rel="icon" href="/icon.png">
+
+
+
+
+    <!-- stylesheets list from _config.yml -->
+    
+    <link rel="stylesheet" href="/css/style.css">
+    
+
+
+
+    <!-- scripts list from _config.yml -->
+    
+    <script src="/js/script.js"></script>
+    
+    <script src="/js/tocbot.min.js"></script>
+    
+
+
+
+    
+    
+        <!-- MathJax配置，可通过单美元符号书写行内公式等 -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+    "HTML-CSS": {
+        preferredFont: "TeX",
+        availableFonts: ["STIX","TeX"],
+        linebreaks: { automatic:true },
+        EqnChunk: (MathJax.Hub.Browser.isMobile ? 10 : 50)
+    },
+    tex2jax: {
+        inlineMath: [ ["$", "$"], ["\\(","\\)"] ],
+        processEscapes: true,
+        ignoreClass: "tex2jax_ignore|dno",
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    },
+    TeX: {
+        equationNumbers: { autoNumber: "AMS" },
+        noUndefined: { attributes: { mathcolor: "red", mathbackground: "#FFEEEE", mathsize: "90%" } },
+        Macros: { href: "{}" }
+    },
+    messageStyle: "none"
+    });
+</script>
+<!-- 给MathJax元素添加has-jax class -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for(i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+<!-- 通过连接CDN加载MathJax的js代码 -->
+<script type="text/javascript" async
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+
+
+    
+
+
+<meta name="generator" content="Hexo 5.4.1"></head>
+
+<body>
+    <script>
+        // this function is used to check current theme before page loaded.
+        (() => {
+            const currentTheme = window.localStorage && window.localStorage.getItem('theme') || '';
+            const isDark = currentTheme === 'dark';
+            const pagebody = document.getElementsByTagName('body')[0]
+            if (isDark) {
+                pagebody.classList.add('dark-theme');
+                // mobile
+                document.getElementById("mobile-toggle-theme").innerText = "· Dark"
+            } else {
+                pagebody.classList.remove('dark-theme');
+                // mobile
+                document.getElementById("mobile-toggle-theme").innerText = "· Light"
+            }
+        })();
+    </script>
+
+
+    <div class="wrapper">
+        <header>
+    <nav class="navbar">
+        <div class="container">
+            <div class="navbar-header header-logo"><a href="/">Jorwnpay&#39;s Blog</a></div>
+            <div class="menu navbar-right">
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                    <a class="menu-item" href="/category">Categories</a>
+                
+                    <a class="menu-item" href="/tag">Tags</a>
+                
+                    <a class="menu-item" href="/about">About</a>
+                
+                <input id="switch_default" type="checkbox" class="switch_default">
+                <label for="switch_default" class="toggleBtn"></label>
+            </div>
+        </div>
+    </nav>
+
+    
+    <nav class="navbar-mobile" id="nav-mobile">
+        <div class="container">
+            <div class="navbar-header">
+                <div>
+                    <a href="/">Jorwnpay&#39;s Blog</a><a id="mobile-toggle-theme">·&nbsp;Light</a>
+                </div>
+                <div class="menu-toggle" onclick="mobileBtn()">&#9776; Menu</div>
+            </div>
+            <div class="menu" id="mobile-menu">
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                    <a class="menu-item" href="/category">Categories</a>
+                
+                    <a class="menu-item" href="/tag">Tags</a>
+                
+                    <a class="menu-item" href="/about">About</a>
+                
+            </div>
+        </div>
+    </nav>
+
+</header>
+<script>
+    var mobileBtn = function f() {
+        var toggleMenu = document.getElementsByClassName("menu-toggle")[0];
+        var mobileMenu = document.getElementById("mobile-menu");
+        if(toggleMenu.classList.contains("active")){
+           toggleMenu.classList.remove("active")
+            mobileMenu.classList.remove("active")
+        }else{
+            toggleMenu.classList.add("active")
+            mobileMenu.classList.add("active")
+        }
+    }
+</script>
+            <div class="main">
+                <div class="container">
+    
+    
+        <div class="post-toc">
+    <div class="tocbot-list">
+    </div>
+    <div class="tocbot-list-menu">
+        <a class="tocbot-toc-expand" onclick="expand_toc()">Expand all</a>
+        <a onclick="go_top()">Back to top</a>
+        <a onclick="go_bottom()">Go to bottom</a>
+    </div>
+</div>
+
+<script>
+    document.ready(
+        function () {
+            tocbot.init({
+                tocSelector: '.tocbot-list',
+                contentSelector: '.post-content',
+                headingSelector: 'h1, h2, h3, h4, h5',
+                collapseDepth: 1,
+                orderedList: false,
+                scrollSmooth: true,
+            })
+        }
+    )
+
+    function expand_toc() {
+        var b = document.querySelector(".tocbot-toc-expand");
+        tocbot.init({
+            tocSelector: '.tocbot-list',
+            contentSelector: '.post-content',
+            headingSelector: 'h1, h2, h3, h4, h5',
+            collapseDepth: 6,
+            orderedList: false,
+            scrollSmooth: true,
+        });
+        b.setAttribute("onclick", "collapse_toc()");
+        b.innerHTML = "Collapse all"
+    }
+
+    function collapse_toc() {
+        var b = document.querySelector(".tocbot-toc-expand");
+        tocbot.init({
+            tocSelector: '.tocbot-list',
+            contentSelector: '.post-content',
+            headingSelector: 'h1, h2, h3, h4, h5',
+            collapseDepth: 1,
+            orderedList: false,
+            scrollSmooth: true,
+        });
+        b.setAttribute("onclick", "expand_toc()");
+        b.innerHTML = "Expand all"
+    }
+
+    function go_top() {
+        window.scrollTo(0, 0);
+    }
+
+    function go_bottom() {
+        window.scrollTo(0, document.body.scrollHeight);
+    }
+
+</script>
+    
+
+    
+    <article class="post-wrap">
+        <header class="post-header">
+            <h1 class="post-title">Socket通信详细解析（C++、TCP）</h1>
+            
+                <div class="post-meta">
+                    
+                        Author: <a itemprop="author" rel="author" href="/">Jorwnpay</a>
+                    
+
+                    
+                        <span class="post-time">
+                        Date: <a href="#">June 15, 2019&nbsp;&nbsp;19:30:26</a>
+                        </span>
+                    
+                    
+                        <span class="post-category">
+                    Category:
+                            
+                                <a href="/categories/%E5%AE%9E%E8%B7%B5%E7%AC%94%E8%AE%B0/">实践笔记</a>
+                            
+                        </span>
+                    
+                </div>
+            
+        </header>
+
+        <div class="post-content">
+            <h1 id="Socket通信实现详细步骤"><a href="#Socket通信实现详细步骤" class="headerlink" title="Socket通信实现详细步骤"></a>Socket通信实现详细步骤</h1><hr>
+<p>@[toc]</p>
+<hr>
+<h2 id="说在前面"><a href="#说在前面" class="headerlink" title="说在前面"></a>说在前面</h2><p><strong>对套接字的理解：</strong></p>
+<ul>
+<li>应用层通过传输层进行数据通信时，TCP和UDP会遇到同时为多个应用程序进程提供并发服务的问题。多个TCP连接或多个应用程序进程可能需要 通过同一个TCP协议端口传输数据。为了区别不同的应用程序进程和连接，许多计算机操作系统为应用程序与TCP／IP协议交互提供了称为套接字 (Socket)的接口，区分不同应用程序进程间的网络通信和连接。（太难理解了。。。QAQ）</li>
+<li>socket起源于Unix，而Unix/Linux基本哲学之一就是“一切皆文件”，都可以用“打开open –&gt; 读写write/read –&gt; 关闭close”模式来操作。我的理解就是Socket就是该模式的一个实现，socket即是一种特殊的文件，一些socket函数就是对其进行的操作（读/写IO、打开、关闭），这些函数我们在后面进行介绍。</li>
+<li>socket一词的起源<br>  在组网领域的首次使用是在1970年2月12日发布的文献IETF RFC33中发现的，撰写者为Stephen Carr、Steve Crocker和Vint Cerf。根据美国计算机历史博物馆的记载，Croker写道：“命名空间的元素都可称为套接字接口。一个套接字接口构成一个连接的一端，而一个连接可完全由一对套接字接口规定。”计算机历史博物馆补充道：“这比BSD的套接字接口定义早了大约12年。”</li>
+</ul>
+<p><strong>推荐一篇前辈的文章，讲的特别好：</strong><br><a target="_blank" rel="noopener" href="https://www.cnblogs.com/skynet/archive/2010/12/12/1903949.html#4251778">Socket网络编程</a></p>
+<h2 id="一、server端构建"><a href="#一、server端构建" class="headerlink" title="一、server端构建"></a>一、server端构建</h2><ul>
+<li> 用结构体sockaddr_in创建一个本地通信地址，设置通信方式、端口、IP；</li>
+<li>创建Socket套接字</li>
+<li>调用bind函数将套接字和地址连接；</li>
+<li>调用listen函数,把内核设置为接收指向该套接口的连接请求；</li>
+<li>创建一个新的套接字，循环调用accept函数，返回值赋给该套接字</li>
+<li>调用recv函数获取消息的内容；</li>
+<li>通信完成后调用close函数关闭这个新创建的socket；</li>
+<li>如果不需要等待任何客户端连接，那么用close函数关闭server的socket；<h3 id="1-创建本地通信地址"><a href="#1-创建本地通信地址" class="headerlink" title="1.创建本地通信地址"></a>1.创建本地通信地址</h3>创建地址<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">#include&lt;netinet/in.h&gt;</span><br><span class="line">struct sockaddr_in  servaddr;//服务器端地址</span><br></pre></td></tr></table></figure>
+sockaddr_in是IPv4套接口地址结构(网际套接口地址结构)；<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">struct sockaddr_in &#123;</span><br><span class="line">    uint8_t sin_len;      </span><br><span class="line">    sa_family_t  sin_family;  </span><br><span class="line">    in_port_t sin_port; </span><br><span class="line">    struct in_addr sin_addr;  </span><br><span class="line">    char sin_zero[8];   </span><br><span class="line">&#125;;</span><br><span class="line">/*******************************/</span><br><span class="line"> struct in_addr&#123;  </span><br><span class="line">	union &#123;</span><br><span class="line">         struct &#123; u_char s_b1,s_b2,s_b3,s_b4; &#125; S_un_b;</span><br><span class="line">         struct &#123; u_short s_w1,s_w2; &#125; S_un_w;</span><br><span class="line">         u_long S_addr; </span><br><span class="line">    &#125; S_un;</span><br><span class="line">	#define s_addr  S_un.S_addr</span><br><span class="line">&#125;;  </span><br></pre></td></tr></table></figure>
+<a target="_blank" rel="noopener" href="https://blog.csdn.net/maopig/article/details/17193021#commentBox">sockaddr_in详细解释</a><br>设置通信方式、IP、端口<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">memset(&amp;servaddr, 0, sizeof(servaddr));//结构体清零</span><br><span class="line">servaddr.sin_family = AF_INET;//设置使用ipv4进行通信</span><br><span class="line">servaddr.sin_addr.s_addr = htonl(INADDR_ANY);//绑定到默认ip地址,将主机数转换成无符号长整型的网络字节顺序htonl:host to net long</span><br><span class="line">servaddr.sin_port = htons(3100);//设置端口为3100</span><br></pre></td></tr></table></figure>
+htonl()函数：把主机字节序转化为网络字节序（host to net long）;<br><a target="_blank" rel="noopener" href="https://www.cnblogs.com/52php/p/6114080.html">主机字节序和网络字节序的区别</a><br>htons()函数：把主机字节许转化为网络字节序（host to net short）;<br>两种字节序之间相互转换的函数：<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">uint16_t    htons(uint16_t host16bitvalue);</span><br><span class="line">uint32_t    htonl(uint32_t host32bitvalue);</span><br><span class="line">uint16_t    ntohs(uint16_t net16bitvalue);</span><br><span class="line">uint32_t    ntohl(uint32_t net32bitvalue);</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h3 id="2-创建套接字"><a href="#2-创建套接字" class="headerlink" title="2.创建套接字"></a>2.创建套接字</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">listenfd = socket(AF_INET,SOCK_STREAM,0)</span><br></pre></td></tr></table></figure>
+<p>设定协议族为AF_INET(IPv4 协议),套接口类型为SOCK_STREAM(字节流套接口),协议设置为0,采用缺省配置；<br><strong>socket函数原型</strong>:</p>
+<pre><code>#include&lt;sys/socket.h&gt;
+int socket(int family, int type, int protocal);
+   
+</code></pre>
+<p><strong>参数：</strong><br>family参数指明协议族</p>
+<pre><code>family              说明
+AF_INET        IPv4 协议    
+AF_INET6        IPv6 协议
+AF_LOCAL        UNIX域协议
+AF_ROUTE        路由套接口
+AF_KEY            密钥套接口
+</code></pre>
+<p>type参数指明套接口类型</p>
+<pre><code>type              说明
+SOCK_STREAM        字节流套接口
+SOCK_DGRAM        数据报套接口
+SOCK_SEQPACKET    有序分组套接口
+SOCK_RAW        原始套接口
+</code></pre>
+<p>protocal参数指明某个协议类型常值,或者设置为0,以选择给定family和type组合的系统缺省值</p>
+<pre><code>protocal          说明
+IPPROTO_TCP        TCP传输协议
+IPPROTO_UDP        UDP传输协议
+IPPROTO_SCTP        SCTP传输协议
+</code></pre>
+<p>这里注意,不是所有的family与type的组合都是有效的</p>
+<p>socket函数成功时返回一个非负整数值,它与文件描述符类似.称其为套接口描述符(socket descriptor),简称套接字(sockfd).</p>
+<h3 id="3-调用bind-函数将服务器端地址和sever套接字连接"><a href="#3-调用bind-函数将服务器端地址和sever套接字连接" class="headerlink" title="3.调用bind()函数将服务器端地址和sever套接字连接"></a>3.调用bind()函数将服务器端地址和sever套接字连接</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">if( bind(listenfd, (struct sockaddr*)&amp;servaddr, sizeof(servaddr)) == -1)&#123;</span><br><span class="line">        printf(&quot;bind socket error: %s(errno: %d)\n&quot;,strerror(errno),errno);</span><br><span class="line">        return 0;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>bind函数原型：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">int bind(int sockfd, const struct sockaddr *myaddr, socklen_t addrlen);</span><br></pre></td></tr></table></figure>
+<p>sockfd参数是套接口标识；<br>myaddr参数是服务器端的地址；<br>addrlen参数是地址长度；</p>
+<h3 id="4-调用listen-函数打开套接口的监听模式"><a href="#4-调用listen-函数打开套接口的监听模式" class="headerlink" title="4.调用listen()函数打开套接口的监听模式"></a>4.调用listen()函数打开套接口的监听模式</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">if( listen(listenfd, 10) == -1)&#123;</span><br><span class="line">        printf(&quot;listen socket error: %s(errno: %d)\n&quot;,strerror(errno),errno);</span><br><span class="line">        return 0;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>listen函数原型:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">int listen(int sockfd, int backlog);</span><br></pre></td></tr></table></figure>
+<p>listen函数仅由TCP服务器调用.当socket函数创建一个套接口时,它被假设为一个主动套接口,即是一个将调用connect函数发起连接的客户端接口.而listen函数把一个未连接的套接口转换成一个 被动套接口,指示内核接收指向该套接口的连接请求.这将导致套接口状态从closed转换到listen.</p>
+<h3 id="5-循环调用accept-函数"><a href="#5-循环调用accept-函数" class="headerlink" title="5.循环调用accept()函数"></a>5.循环调用accept()函数</h3><p>调用accept()函数，将返回值赋给套接字connfd</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">if( (connfd = accept(listenfd, (struct sockaddr*)NULL, NULL)) == -1)&#123;</span><br><span class="line">      printf(&quot;accept socket error: %s(errno: %d)&quot;,strerror(errno),errno);</span><br><span class="line">      continue;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>accept()函数原型：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">int accept(int sockfd, struct sockaddr* cliaddr, socklen_t *addrlen);</span><br></pre></td></tr></table></figure>
+<p>参数cliaddr和addrlen用来返回已连接的对端进程(客户)的协议地址.<br>addrlen是一个值-结果参数:调用前我们将由*addrlen所引用的整数值置为由cliaddr所指的套接口地址结构的长度,返回时,该整数值即为由内核存在该套接口地址结构内的确切字节数.</p>
+<h3 id="6-调用recv-函数获取消息的内容"><a href="#6-调用recv-函数获取消息的内容" class="headerlink" title="6.调用recv()函数获取消息的内容"></a>6.调用recv()函数获取消息的内容</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">n = recv(connfd, buff, MAXLINE, 0);</span><br></pre></td></tr></table></figure>
+<p>函数原型：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">int recv( SOCKET s, char *buf, int len, int flags)；</span><br></pre></td></tr></table></figure>
+<p>s参数是socket套接字；<br>buf参数是指明一个缓冲区，该缓冲区用来存放recv函数接收到的数据；<br>len参数指明缓冲区的长度；<br>flags参数一般置为0；</p>
+<h3 id="7-调用close-函数关闭创建的临时socket"><a href="#7-调用close-函数关闭创建的临时socket" class="headerlink" title="7.调用close()函数关闭创建的临时socket"></a>7.调用close()函数关闭创建的临时socket</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">close(connfd);</span><br></pre></td></tr></table></figure>
+<p>connfd参数为socket套接字；</p>
+<h3 id="8-不需要等待请求时，调用close-函数关闭server的套接字"><a href="#8-不需要等待请求时，调用close-函数关闭server的套接字" class="headerlink" title="8.不需要等待请求时，调用close()函数关闭server的套接字"></a>8.不需要等待请求时，调用close()函数关闭server的套接字</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">close(listenfd);</span><br></pre></td></tr></table></figure>
+<p><strong>完整代码：server.cpp</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br></pre></td><td class="code"><pre><span class="line">#include&lt;stdio.h&gt;</span><br><span class="line">#include&lt;stdlib.h&gt;</span><br><span class="line">#include&lt;string.h&gt;</span><br><span class="line">#include&lt;errno.h&gt;</span><br><span class="line">#include&lt;sys/types.h&gt;</span><br><span class="line">#include&lt;sys/socket.h&gt;</span><br><span class="line">#include&lt;netinet/in.h&gt;</span><br><span class="line">#include&lt;unistd.h&gt;</span><br><span class="line"></span><br><span class="line">#define MAXLINE 16*1024</span><br><span class="line"></span><br><span class="line">int main(int argc, char** argv)&#123;</span><br><span class="line">    int  listenfd, connfd;</span><br><span class="line">    struct sockaddr_in  servaddr;//服务器端地址</span><br><span class="line">    char  buff[MAXLINE];</span><br><span class="line">    int  n;</span><br><span class="line">	//创建套接字</span><br><span class="line">    if( (listenfd = socket(AF_INET, SOCK_STREAM, 0)) == -1 )&#123;</span><br><span class="line">        printf(&quot;create socket error: %s(errno: %d)\n&quot;,strerror(errno),errno);</span><br><span class="line">        return 0;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    memset(&amp;servaddr, 0, sizeof(servaddr));//结构体清零</span><br><span class="line">    servaddr.sin_family = AF_INET;//设置使用ipv4进行通信</span><br><span class="line">    servaddr.sin_addr.s_addr = htonl(INADDR_ANY);//绑定到默认ip地址,将主机数转换成无符号长整型的网络字节顺序htonl:host to net long</span><br><span class="line">    servaddr.sin_port = htons(3100);//设置端口为3100</span><br><span class="line">	//将服务器端地址和sever套接字连接</span><br><span class="line">    if( bind(listenfd, (struct sockaddr*)&amp;servaddr, sizeof(servaddr)) == -1)&#123;</span><br><span class="line">        printf(&quot;bind socket error: %s(errno: %d)\n&quot;,strerror(errno),errno);</span><br><span class="line">        return 0;</span><br><span class="line">    &#125;</span><br><span class="line">	//设置套接字为监听状态</span><br><span class="line">    if( listen(listenfd, 10) == -1)&#123;</span><br><span class="line">        printf(&quot;listen socket error: %s(errno: %d)\n&quot;,strerror(errno),errno);</span><br><span class="line">        return 0;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    printf(&quot;======waiting for client&#x27;s request======\n&quot;);</span><br><span class="line">    while(1)&#123;</span><br><span class="line">        //接收的内容放到套接字connfd里</span><br><span class="line">        if( (connfd = accept(listenfd, (struct sockaddr*)NULL, NULL)) == -1)&#123;</span><br><span class="line">            printf(&quot;accept socket error: %s(errno: %d)&quot;,strerror(errno),errno);</span><br><span class="line">            continue;</span><br><span class="line">        &#125;</span><br><span class="line">        n = recv(connfd, buff, MAXLINE, 0);</span><br><span class="line">        buff[n] = &#x27;\0&#x27;;</span><br><span class="line">        printf(&quot;recv msg from client: %s\n*****%d&quot;, buff,n);</span><br><span class="line">        close(connfd);</span><br><span class="line">    &#125;</span><br><span class="line">    close(listenfd);</span><br><span class="line">    return 0;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="二、client端构建"><a href="#二、client端构建" class="headerlink" title="二、client端构建"></a>二、client端构建</h2><ul>
+<li>创建client端的Socket套接字</li>
+<li>通过端口号和地址确定目标服务器</li>
+<li>用inet_pton将ip字符串转化为二进制</li>
+<li>使用Connect连接到服务器</li>
+<li>使用send发送消息</li>
+<li>通信完成后调用close关闭socket<h3 id="1-创建client端的Socket套接字"><a href="#1-创建client端的Socket套接字" class="headerlink" title="1.创建client端的Socket套接字"></a>1.创建client端的Socket套接字</h3>跟server端的创建相似<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">if( (sockfd = socket(AF_INET, SOCK_STREAM, 0)) &lt; 0)&#123;</span><br><span class="line">        printf(&quot;create socket error: %s(errno: %d)\n&quot;, strerror(errno),errno);</span><br><span class="line">        return 0;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="2-设置目标服务器地址"><a href="#2-设置目标服务器地址" class="headerlink" title="2.设置目标服务器地址"></a>2.设置目标服务器地址</h3>memset()函数的作用是将servaddr结构体里的变量都置为0；<br>端口号设置成与server一致，表明要连接的是我们刚才建立的那个server；<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">memset(&amp;servaddr, 0, sizeof(servaddr));</span><br><span class="line">servaddr.sin_family = AF_INET;//设置使用ipv4进行通信</span><br><span class="line">servaddr.sin_port = htons(3100);//设置端口为3100</span><br></pre></td></tr></table></figure>
+<h3 id="3-用inet-pton将ip字符串转化为二进制"><a href="#3-用inet-pton将ip字符串转化为二进制" class="headerlink" title="3.用inet_pton将ip字符串转化为二进制"></a>3.用inet_pton将ip字符串转化为二进制</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">if( inet_pton(AF_INET, argv[1], &amp;servaddr.sin_addr) &lt;= 0)&#123;</span><br><span class="line">        printf(&quot;inet_pton error for %s\n&quot;,argv[1]);</span><br><span class="line">        return 0;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+</ul>
+<p>将我们输入的目标IP参数(IPv4),转换为二进制存储到servaddr.sin_addr中.</p>
+<p>此函数原型为:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">int inet_pton(int family, const char* strptr, void *addrptr);</span><br></pre></td></tr></table></figure>
+
+<p>inet_pton()函数将转换由指针strptr所指的串,并存到addrptr中(二进制结果),地址表达格式可以为IPv4(AF_INET),也可以是IPv6(AF_INET6)；avg[1]是从控制台读入的第二个参数；</p>
+<h3 id="4-使用Connect连接到服务器"><a href="#4-使用Connect连接到服务器" class="headerlink" title="4.使用Connect连接到服务器"></a>4.使用Connect连接到服务器</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">if( connect(sockfd, (struct sockaddr*)&amp;servaddr, sizeof(servaddr)) &lt; 0)&#123;</span><br><span class="line">        printf(&quot;connect error: %s(errno: %d)\n&quot;,strerror(errno),errno);</span><br><span class="line">        return 0;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>connect函数原型:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">int connect(ini sockfd, const struct sockaddr* servaddr, socklen_t addrlen);</span><br></pre></td></tr></table></figure>
+<p>这里sockfd是前面提到的由socket函数返回的套接口描述字,接着是一个指向套接口地址结构的指针和该结构的大小.套接口地址结构中必需包含有服务器的IP地址和端口号.端口号前面已经设定了为3100,IP地址在上一个步骤inet_pton函数中通过命令行参数argv[1]设定.<br>这个函数将client套接字和server的地址连接；  </p>
+<h3 id="5-使用send发送消息"><a href="#5-使用send发送消息" class="headerlink" title="5.使用send发送消息"></a>5.使用send发送消息</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">if( send(sockfd, sendline, strlen(sendline), 0) &lt; 0)&#123;</span><br><span class="line">        printf(&quot;send msg error: %s(errno: %d)\n&quot;, strerror(errno), errno);</span><br><span class="line">        return 0;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>函数原型：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">int send( SOCKET s, const char FAR *buf, int len, int flags );</span><br></pre></td></tr></table></figure>
+<p>该函数的第一个参数指定发送端套接字描述符；<br>第二个参数指明一个存放应用程序要发送数据的缓冲区；<br>第三个参数指明实际要发送的数据的字节数；<br>第四个参数一般置0。<br>这里只描述同步Socket的send函数的执行流程。当调用该函数时，</p>
+<p>   （1）send先比较待发送数据的长度len和套接字s的发送缓冲的长度， 如果len大于s的发送缓冲区的长度，该函数返回SOCKET_ERROR；</p>
+<p>   （2）如果len小于或者等于s的发送缓冲区的长度，那么send先检查协议是否正在发送s的发送缓冲中的数据，如果是就等待协议把数据发送完，如果协议还没有开始发送s的发送缓冲中的数据或者s的发送缓冲中没有数据，那么send就比较s的发送缓冲区的剩余空间和len</p>
+<p>   （3）如果len大于剩余空间大小，send就一直等待协议把s的发送缓冲中的数据发送完</p>
+<p>   （4）如果len小于剩余 空间大小，send就仅仅把buf中的数据copy到剩余空间里（注意并不是send把s的发送缓冲中的数据传到连接的另一端的，而是协议传的，send仅仅是把buf中的数据copy到s的发送缓冲区的剩余空间里）。</p>
+<p>   如果send函数copy数据成功，就返回实际copy的字节数，如果send在copy数据时出现错误，那么send就返回SOCKET_ERROR；如果send在等待协议传送数据时网络断开的话，那么send函数也返回SOCKET_ERROR。</p>
+<p>   要注意send函数把buf中的数据成功copy到s的发送缓冲的剩余空间里后它就返回了，但是此时这些数据并不一定马上被传到连接的另一端。如果协议在后续的传送过程中出现网络错误的话，那么下一个Socket函数就会返回SOCKET_ERROR。（每一个除send外的Socket函数在执 行的最开始总要先等待套接字的发送缓冲中的数据被协议传送完毕才能继续，如果在等待时出现网络错误，那么该Socket函数就返回 SOCKET_ERROR）</p>
+<p>注意：在Unix系统下，如果send在等待协议传送数据时网络断开的话，调用send的进程会接收到一个SIGPIPE信号，进程对该信号的默认处理是进程终止。<a target="_blank" rel="noopener" href="https://www.cnblogs.com/tianlangshu/p/6795681.html">详细解释</a></p>
+<h3 id="6-调用close关闭socket"><a href="#6-调用close关闭socket" class="headerlink" title="6.调用close关闭socket"></a>6.调用close关闭socket</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">close(sockfd);</span><br></pre></td></tr></table></figure>
+<p> <strong>整体代码：client.cpp</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br></pre></td><td class="code"><pre><span class="line">#include&lt;stdio.h&gt;</span><br><span class="line">#include&lt;stdlib.h&gt;</span><br><span class="line">#include&lt;string.h&gt;</span><br><span class="line">#include&lt;errno.h&gt;</span><br><span class="line">#include&lt;sys/types.h&gt;</span><br><span class="line">#include&lt;sys/socket.h&gt;</span><br><span class="line">#include&lt;netinet/in.h&gt;</span><br><span class="line">#include&lt;arpa/inet.h&gt;</span><br><span class="line">#include&lt;unistd.h&gt;</span><br><span class="line">#define MAXLINE 4096</span><br><span class="line"></span><br><span class="line">int main(int argc, char** argv)&#123;</span><br><span class="line">    int   sockfd, n;</span><br><span class="line">    char  recvline[4096], sendline[4096];</span><br><span class="line">    struct sockaddr_in  servaddr;</span><br><span class="line">	//控制台传入要连接的端口ip</span><br><span class="line">    if( argc != 2)&#123;</span><br><span class="line">        printf(&quot;usage: ./client &lt;ipaddress&gt;\n&quot;);</span><br><span class="line">        return 0;</span><br><span class="line">    &#125;</span><br><span class="line">	//创建套接字</span><br><span class="line">    if( (sockfd = socket(AF_INET, SOCK_STREAM, 0)) &lt; 0)&#123;</span><br><span class="line">        printf(&quot;create socket error: %s(errno: %d)\n&quot;, strerror(errno),errno);</span><br><span class="line">        return 0;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    memset(&amp;servaddr, 0, sizeof(servaddr));</span><br><span class="line">    servaddr.sin_family = AF_INET;//设置使用ipv4进行通信</span><br><span class="line">    servaddr.sin_port = htons(3100);//设置端口为3100</span><br><span class="line"></span><br><span class="line">    if( inet_pton(AF_INET, argv[1], &amp;servaddr.sin_addr) &lt;= 0)&#123;</span><br><span class="line">        printf(&quot;inet_pton error for %s\n&quot;,argv[1]);</span><br><span class="line">        return 0;</span><br><span class="line">    &#125;</span><br><span class="line">	//将client套接字和端口连接</span><br><span class="line">    if( connect(sockfd, (struct sockaddr*)&amp;servaddr, sizeof(servaddr)) &lt; 0)&#123;</span><br><span class="line">        printf(&quot;connect error: %s(errno: %d)\n&quot;,strerror(errno),errno);</span><br><span class="line">        return 0;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    printf(&quot;send msg to server: \n&quot;);</span><br><span class="line">    fgets(sendline, 4096, stdin);</span><br><span class="line">    if( send(sockfd, sendline, strlen(sendline), 0) &lt; 0)&#123;</span><br><span class="line">        printf(&quot;send msg error: %s(errno: %d)\n&quot;, strerror(errno), errno);</span><br><span class="line">        return 0;</span><br><span class="line">    &#125;</span><br><span class="line">    close(sockfd);</span><br><span class="line">    return 0;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="三、通信效果"><a href="#三、通信效果" class="headerlink" title="三、通信效果"></a>三、通信效果</h2><p>将server.cpp和client.cpp分别编译成可执行文件<br>用makefile编译cpp文件的详细步骤见另一篇博客：<br><a target="_blank" rel="noopener" href="https://blog.csdn.net/qq_41748900/article/details/82316662">https://blog.csdn.net/qq_41748900/article/details/82316662</a><br>运行server：<br><img src="https://img-blog.csdnimg.cn/20190615233652772.png" alt="在这里插入图片描述"><br>运行client：（127.0.0.1是本地的ip）<br><img src="https://img-blog.csdnimg.cn/2019061523360482.png" alt="在这里插入图片描述"></p>
+<p>参考文献：<br><a target="_blank" rel="noopener" href="https://www.cnblogs.com/zkfopen/p/9441264.html">https://www.cnblogs.com/zkfopen/p/9441264.html</a><br><a target="_blank" rel="noopener" href="https://blog.csdn.net/qq_27923041/article/details/83857964">https://blog.csdn.net/qq_27923041/article/details/83857964</a><br><a target="_blank" rel="noopener" href="https://blog.csdn.net/maopig/article/details/17193021#commentBox">https://blog.csdn.net/maopig/article/details/17193021#commentBox</a><br><a target="_blank" rel="noopener" href="https://zhidao.baidu.com/question/529573816.html">https://zhidao.baidu.com/question/529573816.html</a><br><a target="_blank" rel="noopener" href="https://blog.csdn.net/kvew/article/details/1336577">https://blog.csdn.net/kvew/article/details/1336577</a><br><a target="_blank" rel="noopener" href="http://blog.chinaunix.net/uid-14261758-id-2825546.html">http://blog.chinaunix.net/uid-14261758-id-2825546.html</a><br><a target="_blank" rel="noopener" href="https://blog.csdn.net/qq_39540224/article/details/79180349">https://blog.csdn.net/qq_39540224/article/details/79180349</a><br><a target="_blank" rel="noopener" href="https://www.cnblogs.com/tianlangshu/p/6795681.html">https://www.cnblogs.com/tianlangshu/p/6795681.html</a></p>
+
+        </div>
+
+        
+            <section class="post-copyright">
+                
+                    <p class="copyright-item">
+                        <span>Author:</span>
+                        <span>Jorwnpay</span>
+                    </p>
+                
+                
+                
+                    <p class="copyright-item">
+                        <span>License:</span>
+                        <span>Copyright (c) 2019 <a target="_blank" rel="noopener" href="http://creativecommons.org/licenses/by-nc/4.0/">CC-BY-NC-4.0</a> LICENSE</span>
+                    </p>
+                
+                
+                     <p class="copyright-item">
+                         <span>Slogan:</span>
+                         <span>I think it is possible for ordinary people to choose to be extraordinary.</span>
+                     </p>
+                
+
+            </section>
+        
+        <section class="post-tags">
+            <div>
+                <span>Tag(s):</span>
+                <span class="tag">
+                    
+                    
+                        <a href="/tags/socket%E9%80%9A%E4%BF%A1/"># socket通信</a>
+                    
+                        
+                </span>
+            </div>
+            <div>
+                <a href="javascript:window.history.back();">back</a>
+                <span>· </span>
+                <a href="/">home</a>
+            </div>
+        </section>
+        <section class="post-nav">
+            
+                <a class="prev" rel="prev" href="/2019/06/19/MYSQL%E6%9F%A5%E8%AF%A2%E6%96%B9%E6%B3%95%E7%BB%8F%E9%AA%8C%E6%80%BB%E7%BB%93/">MYSQL查询方法经验总结</a>
+            
+            
+            <a class="next" rel="next" href="/2019/06/13/k60%E7%83%A7%E5%86%99%E8%B0%83%E8%AF%95%E9%81%87%E5%88%B0%E7%9A%84%E9%97%AE%E9%A2%98%E6%80%BB%E7%BB%93/">k60烧写调试遇到的问题总结</a>
+            
+        </section>
+
+
+    </article>
+</div>
+
+            </div>
+            <footer id="footer" class="footer">
+    <div class="copyright">
+        <span>© Jorwnpay | Powered by <a href="https://hexo.io" target="_blank">Hexo</a> & <a href="https://github.com/Siricee/hexo-theme-Chic" target="_blank">Chic</a></span>
+    </div>
+</footer>
+
+    </div>
+</body>
+
+</html>

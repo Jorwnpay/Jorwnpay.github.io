@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <meta name="author" content="Jorwnpay">
+
+
+
+
+
+<title>长尾分布论文（二）：Adaptive Class Suppression Loss for Long-Tail Object Detection | Mr.Duck</title>
+
+
+
+    <link rel="icon" href="/icon.png">
+
+
+
+
+    <!-- stylesheets list from _config.yml -->
+    
+    <link rel="stylesheet" href="/css/style.css">
+    
+
+
+
+    <!-- scripts list from _config.yml -->
+    
+    <script src="/js/script.js"></script>
+    
+    <script src="/js/tocbot.min.js"></script>
+    
+
+
+
+    
+    
+        <!-- MathJax配置，可通过单美元符号书写行内公式等 -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+    "HTML-CSS": {
+        preferredFont: "TeX",
+        availableFonts: ["STIX","TeX"],
+        linebreaks: { automatic:true },
+        EqnChunk: (MathJax.Hub.Browser.isMobile ? 10 : 50)
+    },
+    tex2jax: {
+        inlineMath: [ ["$", "$"], ["\\(","\\)"] ],
+        processEscapes: true,
+        ignoreClass: "tex2jax_ignore|dno",
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    },
+    TeX: {
+        equationNumbers: { autoNumber: "AMS" },
+        noUndefined: { attributes: { mathcolor: "red", mathbackground: "#FFEEEE", mathsize: "90%" } },
+        Macros: { href: "{}" }
+    },
+    messageStyle: "none"
+    });
+</script>
+<!-- 给MathJax元素添加has-jax class -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for(i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+<!-- 通过连接CDN加载MathJax的js代码 -->
+<script type="text/javascript" async
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+
+
+    
+
+
+<meta name="generator" content="Hexo 5.4.1"></head>
+
+<body>
+    <script>
+        // this function is used to check current theme before page loaded.
+        (() => {
+            const currentTheme = window.localStorage && window.localStorage.getItem('theme') || '';
+            const isDark = currentTheme === 'dark';
+            const pagebody = document.getElementsByTagName('body')[0]
+            if (isDark) {
+                pagebody.classList.add('dark-theme');
+                // mobile
+                document.getElementById("mobile-toggle-theme").innerText = "· Dark"
+            } else {
+                pagebody.classList.remove('dark-theme');
+                // mobile
+                document.getElementById("mobile-toggle-theme").innerText = "· Light"
+            }
+        })();
+    </script>
+
+
+    <div class="wrapper">
+        <header>
+    <nav class="navbar">
+        <div class="container">
+            <div class="navbar-header header-logo"><a href="/">Jorwnpay&#39;s Blog</a></div>
+            <div class="menu navbar-right">
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                    <a class="menu-item" href="/category">Categories</a>
+                
+                    <a class="menu-item" href="/tag">Tags</a>
+                
+                    <a class="menu-item" href="/about">About</a>
+                
+                <input id="switch_default" type="checkbox" class="switch_default">
+                <label for="switch_default" class="toggleBtn"></label>
+            </div>
+        </div>
+    </nav>
+
+    
+    <nav class="navbar-mobile" id="nav-mobile">
+        <div class="container">
+            <div class="navbar-header">
+                <div>
+                    <a href="/">Jorwnpay&#39;s Blog</a><a id="mobile-toggle-theme">·&nbsp;Light</a>
+                </div>
+                <div class="menu-toggle" onclick="mobileBtn()">&#9776; Menu</div>
+            </div>
+            <div class="menu" id="mobile-menu">
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                    <a class="menu-item" href="/category">Categories</a>
+                
+                    <a class="menu-item" href="/tag">Tags</a>
+                
+                    <a class="menu-item" href="/about">About</a>
+                
+            </div>
+        </div>
+    </nav>
+
+</header>
+<script>
+    var mobileBtn = function f() {
+        var toggleMenu = document.getElementsByClassName("menu-toggle")[0];
+        var mobileMenu = document.getElementById("mobile-menu");
+        if(toggleMenu.classList.contains("active")){
+           toggleMenu.classList.remove("active")
+            mobileMenu.classList.remove("active")
+        }else{
+            toggleMenu.classList.add("active")
+            mobileMenu.classList.add("active")
+        }
+    }
+</script>
+            <div class="main">
+                <div class="container">
+    
+    
+        <div class="post-toc">
+    <div class="tocbot-list">
+    </div>
+    <div class="tocbot-list-menu">
+        <a class="tocbot-toc-expand" onclick="expand_toc()">Expand all</a>
+        <a onclick="go_top()">Back to top</a>
+        <a onclick="go_bottom()">Go to bottom</a>
+    </div>
+</div>
+
+<script>
+    document.ready(
+        function () {
+            tocbot.init({
+                tocSelector: '.tocbot-list',
+                contentSelector: '.post-content',
+                headingSelector: 'h1, h2, h3, h4, h5',
+                collapseDepth: 1,
+                orderedList: false,
+                scrollSmooth: true,
+            })
+        }
+    )
+
+    function expand_toc() {
+        var b = document.querySelector(".tocbot-toc-expand");
+        tocbot.init({
+            tocSelector: '.tocbot-list',
+            contentSelector: '.post-content',
+            headingSelector: 'h1, h2, h3, h4, h5',
+            collapseDepth: 6,
+            orderedList: false,
+            scrollSmooth: true,
+        });
+        b.setAttribute("onclick", "collapse_toc()");
+        b.innerHTML = "Collapse all"
+    }
+
+    function collapse_toc() {
+        var b = document.querySelector(".tocbot-toc-expand");
+        tocbot.init({
+            tocSelector: '.tocbot-list',
+            contentSelector: '.post-content',
+            headingSelector: 'h1, h2, h3, h4, h5',
+            collapseDepth: 1,
+            orderedList: false,
+            scrollSmooth: true,
+        });
+        b.setAttribute("onclick", "expand_toc()");
+        b.innerHTML = "Expand all"
+    }
+
+    function go_top() {
+        window.scrollTo(0, 0);
+    }
+
+    function go_bottom() {
+        window.scrollTo(0, document.body.scrollHeight);
+    }
+
+</script>
+    
+
+    
+    <article class="post-wrap">
+        <header class="post-header">
+            <h1 class="post-title">长尾分布论文（二）：Adaptive Class Suppression Loss for Long-Tail Object Detection</h1>
+            
+                <div class="post-meta">
+                    
+                        Author: <a itemprop="author" rel="author" href="/">Jorwnpay</a>
+                    
+
+                    
+                        <span class="post-time">
+                        Date: <a href="#">October 3, 2021&nbsp;&nbsp;22:14:00</a>
+                        </span>
+                    
+                    
+                        <span class="post-category">
+                    Category:
+                            
+                                <a href="/categories/%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB/">论文阅读</a>
+                            
+                        </span>
+                    
+                </div>
+            
+        </header>
+
+        <div class="post-content">
+            <p>这篇文章是收录在CVPR 2021的一篇关于长尾分布下的目标检测的文章。提出了一种比较简单、巧妙的损失函数，有效地提升了长尾分布下目标检测的准确度。</p>
+<p><a target="_blank" rel="noopener" href="https://openaccess.thecvf.com/content/CVPR2021/papers/Wang_Adaptive_Class_Suppression_Loss_for_Long-Tail_Object_Detection_CVPR_2021_paper.pdf">论文地址</a></p>
+<p><a target="_blank" rel="noopener" href="https://github.com/CASIA-IVA-Lab/ACSL">代码地址</a></p>
+<p>在长尾目标检测问题中，现有的方法通常是将整个数据集划分为若干组，并对每组采用不同的策略。这种方法虽然能够取得不错的结果，但是存在以下两个问题（如下图所示）：</p>
+<p>1）相似大小的相邻类别之间的训练不一致；</p>
+<blockquote>
+<p>这种方法要通过设定一个阈值来将数据集划分为不同的组，在分界线两侧的类别虽然有相近的图片数量，但是由于被分到的组不一样而有不同的训练结果；</p>
+</blockquote>
+<p>2）学习模型对语义上与某些头部类别相似的尾部类别缺乏区分。</p>
+<blockquote>
+<p>因为模型是分组训练的，因此头部和尾部的相似类别可能学到的特征也非常相似，这样在最后放在一起测试时很难将两种样本区分开。</p>
+</blockquote>
+<img src="https://pic4.zhimg.com/80/v2-9e87937002ec070ecfd53baeabfa09b3_1440w.jpg" alt="p6-1" style="zoom:80%;" />
+
+<p>此外，分组的方法还依赖于具体数据集分布先验，当面临新的数据集分布时，这种方法需要重新调参数来确定最优的分组策略，从而限制了方法的通用性和可移植性。</p>
+<h4 id="6-1-分组方法的局限性验证"><a href="#6-1-分组方法的局限性验证" class="headerlink" title="6.1 分组方法的局限性验证"></a>6.1 分组方法的局限性验证</h4><p>前面指出了现有的分组方法存在的问题，但口说无凭，下面就来实验验证，拿数据说话。</p>
+<p>本文使用<em>BAGS</em>[5]（一种SOTA的基于组的长尾目标检测方法）在LVIS上进行了实验，分别以5、50、500、5000为界将数据集分为两个组，得到了下面的实验结果。（下表中的r代表罕见类别，c代表常见类别，f代表频繁类别）。从表中可以看出需要设定适当的分界线（50~500），才能实现令人满意的性能，设置过大或过小都会降低性能。</p>
+<img src="https://pic1.zhimg.com/80/v2-3cf65edecb15950231c684ec9de75824_1440w.jpg" alt="p6-2" style="zoom:67%;" />
+
+<p>但是即便已经在一个数据集上确定了恰当的分界线，当面临不同分布的新数据集时，又需要重新确定分界线，如下图所示，我们在LVIS上确定的分界线在Open Images上并不适用。</p>
+<img src="https://pic2.zhimg.com/80/v2-5d5cc2ecf34dc0d7702ed4c556f77295_1440w.jpg" alt="p6-3" style="zoom:60%;" />
+
+<p><strong>Motivation：</strong>基于上面的讨论，很容易提出一个问题：能不能设计一种可以直接应用于不同的长尾分布数据集上的更通用的方法呢？因此本文提出了一种自适应类抑制损失（Adaptive Class Suppression Loss, 简称ACSL），可以避免上述问题。</p>
+<h4 id="6-2-ACSL是啥？"><a href="#6-2-ACSL是啥？" class="headerlink" title="6.2 ACSL是啥？"></a>6.2 ACSL是啥？</h4><p>ACSL的思想很简单：对于数据集中的每个类别，仅保留<strong>当前类别</strong>和<strong>容易跟当前类别混淆的类别</strong>的损失，去除其余所有类别的损失。</p>
+<p>我们先看一下多分类情况下的交叉熵损失函数：</p>
+<p><img src="https://pic4.zhimg.com/80/v2-5a012daf4eb09467b372fa880012355f_1440w.jpg" alt="p6-4"></p>
+<p>其中：</p>
+<p><img src="https://pic2.zhimg.com/80/v2-45c6cb6e88eb9c6db638a182e48d62c5_1440w.jpg" alt="p6-5"></p>
+<p>$C$ 是数据集中的类别数量。</p>
+<p>再来看下ACSL：实际上就是在普通的交叉熵损失函数前加了个权重$w_i$​​​​：</p>
+<img src="https://pic3.zhimg.com/80/v2-b3697b6ef22d10e1a9a70958eb5a9d9a_1440w.jpg" alt="p6-6" style="zoom:65%;" />
+
+<p>其中：</p>
+<img src="https://pic1.zhimg.com/80/v2-98ee0e4b1f398b0cb4572a5604e0af84_1440w.jpg" alt="p6-7" style="zoom:67%;" />
+
+<p>$\xi$​​​ 是需要我们自己设定的一个阈值，范围在（0，1）之间，定义$p_i&gt;\xi$的类别为容易混淆的类别。</p>
+<p>这个公式（ACSL）相对于普通的交叉熵损失函数（BCE）所作的改进就是：BCE计算了所有类别的损失，而ACSL则仅计算了正确的类别和容易混淆的类别的损失，这样就“隔离”了其余类别对正确类别的影响，从而减小了头部类别在训练时对尾部类别的影响。</p>
+<p>举个例子来说明一下：</p>
+<p><img src="https://pic2.zhimg.com/80/v2-8dcea758e5317b74a43932b2defa95e9_1440w.jpg" alt="p6-8"></p>
+<p>这个图表示二值交叉熵损失和ACSL对同一个样本的处理方式。该样本属于A类别，对于二值交叉熵损失来说，每个类别的损失的权重项均设置为1。对于ACSL来说，由于网络在A类别和D类别上都有比较高的得分，说明网络容易对这两个类别产生混淆，所以要保留对类别D的抑制梯度，其权重设置为1。对于类别B，C，E来说，网络产生的得分较低，所以将其对应的权重设置为0，可以避免对尾部类别产生过度的抑制作用，保护尾部类别的精度[6]。</p>
+<h4 id="6-3-实验结果"><a href="#6-3-实验结果" class="headerlink" title="6.3 实验结果"></a>6.3 实验结果</h4><p>作者在LVIS数据集上进行了实验。首先进行了消融实验，对 $\xi$​ 的不同取值时的检测效果进行了实验，如下表。从表中可以看出ACSL方法的检测效果较baseline有所提升，且适当增加$\xi$​的值模型性能也会随之增加，当 $\xi=0.7$ 时模型达到最佳性能。​ </p>
+<img src="https://pic2.zhimg.com/80/v2-a590ba675b9d85107a968e14a497bc49_1440w.jpg" alt="p6-9" style="zoom:60%;" />
+
+<p>接下来验证了ACSL在不同模型上的表现都很不错（下表中的r代表罕见类别，c代表常见类别，f代表频繁类别）：</p>
+<img src="https://pic1.zhimg.com/80/v2-0fbd052697f3e700d50ff2939a9c8948_1440w.jpg" alt="p6-10" style="zoom:55%;" />
+
+<p>随后在LVIS-v0.5上对ACSL和以前的SOTA方法进行了对比：</p>
+<p><img src="https://pic2.zhimg.com/80/v2-3afc3120afb77b34959e4a804da46d21_1440w.jpg" alt="p6-11"></p>
+<p>最后在最大的Open Images数据集上进行了实验，验证了本文所提方法的有效性：</p>
+<img src="https://pic4.zhimg.com/80/v2-51516c3c969faaeac2fba6fede25df43_1440w.jpg" alt="p6-12" style="zoom:50%;" />
+        </div>
+
+        
+            <section class="post-copyright">
+                
+                    <p class="copyright-item">
+                        <span>Author:</span>
+                        <span>Jorwnpay</span>
+                    </p>
+                
+                
+                
+                    <p class="copyright-item">
+                        <span>License:</span>
+                        <span>Copyright (c) 2019 <a target="_blank" rel="noopener" href="http://creativecommons.org/licenses/by-nc/4.0/">CC-BY-NC-4.0</a> LICENSE</span>
+                    </p>
+                
+                
+                     <p class="copyright-item">
+                         <span>Slogan:</span>
+                         <span>I think it is possible for ordinary people to choose to be extraordinary.</span>
+                     </p>
+                
+
+            </section>
+        
+        <section class="post-tags">
+            <div>
+                <span>Tag(s):</span>
+                <span class="tag">
+                    
+                    
+                        <a href="/tags/%E9%95%BF%E5%B0%BE%E5%AD%A6%E4%B9%A0/"># 长尾学习</a>
+                    
+                        
+                </span>
+            </div>
+            <div>
+                <a href="javascript:window.history.back();">back</a>
+                <span>· </span>
+                <a href="/">home</a>
+            </div>
+        </section>
+        <section class="post-nav">
+            
+                <a class="prev" rel="prev" href="/2021/10/07/%E9%95%BF%E5%B0%BE%E5%88%86%E5%B8%83%E8%AE%BA%E6%96%87%EF%BC%88%E4%B8%89%EF%BC%89%EF%BC%9AEqualization%20Loss%20v2%EF%BC%9AA%20New%20Gradient%20Balance%20Approach%20for%20Long-tailed%20Object%20Detection/">长尾分布论文（三）：Equalization Loss v2</a>
+            
+            
+            <a class="next" rel="next" href="/2021/10/02/%E9%95%BF%E5%B0%BE%E5%88%86%E5%B8%83%E8%AE%BA%E6%96%87%EF%BC%88%E4%B8%80%EF%BC%89%EF%BC%9ABag%20of%20Tricks%20for%20Long-Tailed%20Visual%20Recognition%20with%20Deep%20Convolutional%20Neural%20Networks/">长尾分布论文（一）：Bag of Tricks for Long-Tailed Visual Recognition</a>
+            
+        </section>
+
+
+    </article>
+</div>
+
+            </div>
+            <footer id="footer" class="footer">
+    <div class="copyright">
+        <span>© Jorwnpay | Powered by <a href="https://hexo.io" target="_blank">Hexo</a> & <a href="https://github.com/Siricee/hexo-theme-Chic" target="_blank">Chic</a></span>
+    </div>
+</footer>
+
+    </div>
+</body>
+
+</html>

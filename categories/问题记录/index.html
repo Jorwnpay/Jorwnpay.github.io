@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <meta name="author" content="Jorwnpay">
+
+
+
+
+
+<title>Category: 问题记录 | Mr.Duck</title>
+
+
+
+    <link rel="icon" href="/icon.png">
+
+
+
+
+    <!-- stylesheets list from _config.yml -->
+    
+    <link rel="stylesheet" href="/css/style.css">
+    
+
+
+
+    <!-- scripts list from _config.yml -->
+    
+    <script src="/js/script.js"></script>
+    
+    <script src="/js/tocbot.min.js"></script>
+    
+
+
+
+    
+    
+        <!-- MathJax配置，可通过单美元符号书写行内公式等 -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+    "HTML-CSS": {
+        preferredFont: "TeX",
+        availableFonts: ["STIX","TeX"],
+        linebreaks: { automatic:true },
+        EqnChunk: (MathJax.Hub.Browser.isMobile ? 10 : 50)
+    },
+    tex2jax: {
+        inlineMath: [ ["$", "$"], ["\\(","\\)"] ],
+        processEscapes: true,
+        ignoreClass: "tex2jax_ignore|dno",
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    },
+    TeX: {
+        equationNumbers: { autoNumber: "AMS" },
+        noUndefined: { attributes: { mathcolor: "red", mathbackground: "#FFEEEE", mathsize: "90%" } },
+        Macros: { href: "{}" }
+    },
+    messageStyle: "none"
+    });
+</script>
+<!-- 给MathJax元素添加has-jax class -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for(i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+<!-- 通过连接CDN加载MathJax的js代码 -->
+<script type="text/javascript" async
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+
+
+    
+
+
+<meta name="generator" content="Hexo 5.4.1"></head>
+
+<body>
+    <script>
+        // this function is used to check current theme before page loaded.
+        (() => {
+            const currentTheme = window.localStorage && window.localStorage.getItem('theme') || '';
+            const isDark = currentTheme === 'dark';
+            const pagebody = document.getElementsByTagName('body')[0]
+            if (isDark) {
+                pagebody.classList.add('dark-theme');
+                // mobile
+                document.getElementById("mobile-toggle-theme").innerText = "· Dark"
+            } else {
+                pagebody.classList.remove('dark-theme');
+                // mobile
+                document.getElementById("mobile-toggle-theme").innerText = "· Light"
+            }
+        })();
+    </script>
+
+
+    <div class="wrapper">
+        <header>
+    <nav class="navbar">
+        <div class="container">
+            <div class="navbar-header header-logo"><a href="/">Jorwnpay&#39;s Blog</a></div>
+            <div class="menu navbar-right">
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                    <a class="menu-item" href="/category">Categories</a>
+                
+                    <a class="menu-item" href="/tag">Tags</a>
+                
+                    <a class="menu-item" href="/about">About</a>
+                
+                <input id="switch_default" type="checkbox" class="switch_default">
+                <label for="switch_default" class="toggleBtn"></label>
+            </div>
+        </div>
+    </nav>
+
+    
+    <nav class="navbar-mobile" id="nav-mobile">
+        <div class="container">
+            <div class="navbar-header">
+                <div>
+                    <a href="/">Jorwnpay&#39;s Blog</a><a id="mobile-toggle-theme">·&nbsp;Light</a>
+                </div>
+                <div class="menu-toggle" onclick="mobileBtn()">&#9776; Menu</div>
+            </div>
+            <div class="menu" id="mobile-menu">
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                    <a class="menu-item" href="/category">Categories</a>
+                
+                    <a class="menu-item" href="/tag">Tags</a>
+                
+                    <a class="menu-item" href="/about">About</a>
+                
+            </div>
+        </div>
+    </nav>
+
+</header>
+<script>
+    var mobileBtn = function f() {
+        var toggleMenu = document.getElementsByClassName("menu-toggle")[0];
+        var mobileMenu = document.getElementById("mobile-menu");
+        if(toggleMenu.classList.contains("active")){
+           toggleMenu.classList.remove("active")
+            mobileMenu.classList.remove("active")
+        }else{
+            toggleMenu.classList.add("active")
+            mobileMenu.classList.add("active")
+        }
+    }
+</script>
+            <div class="main">
+                
+
+
+    
+<div class="container">
+    <div class="post-wrap categories">
+        <h2 class="post-title">-&nbsp;Categories&nbsp;·&nbsp;问题记录-</h2>
+    </div>
+    <div class="post-wrap archive">
+    
+    
+        
+
+        
+            <h3>2020</h3>
+        
+
+        <article class="archive-item">
+            <a class="archive-item-link" href="/2020/01/21/ctypes.ArgumentError_%20argument%202_%20type%20'exceptions.TypeError'_%20Don't%20know%20how%20to%20convert%20parameter/">ctypes.ArgumentError：argument 2：type &#39;exceptions.TypeError&#39;</a>
+            <span class="archive-item-date">January 21, 2020</span>
+        </article>
+    
+        
+
+        
+
+        <article class="archive-item">
+            <a class="archive-item-link" href="/2020/01/20/python%E8%B0%83%E7%94%A8.so%E6%96%87%E4%BB%B6%E5%87%BA%E7%8E%B0%E6%8A%A5%E9%94%99%EF%BC%9AOSError_%20._xx.so_%20invalid%20ELF%20header%EF%BC%88Linux%E7%8E%AF%E5%A2%83%EF%BC%89/">python调用.so文件出现报错：OSError：./xx.so：invalid ELF header（Linux环境）</a>
+            <span class="archive-item-date">January 20, 2020</span>
+        </article>
+    
+        
+
+        
+            <h3>2019</h3>
+        
+
+        <article class="archive-item">
+            <a class="archive-item-link" href="/2019/10/06/arduino%20IDE%E7%83%A7%E5%86%99%E9%97%AE%E9%A2%98%E8%AE%B0%E5%BD%95/">arduino IDE烧写问题记录</a>
+            <span class="archive-item-date">October 6, 2019</span>
+        </article>
+    
+        
+
+        
+
+        <article class="archive-item">
+            <a class="archive-item-link" href="/2019/08/31/arduinoIDE%20%E6%8A%A5%E9%94%99%20-%20avrdude_%20stk500_recv()_%20programmer%20is%20not%20responding/">arduinoIDE报错 - avrdude：stk500_recv()：programmer is not responding</a>
+            <span class="archive-item-date">August 31, 2019</span>
+        </article>
+    
+        
+
+        
+
+        <article class="archive-item">
+            <a class="archive-item-link" href="/2019/08/28/Matlab%E9%81%87%E5%88%B0%E5%86%85%E9%83%A8%E9%97%AE%E9%A2%98%EF%BC%8C%E9%9C%80%E8%A6%81%E5%85%B3%E9%97%ADDisabled%20-%20No%20sandbox%20or%20build%20area%20path/">Matlab遇到内部问题，需要关闭Disabled - No sandbox or build area path</a>
+            <span class="archive-item-date">August 28, 2019</span>
+        </article>
+    
+        
+
+        
+
+        <article class="archive-item">
+            <a class="archive-item-link" href="/2019/08/21/pygame.key.get_pressed()%E4%B8%8D%E5%B7%A5%E4%BD%9C/">pygame.key.get_pressed()不工作</a>
+            <span class="archive-item-date">August 21, 2019</span>
+        </article>
+    
+        
+
+        
+
+        <article class="archive-item">
+            <a class="archive-item-link" href="/2019/08/11/pygame.error_%20video%20system%20not%20initialized/">pygame.error：video system not initialized</a>
+            <span class="archive-item-date">August 11, 2019</span>
+        </article>
+    
+        
+
+        
+
+        <article class="archive-item">
+            <a class="archive-item-link" href="/2019/07/11/pycharm%E7%99%BB%E5%BD%95%E6%97%B6%E5%A4%B1%E8%B4%A5%EF%BC%8C%E5%BC%B9%E5%87%BAyour%20host%20may%20be%20behind%20a%20proxy.../">pycharm登录时失败，弹出your host may be behind a proxy...</a>
+            <span class="archive-item-date">July 11, 2019</span>
+        </article>
+    
+        
+
+        
+
+        <article class="archive-item">
+            <a class="archive-item-link" href="/2019/06/13/k60%E7%83%A7%E5%86%99%E8%B0%83%E8%AF%95%E9%81%87%E5%88%B0%E7%9A%84%E9%97%AE%E9%A2%98%E6%80%BB%E7%BB%93/">k60烧写调试遇到的问题总结</a>
+            <span class="archive-item-date">June 13, 2019</span>
+        </article>
+    
+        
+
+        
+
+        <article class="archive-item">
+            <a class="archive-item-link" href="/2019/06/03/mysql%20ERROR%201046%20(3D000)/">mysql ERROR 1046 (3D000)</a>
+            <span class="archive-item-date">June 3, 2019</span>
+        </article>
+    
+    
+</div>
+</div>
+
+            </div>
+            <footer id="footer" class="footer">
+    <div class="copyright">
+        <span>© Jorwnpay | Powered by <a href="https://hexo.io" target="_blank">Hexo</a> & <a href="https://github.com/Siricee/hexo-theme-Chic" target="_blank">Chic</a></span>
+    </div>
+</footer>
+
+    </div>
+</body>
+
+</html>

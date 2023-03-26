@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <meta name="author" content="Jorwnpay">
+
+
+
+
+
+<title>MySQL：数据表常用操作总结 | Mr.Duck</title>
+
+
+
+    <link rel="icon" href="/icon.png">
+
+
+
+
+    <!-- stylesheets list from _config.yml -->
+    
+    <link rel="stylesheet" href="/css/style.css">
+    
+
+
+
+    <!-- scripts list from _config.yml -->
+    
+    <script src="/js/script.js"></script>
+    
+    <script src="/js/tocbot.min.js"></script>
+    
+
+
+
+    
+    
+        <!-- MathJax配置，可通过单美元符号书写行内公式等 -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+    "HTML-CSS": {
+        preferredFont: "TeX",
+        availableFonts: ["STIX","TeX"],
+        linebreaks: { automatic:true },
+        EqnChunk: (MathJax.Hub.Browser.isMobile ? 10 : 50)
+    },
+    tex2jax: {
+        inlineMath: [ ["$", "$"], ["\\(","\\)"] ],
+        processEscapes: true,
+        ignoreClass: "tex2jax_ignore|dno",
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    },
+    TeX: {
+        equationNumbers: { autoNumber: "AMS" },
+        noUndefined: { attributes: { mathcolor: "red", mathbackground: "#FFEEEE", mathsize: "90%" } },
+        Macros: { href: "{}" }
+    },
+    messageStyle: "none"
+    });
+</script>
+<!-- 给MathJax元素添加has-jax class -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for(i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+<!-- 通过连接CDN加载MathJax的js代码 -->
+<script type="text/javascript" async
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+
+
+    
+
+
+<meta name="generator" content="Hexo 5.4.1"></head>
+
+<body>
+    <script>
+        // this function is used to check current theme before page loaded.
+        (() => {
+            const currentTheme = window.localStorage && window.localStorage.getItem('theme') || '';
+            const isDark = currentTheme === 'dark';
+            const pagebody = document.getElementsByTagName('body')[0]
+            if (isDark) {
+                pagebody.classList.add('dark-theme');
+                // mobile
+                document.getElementById("mobile-toggle-theme").innerText = "· Dark"
+            } else {
+                pagebody.classList.remove('dark-theme');
+                // mobile
+                document.getElementById("mobile-toggle-theme").innerText = "· Light"
+            }
+        })();
+    </script>
+
+
+    <div class="wrapper">
+        <header>
+    <nav class="navbar">
+        <div class="container">
+            <div class="navbar-header header-logo"><a href="/">Jorwnpay&#39;s Blog</a></div>
+            <div class="menu navbar-right">
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                    <a class="menu-item" href="/category">Categories</a>
+                
+                    <a class="menu-item" href="/tag">Tags</a>
+                
+                    <a class="menu-item" href="/about">About</a>
+                
+                <input id="switch_default" type="checkbox" class="switch_default">
+                <label for="switch_default" class="toggleBtn"></label>
+            </div>
+        </div>
+    </nav>
+
+    
+    <nav class="navbar-mobile" id="nav-mobile">
+        <div class="container">
+            <div class="navbar-header">
+                <div>
+                    <a href="/">Jorwnpay&#39;s Blog</a><a id="mobile-toggle-theme">·&nbsp;Light</a>
+                </div>
+                <div class="menu-toggle" onclick="mobileBtn()">&#9776; Menu</div>
+            </div>
+            <div class="menu" id="mobile-menu">
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                    <a class="menu-item" href="/category">Categories</a>
+                
+                    <a class="menu-item" href="/tag">Tags</a>
+                
+                    <a class="menu-item" href="/about">About</a>
+                
+            </div>
+        </div>
+    </nav>
+
+</header>
+<script>
+    var mobileBtn = function f() {
+        var toggleMenu = document.getElementsByClassName("menu-toggle")[0];
+        var mobileMenu = document.getElementById("mobile-menu");
+        if(toggleMenu.classList.contains("active")){
+           toggleMenu.classList.remove("active")
+            mobileMenu.classList.remove("active")
+        }else{
+            toggleMenu.classList.add("active")
+            mobileMenu.classList.add("active")
+        }
+    }
+</script>
+            <div class="main">
+                <div class="container">
+    
+    
+        <div class="post-toc">
+    <div class="tocbot-list">
+    </div>
+    <div class="tocbot-list-menu">
+        <a class="tocbot-toc-expand" onclick="expand_toc()">Expand all</a>
+        <a onclick="go_top()">Back to top</a>
+        <a onclick="go_bottom()">Go to bottom</a>
+    </div>
+</div>
+
+<script>
+    document.ready(
+        function () {
+            tocbot.init({
+                tocSelector: '.tocbot-list',
+                contentSelector: '.post-content',
+                headingSelector: 'h1, h2, h3, h4, h5',
+                collapseDepth: 1,
+                orderedList: false,
+                scrollSmooth: true,
+            })
+        }
+    )
+
+    function expand_toc() {
+        var b = document.querySelector(".tocbot-toc-expand");
+        tocbot.init({
+            tocSelector: '.tocbot-list',
+            contentSelector: '.post-content',
+            headingSelector: 'h1, h2, h3, h4, h5',
+            collapseDepth: 6,
+            orderedList: false,
+            scrollSmooth: true,
+        });
+        b.setAttribute("onclick", "collapse_toc()");
+        b.innerHTML = "Collapse all"
+    }
+
+    function collapse_toc() {
+        var b = document.querySelector(".tocbot-toc-expand");
+        tocbot.init({
+            tocSelector: '.tocbot-list',
+            contentSelector: '.post-content',
+            headingSelector: 'h1, h2, h3, h4, h5',
+            collapseDepth: 1,
+            orderedList: false,
+            scrollSmooth: true,
+        });
+        b.setAttribute("onclick", "expand_toc()");
+        b.innerHTML = "Expand all"
+    }
+
+    function go_top() {
+        window.scrollTo(0, 0);
+    }
+
+    function go_bottom() {
+        window.scrollTo(0, document.body.scrollHeight);
+    }
+
+</script>
+    
+
+    
+    <article class="post-wrap">
+        <header class="post-header">
+            <h1 class="post-title">MySQL：数据表常用操作总结</h1>
+            
+                <div class="post-meta">
+                    
+                        Author: <a itemprop="author" rel="author" href="/">Jorwnpay</a>
+                    
+
+                    
+                        <span class="post-time">
+                        Date: <a href="#">June 23, 2019&nbsp;&nbsp;23:17:10</a>
+                        </span>
+                    
+                    
+                        <span class="post-category">
+                    Category:
+                            
+                                <a href="/categories/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/">学习笔记</a>
+                            
+                        </span>
+                    
+                </div>
+            
+        </header>
+
+        <div class="post-content">
+            <h3 id="1-删除表中某一列的外码约束"><a href="#1-删除表中某一列的外码约束" class="headerlink" title="1.删除表中某一列的外码约束"></a>1.删除表中某一列的外码约束</h3><p>格式：alter table 表名 drop foreign key 外键约束名</p>
+<p><strong>外键约束名</strong>:指在定义表时constraint关键字后面的约束名<br>可以使用show create table语句查看在constraint后面单引号中。<br>例如：<br><img src="https://img-blog.csdnimg.cn/20190623104515472.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQxNzQ4OTAw,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"><br>例如删除sc表中sno属性列的外码约束：<br><img src="https://img-blog.csdnimg.cn/201906231047035.png" alt="在这里插入图片描述"></p>
+<h3 id="2-给表中的列增加外码约束"><a href="#2-给表中的列增加外码约束" class="headerlink" title="2.给表中的列增加外码约束"></a>2.给表中的列增加外码约束</h3><p>格式：alter table 表名 add foreign key 表名(列名) references 表名2(列名2);<br>例如：将sc表中的sno列设置为外码并连接到student表中的sno列：<br><img src="https://img-blog.csdnimg.cn/20190623104912534.png" alt="在这里插入图片描述"></p>
+<h3 id="3-删除表中某列的主码属性"><a href="#3-删除表中某列的主码属性" class="headerlink" title="3.删除表中某列的主码属性"></a>3.删除表中某列的主码属性</h3><ul>
+<li><strong>如果该主码不是其他表中的外码：</strong><br>格式：drop index 键名 on 表名；<br>键名：通过 show keys from 表名；  查看Key_name<br>例如，查看student表中的keys<br><img src="https://img-blog.csdnimg.cn/2019062311103734.png" alt="在这里插入图片描述"><br>然后，删除student表中sno的主码属性：<br><img src="https://img-blog.csdnimg.cn/20190623110619136.png" alt="在这里插入图片描述"></li>
+<li><strong>如果该主码是其他表中的外码：</strong><br>需要先把其他表中对应的外码属性删除，然后再删除该表中的主码属性；<br>例如，student表中的主码sno是sc表中的外码，需要先把sc表中sno的外码属性删除，再删除student表中的主码属性：<br><img src="https://img-blog.csdnimg.cn/20190623111527540.png" alt="在这里插入图片描述"><h3 id="4-给表中某列添加主码属性"><a href="#4-给表中某列添加主码属性" class="headerlink" title="4.给表中某列添加主码属性"></a>4.给表中某列添加主码属性</h3>格式：alter table 表名 add uninque 列名(列名);<br>例如，给student表中的sno列添加主码属性：<br><img src="https://img-blog.csdnimg.cn/2019062311255542.png" alt="在这里插入图片描述"><h3 id="5-修改属性列的值"><a href="#5-修改属性列的值" class="headerlink" title="5.修改属性列的值"></a>5.修改属性列的值</h3>格式：update 表名 set 列名1=表达式1,列名2=表达式2 where 条件;<br>注意：如果要修改的列是其他表的外码，则不被允许修改，因为可能会破坏表上已定义的完整性规则！<br>例如：将student表中sname列的“李白”修改为“李冰”：<br><img src="https://img-blog.csdnimg.cn/20190623114036323.png" alt="在这里插入图片描述"><br>再如：将student表中学号为95666的学生的sname修改为“李新旺”，ssex修改为“男”,sage修改为18：<br><img src="https://img-blog.csdnimg.cn/20190623114601981.png" alt="在这里插入图片描述"><h3 id="6-删除表中的某行"><a href="#6-删除表中的某行" class="headerlink" title="6.删除表中的某行"></a>6.删除表中的某行</h3>格式：delete from 表名 where 条件;<br>注意：注意：如果要删除的行中的某个元素是其他表的外码，则不被允许修改，因为可能会破坏表上已定义的完整性规则！<br>例如：删除student表中sno为95014的一行：<br><img src="https://img-blog.csdnimg.cn/20190623163454903.png" alt="在这里插入图片描述"><h3 id="7-向表中插入一行"><a href="#7-向表中插入一行" class="headerlink" title="7.向表中插入一行"></a>7.向表中插入一行</h3>格式：insert into 表名 (列名1，列名2，列名3) values (常量1，常量2，常量3);<br>例如：向student表中插入学生信息：姓名(sname)李新旺、学号(sno)95015、性别(ssex)男、年龄(sage)18、院系(sdept)CS:<br><img src="https://img-blog.csdnimg.cn/20190623201355314.png" alt="在这里插入图片描述"><br>value子句提供的值必须与into子句提供的变量类型和个数相匹配；<h3 id="8-添加新表"><a href="#8-添加新表" class="headerlink" title="8.添加新表"></a>8.添加新表</h3>格式：create table 表名 (列名1 数据类型 约束条件，列名2  数据类型 约束条件，列名3 数据类型 约束条件…);<br>例如：添加新表scnewadd，有sno、cno两列数据，类型分别为varchar(30),varchar(10),（sno,cno)<br>是主码;<br><img src="https://img-blog.csdnimg.cn/20190624094254294.png" alt="在这里插入图片描述"><h3 id="9-查看表中列名、类型、约束条件"><a href="#9-查看表中列名、类型、约束条件" class="headerlink" title="9.查看表中列名、类型、约束条件"></a>9.查看表中列名、类型、约束条件</h3>格式：desc 表名;<br>例如：查看上面创建的scnewadd表的列名、类型、约束条件<br><img src="https://img-blog.csdnimg.cn/20190624094446955.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQxNzQ4OTAw,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"><h3 id="10-删除表格"><a href="#10-删除表格" class="headerlink" title="10.删除表格"></a>10.删除表格</h3>格式：drop table 表名；<br>例如：把刚才创建的表scnewadd删除:<br><img src="https://img-blog.csdnimg.cn/20190624094831809.png" alt="在这里插入图片描述"></li>
+</ul>
+
+        </div>
+
+        
+            <section class="post-copyright">
+                
+                    <p class="copyright-item">
+                        <span>Author:</span>
+                        <span>Jorwnpay</span>
+                    </p>
+                
+                
+                
+                    <p class="copyright-item">
+                        <span>License:</span>
+                        <span>Copyright (c) 2019 <a target="_blank" rel="noopener" href="http://creativecommons.org/licenses/by-nc/4.0/">CC-BY-NC-4.0</a> LICENSE</span>
+                    </p>
+                
+                
+                     <p class="copyright-item">
+                         <span>Slogan:</span>
+                         <span>I think it is possible for ordinary people to choose to be extraordinary.</span>
+                     </p>
+                
+
+            </section>
+        
+        <section class="post-tags">
+            <div>
+                <span>Tag(s):</span>
+                <span class="tag">
+                    
+                    
+                        <a href="/tags/mysql/"># mysql</a>
+                    
+                        
+                </span>
+            </div>
+            <div>
+                <a href="javascript:window.history.back();">back</a>
+                <span>· </span>
+                <a href="/">home</a>
+            </div>
+        </section>
+        <section class="post-nav">
+            
+                <a class="prev" rel="prev" href="/2019/07/11/pycharm%E7%99%BB%E5%BD%95%E6%97%B6%E5%A4%B1%E8%B4%A5%EF%BC%8C%E5%BC%B9%E5%87%BAyour%20host%20may%20be%20behind%20a%20proxy.../">pycharm登录时失败，弹出your host may be behind a proxy...</a>
+            
+            
+            <a class="next" rel="next" href="/2019/06/19/MYSQL%E6%9F%A5%E8%AF%A2%E6%96%B9%E6%B3%95%E7%BB%8F%E9%AA%8C%E6%80%BB%E7%BB%93/">MYSQL查询方法经验总结</a>
+            
+        </section>
+
+
+    </article>
+</div>
+
+            </div>
+            <footer id="footer" class="footer">
+    <div class="copyright">
+        <span>© Jorwnpay | Powered by <a href="https://hexo.io" target="_blank">Hexo</a> & <a href="https://github.com/Siricee/hexo-theme-Chic" target="_blank">Chic</a></span>
+    </div>
+</footer>
+
+    </div>
+</body>
+
+</html>

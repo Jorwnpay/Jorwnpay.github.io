@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <meta name="author" content="Jorwnpay">
+
+
+
+
+
+<title>RoboCup仿真3D底层通信模块介绍（一） | Mr.Duck</title>
+
+
+
+    <link rel="icon" href="/icon.png">
+
+
+
+
+    <!-- stylesheets list from _config.yml -->
+    
+    <link rel="stylesheet" href="/css/style.css">
+    
+
+
+
+    <!-- scripts list from _config.yml -->
+    
+    <script src="/js/script.js"></script>
+    
+    <script src="/js/tocbot.min.js"></script>
+    
+
+
+
+    
+    
+        <!-- MathJax配置，可通过单美元符号书写行内公式等 -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+    "HTML-CSS": {
+        preferredFont: "TeX",
+        availableFonts: ["STIX","TeX"],
+        linebreaks: { automatic:true },
+        EqnChunk: (MathJax.Hub.Browser.isMobile ? 10 : 50)
+    },
+    tex2jax: {
+        inlineMath: [ ["$", "$"], ["\\(","\\)"] ],
+        processEscapes: true,
+        ignoreClass: "tex2jax_ignore|dno",
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    },
+    TeX: {
+        equationNumbers: { autoNumber: "AMS" },
+        noUndefined: { attributes: { mathcolor: "red", mathbackground: "#FFEEEE", mathsize: "90%" } },
+        Macros: { href: "{}" }
+    },
+    messageStyle: "none"
+    });
+</script>
+<!-- 给MathJax元素添加has-jax class -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for(i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+<!-- 通过连接CDN加载MathJax的js代码 -->
+<script type="text/javascript" async
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+
+
+    
+
+
+<meta name="generator" content="Hexo 5.4.1"></head>
+
+<body>
+    <script>
+        // this function is used to check current theme before page loaded.
+        (() => {
+            const currentTheme = window.localStorage && window.localStorage.getItem('theme') || '';
+            const isDark = currentTheme === 'dark';
+            const pagebody = document.getElementsByTagName('body')[0]
+            if (isDark) {
+                pagebody.classList.add('dark-theme');
+                // mobile
+                document.getElementById("mobile-toggle-theme").innerText = "· Dark"
+            } else {
+                pagebody.classList.remove('dark-theme');
+                // mobile
+                document.getElementById("mobile-toggle-theme").innerText = "· Light"
+            }
+        })();
+    </script>
+
+
+    <div class="wrapper">
+        <header>
+    <nav class="navbar">
+        <div class="container">
+            <div class="navbar-header header-logo"><a href="/">Jorwnpay&#39;s Blog</a></div>
+            <div class="menu navbar-right">
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                    <a class="menu-item" href="/category">Categories</a>
+                
+                    <a class="menu-item" href="/tag">Tags</a>
+                
+                    <a class="menu-item" href="/about">About</a>
+                
+                <input id="switch_default" type="checkbox" class="switch_default">
+                <label for="switch_default" class="toggleBtn"></label>
+            </div>
+        </div>
+    </nav>
+
+    
+    <nav class="navbar-mobile" id="nav-mobile">
+        <div class="container">
+            <div class="navbar-header">
+                <div>
+                    <a href="/">Jorwnpay&#39;s Blog</a><a id="mobile-toggle-theme">·&nbsp;Light</a>
+                </div>
+                <div class="menu-toggle" onclick="mobileBtn()">&#9776; Menu</div>
+            </div>
+            <div class="menu" id="mobile-menu">
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                    <a class="menu-item" href="/category">Categories</a>
+                
+                    <a class="menu-item" href="/tag">Tags</a>
+                
+                    <a class="menu-item" href="/about">About</a>
+                
+            </div>
+        </div>
+    </nav>
+
+</header>
+<script>
+    var mobileBtn = function f() {
+        var toggleMenu = document.getElementsByClassName("menu-toggle")[0];
+        var mobileMenu = document.getElementById("mobile-menu");
+        if(toggleMenu.classList.contains("active")){
+           toggleMenu.classList.remove("active")
+            mobileMenu.classList.remove("active")
+        }else{
+            toggleMenu.classList.add("active")
+            mobileMenu.classList.add("active")
+        }
+    }
+</script>
+            <div class="main">
+                <div class="container">
+    
+    
+        <div class="post-toc">
+    <div class="tocbot-list">
+    </div>
+    <div class="tocbot-list-menu">
+        <a class="tocbot-toc-expand" onclick="expand_toc()">Expand all</a>
+        <a onclick="go_top()">Back to top</a>
+        <a onclick="go_bottom()">Go to bottom</a>
+    </div>
+</div>
+
+<script>
+    document.ready(
+        function () {
+            tocbot.init({
+                tocSelector: '.tocbot-list',
+                contentSelector: '.post-content',
+                headingSelector: 'h1, h2, h3, h4, h5',
+                collapseDepth: 1,
+                orderedList: false,
+                scrollSmooth: true,
+            })
+        }
+    )
+
+    function expand_toc() {
+        var b = document.querySelector(".tocbot-toc-expand");
+        tocbot.init({
+            tocSelector: '.tocbot-list',
+            contentSelector: '.post-content',
+            headingSelector: 'h1, h2, h3, h4, h5',
+            collapseDepth: 6,
+            orderedList: false,
+            scrollSmooth: true,
+        });
+        b.setAttribute("onclick", "collapse_toc()");
+        b.innerHTML = "Collapse all"
+    }
+
+    function collapse_toc() {
+        var b = document.querySelector(".tocbot-toc-expand");
+        tocbot.init({
+            tocSelector: '.tocbot-list',
+            contentSelector: '.post-content',
+            headingSelector: 'h1, h2, h3, h4, h5',
+            collapseDepth: 1,
+            orderedList: false,
+            scrollSmooth: true,
+        });
+        b.setAttribute("onclick", "expand_toc()");
+        b.innerHTML = "Expand all"
+    }
+
+    function go_top() {
+        window.scrollTo(0, 0);
+    }
+
+    function go_bottom() {
+        window.scrollTo(0, document.body.scrollHeight);
+    }
+
+</script>
+    
+
+    
+    <article class="post-wrap">
+        <header class="post-header">
+            <h1 class="post-title">RoboCup仿真3D底层通信模块介绍（一）</h1>
+            
+                <div class="post-meta">
+                    
+                        Author: <a itemprop="author" rel="author" href="/">Jorwnpay</a>
+                    
+
+                    
+                        <span class="post-time">
+                        Date: <a href="#">August 2, 2019&nbsp;&nbsp;18:11:53</a>
+                        </span>
+                    
+                    
+                        <span class="post-category">
+                    Category:
+                            
+                                <a href="/categories/%E7%BB%8F%E9%AA%8C%E6%80%BB%E7%BB%93/">经验总结</a>
+                            
+                        </span>
+                    
+                </div>
+            
+        </header>
+
+        <div class="post-content">
+            <h1 id="server和agent之间通信的msg格式-amp-agent的传感器"><a href="#server和agent之间通信的msg格式-amp-agent的传感器" class="headerlink" title="server和agent之间通信的msg格式 &amp; agent的传感器"></a>server和agent之间通信的msg格式 &amp; agent的传感器</h1><hr>
+<p>@[toc]</p>
+<hr>
+<h2 id="一、General-Perceptors（一般传感器）"><a href="#一、General-Perceptors（一般传感器）" class="headerlink" title="一、General Perceptors（一般传感器）"></a>一、General Perceptors（一般传感器）</h2><h3 id="1-Joint-Perceptor（关节传感器）"><a href="#1-Joint-Perceptor（关节传感器）" class="headerlink" title="1.Joint Perceptor（关节传感器）"></a>1.Joint Perceptor（关节传感器）</h3><p>关节分为两种，铰链关节和万向关节.<br>RoboCup3d仿真机器人关节传感器获得的信息蕴含着机器人的运动状态，尤其是双足步行机器人下肢的运动状态对其位姿变化有直接的影响，因此RoboCup3d仿真机器人关节传感器获得的运动信息可以用于机器人进行局部的自定位.</p>
+<ul>
+<li><strong>1.HingeJoint Perceptor（铰链关节传感器）</strong></li>
+</ul>
+<p><img src="https://img-blog.csdnimg.cn/20190802112608335.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQxNzQ4OTAw,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"><br><strong>消息格式：</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Message format: (HJ (n &lt;name&gt;) (ax &lt;ax&gt;))</span><br><span class="line">&lt;name&gt; - the name of the corresponding hinge joint</span><br><span class="line">&lt;ax&gt; - the current position angle in degrees and an accuracy of two digits</span><br><span class="line">Example message: (HJ (n laj3) (ax -1.02))</span><br></pre></td></tr></table></figure>
+<ul>
+<li><strong>2.UniversalJoint Perceptor（万向关节传感器）</strong><br><img src="https://img-blog.csdnimg.cn/20190802113338540.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQxNzQ4OTAw,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></li>
+<li><em>消息格式：</em>*<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">Message format: (UJ (n &lt;name&gt;) (ax1 &lt;ax1&gt;) (ax2 &lt;ax2&gt;))</span><br><span class="line">&lt;name&gt; - the name of the corresponding universal joint</span><br><span class="line">&lt;ax1&gt; &lt;ax2&gt; - the current position angles of the two axes in degrees and an accuracy of two digits</span><br><span class="line">Example message: (UJ (n laj1 2) (ax1 -1.32) (ax2 2.00))</span><br><span class="line">Noise model: None</span><br></pre></td></tr></table></figure>
+<h3 id="2-GyroRate-Perceptor（陀螺仪）"><a href="#2-GyroRate-Perceptor（陀螺仪）" class="headerlink" title="2.GyroRate Perceptor（陀螺仪）"></a>2.GyroRate Perceptor（陀螺仪）</h3>RoboCup仿真3d机器人拥有一个三轴角速度陀螺仪，提供了机器人位姿角度变化的信息.可以用于机器人进行及局部的自定位.</li>
+<li><em>消息格式：</em>*<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">Message format: (GYR (n &lt;name&gt;) (rt &lt;x&gt; &lt;y&gt; &lt;z&gt;))</span><br><span class="line">&lt;name&gt; - the name of the body containing the gyro rate perceptor</span><br><span class="line">&lt;x&gt; &lt;y&gt; &lt;z&gt; - the current angular velocities along the three axes of freedom of the parent body in</span><br><span class="line">deg/s and an accuracy of two digits</span><br><span class="line">Example message: (GYR (n torso) (rt 0.01 0.07 0.46))</span><br><span class="line">Noise model: None</span><br></pre></td></tr></table></figure>
+<h3 id="3-Accelerometer（加速度计）"><a href="#3-Accelerometer（加速度计）" class="headerlink" title="3.Accelerometer（加速度计）"></a>3.Accelerometer（加速度计）</h3></li>
+<li><em>作用：</em>* 加速度计可以测量机器人运动的瞬时加速度.<br>当机器人静止在地球表面时，加速度计测量的结果大约是1G，方向朝上.</li>
+<li><em>消息内容：</em>* 该消息以字符‘ACC’标示，后面跟上该加速度计所属的主体名称，及三个轴向当前的加速度.</li>
+<li><em>消息格式：</em>*<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">Message format: (ACC (n &lt;name&gt;) (a &lt;x&gt; &lt;y&gt; &lt;z&gt;))</span><br><span class="line">&lt;name&gt; - the name of the body containing the accelerometer (see robot descriptions 8)</span><br><span class="line">&lt;x&gt; &lt;y&gt; &lt;z&gt; - the current acceleration along the three axes of freedom in m/s 2 and an accuracy of</span><br><span class="line">two digits</span><br><span class="line">Example message: (ACC (n torso) (a 0.00 0.00 9.81))</span><br><span class="line">Noise model: None</span><br></pre></td></tr></table></figure>
+<h3 id="4-ForceResistance-Perceptor（脚部压力传感器）"><a href="#4-ForceResistance-Perceptor（脚部压力传感器）" class="headerlink" title="4.ForceResistance Perceptor（脚部压力传感器）"></a>4.ForceResistance Perceptor（脚部压力传感器）</h3></li>
+<li><em>作用：</em>* 该传感器获得作用于身体的力.</li>
+<li><em>消息内容：</em>* 该消息以字符‘FRP’标示，后面是主体的名称，再后面是两个向量，第一个向量是受力点的坐标，单位为米，保留两位小数；第二个向量是受到的力在三个方向上的分量.</li>
+<li><em>消息格式：</em>*<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">Message format: (FRP (n &lt;name&gt;) (c &lt;px&gt; &lt;py&gt; &lt;pz&gt;) (f &lt;fx&gt; &lt;fy&gt; &lt;fz&gt;))</span><br><span class="line">&lt;name&gt; - the name of the body, to which the force resistance perceptor belongs (see robot</span><br><span class="line">descriptions 8)</span><br><span class="line">&lt;px&gt; &lt;py&gt; &lt;pz&gt; - the local coordinates of the point of origin of the applied force in meter and an</span><br><span class="line">accuracy of two digits</span><br><span class="line">&lt;fx&gt; &lt;fy&gt; &lt;fz&gt; - the components of the force vector with an accuracy of two digits, while the length</span><br><span class="line">of the force vector represents the given force in newton (kg · m/s 2 )</span><br><span class="line">Example message: (FRP (n lf) (c -0.14 0.08 -0.05) (f 1.12 -0.26 13.07))</span><br><span class="line">Noise model: None</span><br></pre></td></tr></table></figure>
+<h3 id="5-Touch-Perceptor（触碰传感器）"><a href="#5-Touch-Perceptor（触碰传感器）" class="headerlink" title="5.Touch Perceptor（触碰传感器）"></a>5.Touch Perceptor（触碰传感器）</h3></li>
+<li><em>作用：</em>* 当安装该传感器的主体和另外的仿真对象碰撞时，该传感器会被触发.<br>这个传感器会报告它独有的名字，因此一个机器人可以有多个触碰传感器.</li>
+<li><em>消息内容：</em>* value值为0表示未发生碰撞，值为1表示发生碰撞.</li>
+<li><em>消息格式：</em>*<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Message format: (TCH n &lt;name&gt; val 0|1)</span><br><span class="line">Example message: (TCH n bumper val 1)</span><br></pre></td></tr></table></figure></li>
+</ul>
+<hr>
+<h2 id="二、Soccer-Perceptors（足球仿真比赛专用传感器）"><a href="#二、Soccer-Perceptors（足球仿真比赛专用传感器）" class="headerlink" title="二、Soccer Perceptors（足球仿真比赛专用传感器）"></a>二、Soccer Perceptors（足球仿真比赛专用传感器）</h2><h3 id="1-Vision-Perceptor（视觉传感器）"><a href="#1-Vision-Perceptor（视觉传感器）" class="headerlink" title="1.Vision Perceptor（视觉传感器）"></a>1.Vision Perceptor（视觉传感器）</h3><p>你的机器人有一个特别的全方位相机，附带一些智能的图片处理软件：），如果使用常规的视觉传感器，机器人有360度的视野，在RoboCup仿真3d平台中，机器人的视野被限制为水平方向和垂直方向都为120度。视觉的方向总是跟当前机器人的身体取向有关，可以被水平倾斜效应器改变。相机可以水平转到任意角度并且可以在水平面上倾斜。<br><strong>作用：</strong> 视觉传感器提供了一个看到的对象列表，包括机器人身体的一部分、球、或是场上的标志。目前场上有八种标志：足球场的四个角、球门的四个门柱。通过每个可视对象你可以得到一个<strong>球坐标系</strong>下的坐标向量。<br><img src="https://img-blog.csdnimg.cn/2019080215461863.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQxNzQ4OTAw,size_16,color_FFFFFF,t_70" alt="球坐标系"><br><img src="https://img-blog.csdnimg.cn/20190802154043896.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQxNzQ4OTAw,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述">与仿真2D足球相反，这个视觉系统不提供对象的速度。对象可以被其他对象堵塞（目前还未完全实施）。所有的距离和角度都是相对于相机的坐标和方向给出的。<br>视觉系统的噪声参数如下：</p>
+<ul>
+<li>相机的位置会添加一个小的校准误差。对于每个轴，误差均匀分布在-0.005m到0.005m之间。该误差只计算一次并在整场比赛中保持不变。</li>
+<li>动态噪声通常分散在0.0左右（以0.0为期望的正态分布）<ul>
+<li>distance error（距离噪声）: σ = 0.0965 (另外，距离噪声乘了distance/100)</li>
+<li>horizontal angle error（水平角度噪声）: σ = 0.1225</li>
+<li>latitudal angle error（垂直角度噪声）: σ = 0.1480</li>
+</ul>
+</li>
+</ul>
+<p><strong>消息内容：</strong> 视觉消息以字符‘See’来标识，后面是看到的对象列表。球和球场上的标志是可以用一个坐标向量描述的简单对象，而球员是一个更为复杂的对象，需要更严格的描述以及附加的信息比如队名或是球员号码。因此通过队名、球员号和至少一个坐标向量来描述球员的不同身体部分。根据视觉系统附带的超复杂图像处理软件：）视觉信息每三个周期被感知一次。</p>
+<p><strong>消息格式：</strong><br><img src="https://img-blog.csdnimg.cn/20190802135739333.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQxNzQ4OTAw,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"><img src="https://img-blog.csdnimg.cn/20190802135810913.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQxNzQ4OTAw,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<h3 id="2-AgentState-Perceptor（球员状态传感器）"><a href="#2-AgentState-Perceptor（球员状态传感器）" class="headerlink" title="2.AgentState Perceptor（球员状态传感器）"></a>2.AgentState Perceptor（球员状态传感器）</h3><p><strong>作用：</strong> 给出球员的当前状态。<br><strong>消息内容：</strong> 当前的电池状态和球员的温度。<br><strong>消息格式：</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Message format: (AgentState (temp &lt;degree&gt;) (battery &lt;percentile&gt;))</span><br><span class="line">Example message: (AgentState (temp 48) (battery 75))</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-GameState-Perceptor（比赛状态传感器）"><a href="#3-GameState-Perceptor（比赛状态传感器）" class="headerlink" title="3.GameState Perceptor（比赛状态传感器）"></a>3.GameState Perceptor（比赛状态传感器）</h3><p><strong>作用：</strong> 给出当前比赛环境的状态。<br><strong>消息内容：</strong> 当前的比赛时间和比赛模式。<br><strong>消息格式：</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Message format: (GS (t &lt;time&gt;) (pm &lt;playmode&gt;))</span><br><span class="line">&lt;time&gt; - the current play time in seconds and two digits</span><br><span class="line">&lt;playmode&gt; - the current play mode of the soccer game (see table 4.3 for possible values)</span><br><span class="line">Example message: (GS (t 0.00) (pm BeforeKickOff))</span><br></pre></td></tr></table></figure>
+<p><strong>比赛状态表</strong><br><img src="https://img-blog.csdnimg.cn/2019080216543513.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQxNzQ4OTAw,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"><br>2019年世界杯新加入了两种模式：<br>| Pass_Left | pass ball for left team |<br>|–|–|<br>| Pass_Right| pass ball for right team |</p>
+<h3 id="4-Hear-Perceptor（听觉传感器）"><a href="#4-Hear-Perceptor（听觉传感器）" class="headerlink" title="4.Hear Perceptor（听觉传感器）"></a>4.Hear Perceptor（听觉传感器）</h3><p>规则不允许机器人之间直接通信，但是机器人可以通过仿真server来交换信息。因此机器人装了听觉传感器来接收其他球员喊出的消息。<br><strong>作用：</strong> 接收其他球员喊出的消息。<br><strong>消息内容：</strong> 听到消息的时间，听到消息的水平方向与头之间的角度，听到的消息内容。<br><strong>消息格式：</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">Message format: (hear &lt;time&gt; ’self’|&lt;direction&gt; &lt;message&gt;)</span><br><span class="line">&lt;time&gt; - the play time when the given message was heard in seconds</span><br><span class="line">&lt;direction&gt; - the horizontal direction where the sound was located, relative to the head in degrees</span><br><span class="line">&lt;message&gt; - up to 20 characters, which may be taken from the ASCII printing character subset</span><br><span class="line">[0x20, 0x7E] except the white space character (t) and the normal brackets ( and )</span><br><span class="line">Example message: (hear 12.30 self helloworld)</span><br></pre></td></tr></table></figure>
+<p>听觉传感器提出了一些限制：<br>1.&lt; message &gt;的内容最多有20个字符，必须取自ASCII打印字符集[0x20，0x7E]，不包括空格和左右括号‘(’ , ‘)’。<br>2. 超过50米外的消息不能被接收到。<br>3. 可以同时听到的消息数量是有限的：每个球员在每两个周期最多只能听到特定球队发出的一个消息。每支队都有单独的跟踪能力，因为队伍不应该通过一直喊叫来阻挡对手的听觉感知器。如果来自一只队伍的多个消息到达，会按消息到达的顺序依次处理；根本听不到剩下的消息。但是自己喊出的消息总是被注意到。</p>
+
+        </div>
+
+        
+            <section class="post-copyright">
+                
+                    <p class="copyright-item">
+                        <span>Author:</span>
+                        <span>Jorwnpay</span>
+                    </p>
+                
+                
+                
+                    <p class="copyright-item">
+                        <span>License:</span>
+                        <span>Copyright (c) 2019 <a target="_blank" rel="noopener" href="http://creativecommons.org/licenses/by-nc/4.0/">CC-BY-NC-4.0</a> LICENSE</span>
+                    </p>
+                
+                
+                     <p class="copyright-item">
+                         <span>Slogan:</span>
+                         <span>I think it is possible for ordinary people to choose to be extraordinary.</span>
+                     </p>
+                
+
+            </section>
+        
+        <section class="post-tags">
+            <div>
+                <span>Tag(s):</span>
+                <span class="tag">
+                    
+                    
+                        <a href="/tags/RoboCup3D/"># RoboCup3D</a>
+                    
+                        
+                </span>
+            </div>
+            <div>
+                <a href="javascript:window.history.back();">back</a>
+                <span>· </span>
+                <a href="/">home</a>
+            </div>
+        </section>
+        <section class="post-nav">
+            
+                <a class="prev" rel="prev" href="/2019/08/03/RoboCup%E4%BB%BF%E7%9C%9F3D%E5%BA%95%E5%B1%82%E9%80%9A%E4%BF%A1%E6%A8%A1%E5%9D%97%E4%BB%8B%E7%BB%8D(%E4%BA%8C)/">RoboCup仿真3D底层通信模块介绍(二)</a>
+            
+            
+            <a class="next" rel="next" href="/2019/07/31/%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98%E8%A7%A3%E5%86%B3%E6%96%B9%E6%B3%95%E6%B1%87%E6%80%BB%E2%80%94%E2%80%94%E5%8D%81%E5%9B%9B%E5%B1%8A%E6%81%A9%E6%99%BA%E6%B5%A6%E6%99%BA%E8%83%BD%E8%BD%A6%E5%AE%A4%E5%A4%96%E7%94%B5%E7%A3%81%E8%B6%8A%E9%87%8E%E7%BB%84/">常见问题解决方法汇总——十四届恩智浦智能车室外电磁越野组</a>
+            
+        </section>
+
+
+    </article>
+</div>
+
+            </div>
+            <footer id="footer" class="footer">
+    <div class="copyright">
+        <span>© Jorwnpay | Powered by <a href="https://hexo.io" target="_blank">Hexo</a> & <a href="https://github.com/Siricee/hexo-theme-Chic" target="_blank">Chic</a></span>
+    </div>
+</footer>
+
+    </div>
+</body>
+
+</html>

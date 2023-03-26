@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <meta name="author" content="Jorwnpay">
+
+
+
+
+
+<title>长尾分布论文（一）：Bag of Tricks for Long-Tailed Visual Recognition | Mr.Duck</title>
+
+
+
+    <link rel="icon" href="/icon.png">
+
+
+
+
+    <!-- stylesheets list from _config.yml -->
+    
+    <link rel="stylesheet" href="/css/style.css">
+    
+
+
+
+    <!-- scripts list from _config.yml -->
+    
+    <script src="/js/script.js"></script>
+    
+    <script src="/js/tocbot.min.js"></script>
+    
+
+
+
+    
+    
+        <!-- MathJax配置，可通过单美元符号书写行内公式等 -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+    "HTML-CSS": {
+        preferredFont: "TeX",
+        availableFonts: ["STIX","TeX"],
+        linebreaks: { automatic:true },
+        EqnChunk: (MathJax.Hub.Browser.isMobile ? 10 : 50)
+    },
+    tex2jax: {
+        inlineMath: [ ["$", "$"], ["\\(","\\)"] ],
+        processEscapes: true,
+        ignoreClass: "tex2jax_ignore|dno",
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    },
+    TeX: {
+        equationNumbers: { autoNumber: "AMS" },
+        noUndefined: { attributes: { mathcolor: "red", mathbackground: "#FFEEEE", mathsize: "90%" } },
+        Macros: { href: "{}" }
+    },
+    messageStyle: "none"
+    });
+</script>
+<!-- 给MathJax元素添加has-jax class -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for(i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+<!-- 通过连接CDN加载MathJax的js代码 -->
+<script type="text/javascript" async
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+
+
+    
+
+
+<meta name="generator" content="Hexo 5.4.1"></head>
+
+<body>
+    <script>
+        // this function is used to check current theme before page loaded.
+        (() => {
+            const currentTheme = window.localStorage && window.localStorage.getItem('theme') || '';
+            const isDark = currentTheme === 'dark';
+            const pagebody = document.getElementsByTagName('body')[0]
+            if (isDark) {
+                pagebody.classList.add('dark-theme');
+                // mobile
+                document.getElementById("mobile-toggle-theme").innerText = "· Dark"
+            } else {
+                pagebody.classList.remove('dark-theme');
+                // mobile
+                document.getElementById("mobile-toggle-theme").innerText = "· Light"
+            }
+        })();
+    </script>
+
+
+    <div class="wrapper">
+        <header>
+    <nav class="navbar">
+        <div class="container">
+            <div class="navbar-header header-logo"><a href="/">Jorwnpay&#39;s Blog</a></div>
+            <div class="menu navbar-right">
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                    <a class="menu-item" href="/category">Categories</a>
+                
+                    <a class="menu-item" href="/tag">Tags</a>
+                
+                    <a class="menu-item" href="/about">About</a>
+                
+                <input id="switch_default" type="checkbox" class="switch_default">
+                <label for="switch_default" class="toggleBtn"></label>
+            </div>
+        </div>
+    </nav>
+
+    
+    <nav class="navbar-mobile" id="nav-mobile">
+        <div class="container">
+            <div class="navbar-header">
+                <div>
+                    <a href="/">Jorwnpay&#39;s Blog</a><a id="mobile-toggle-theme">·&nbsp;Light</a>
+                </div>
+                <div class="menu-toggle" onclick="mobileBtn()">&#9776; Menu</div>
+            </div>
+            <div class="menu" id="mobile-menu">
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                    <a class="menu-item" href="/category">Categories</a>
+                
+                    <a class="menu-item" href="/tag">Tags</a>
+                
+                    <a class="menu-item" href="/about">About</a>
+                
+            </div>
+        </div>
+    </nav>
+
+</header>
+<script>
+    var mobileBtn = function f() {
+        var toggleMenu = document.getElementsByClassName("menu-toggle")[0];
+        var mobileMenu = document.getElementById("mobile-menu");
+        if(toggleMenu.classList.contains("active")){
+           toggleMenu.classList.remove("active")
+            mobileMenu.classList.remove("active")
+        }else{
+            toggleMenu.classList.add("active")
+            mobileMenu.classList.add("active")
+        }
+    }
+</script>
+            <div class="main">
+                <div class="container">
+    
+    
+        <div class="post-toc">
+    <div class="tocbot-list">
+    </div>
+    <div class="tocbot-list-menu">
+        <a class="tocbot-toc-expand" onclick="expand_toc()">Expand all</a>
+        <a onclick="go_top()">Back to top</a>
+        <a onclick="go_bottom()">Go to bottom</a>
+    </div>
+</div>
+
+<script>
+    document.ready(
+        function () {
+            tocbot.init({
+                tocSelector: '.tocbot-list',
+                contentSelector: '.post-content',
+                headingSelector: 'h1, h2, h3, h4, h5',
+                collapseDepth: 1,
+                orderedList: false,
+                scrollSmooth: true,
+            })
+        }
+    )
+
+    function expand_toc() {
+        var b = document.querySelector(".tocbot-toc-expand");
+        tocbot.init({
+            tocSelector: '.tocbot-list',
+            contentSelector: '.post-content',
+            headingSelector: 'h1, h2, h3, h4, h5',
+            collapseDepth: 6,
+            orderedList: false,
+            scrollSmooth: true,
+        });
+        b.setAttribute("onclick", "collapse_toc()");
+        b.innerHTML = "Collapse all"
+    }
+
+    function collapse_toc() {
+        var b = document.querySelector(".tocbot-toc-expand");
+        tocbot.init({
+            tocSelector: '.tocbot-list',
+            contentSelector: '.post-content',
+            headingSelector: 'h1, h2, h3, h4, h5',
+            collapseDepth: 1,
+            orderedList: false,
+            scrollSmooth: true,
+        });
+        b.setAttribute("onclick", "expand_toc()");
+        b.innerHTML = "Expand all"
+    }
+
+    function go_top() {
+        window.scrollTo(0, 0);
+    }
+
+    function go_bottom() {
+        window.scrollTo(0, document.body.scrollHeight);
+    }
+
+</script>
+    
+
+    
+    <article class="post-wrap">
+        <header class="post-header">
+            <h1 class="post-title">长尾分布论文（一）：Bag of Tricks for Long-Tailed Visual Recognition</h1>
+            
+                <div class="post-meta">
+                    
+                        Author: <a itemprop="author" rel="author" href="/">Jorwnpay</a>
+                    
+
+                    
+                        <span class="post-time">
+                        Date: <a href="#">October 2, 2021&nbsp;&nbsp;13:17:00</a>
+                        </span>
+                    
+                    
+                        <span class="post-category">
+                    Category:
+                            
+                                <a href="/categories/%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB/">论文阅读</a>
+                            
+                        </span>
+                    
+                </div>
+            
+        </header>
+
+        <div class="post-content">
+            <p>本文系统总结了用于长尾识别的各种trick，实验得出了不同trick组合会带来不同的效果，给出了详细的实验指南；并提出了一种新的基于CAM的DRS采样方法；通过本文的trick组合，在CIFAR-LT、iNaturalist、ImageNet-LT上得到了最好的结果。</p>
+<p><a target="_blank" rel="noopener" href="https://www.aaai.org/AAAI21Papers/AAAI-8813.YongshunZ.pdf">论文阅读</a></p>
+<p><a target="_blank" rel="noopener" href="https://github.com/zhangyongshun/BagofTricks-LT">代码阅读</a></p>
+<h4 id="5-1-Trick有哪些？"><a href="#5-1-Trick有哪些？" class="headerlink" title="5.1 Trick有哪些？"></a>5.1 Trick有哪些？</h4><p>本文把长尾识别的trick分为了四个类别，包括：</p>
+<h5 id="1-Re-weighting"><a href="#1-Re-weighting" class="headerlink" title="1.Re-weighting"></a>1.Re-weighting</h5><p>现有的re-weighting方法：</p>
+<ul>
+<li><p>代价敏感softmax交叉熵损失（CS_CE）</p>
+<p>该损失在普通的交叉熵损失函数（CE）前乘上了最小类别中的训练图像数与每个类别的图像数的比值。相当于减少了多数类别的损失贡献，增加了少数类别的损失贡献。</p>
+<img src="https://pic2.zhimg.com/80/v2-041be3bcddd4cbf5eaaa25f661b35a49_1440w.jpg" alt="p5-1" style="zoom:38%;" /></li>
+<li><p>Focal loss</p>
+<p>focal loss可以通过设置参数$\alpha$和$\gamma$​的来控制少数类别、难分类类别对损失的贡献。</p>
+<img src="https://pic3.zhimg.com/80/v2-2a7fde08dde534bc0d2707d854757eda_1440w.jpg" alt="p5-2" style="zoom:38%;" /></li>
+<li><p>类别平衡损失</p>
+<p>类别平衡损失这篇文章提出了一个“样本体积”的概念，其核心思想在于：数据集中的样本并不是都能提供有效的信息，因此应该以类别中的有效类别数量对loss进行加权（而不是直接使用样本数量对loss进行加权）。</p>
+<p>具体来说，就是在普通的损失（如CE、Focal等）前加上一个$\frac{1-\beta}{1-\beta^{n_c}}$项，其中$\beta$是一个超参数。</p>
+<ul>
+<li><p>CB_Focal</p>
+<img src="https://pic4.zhimg.com/80/v2-00e03bb2f0e0b2734cf16a50c315d66f_1440w.jpg" alt="p5-3" style="zoom:38%;" /></li>
+<li><p>CB_CE</p>
+<img src="https://pic4.zhimg.com/80/v2-5acf95389ff071bc0ff9f7536b38ea57_1440w.png" alt="p5-4" style="zoom:38%;" /></li>
+</ul>
+</li>
+</ul>
+<p>对re-weighting方法进行实验：</p>
+<p><img src="https://pic3.zhimg.com/80/v2-af59e3707d0262cafd75339e11ad77c2_1440w.jpg" alt="p5-5"></p>
+<p>可以从实验结果看出，增加图片类别之后一些re-weighting的方法反而不如普通CE好了。</p>
+<h5 id="2-Re-sampling"><a href="#2-Re-sampling" class="headerlink" title="2.Re-sampling"></a>2.Re-sampling</h5><p>现有的re-sampling方法：</p>
+<ul>
+<li><p>随机过采样</p>
+<p>通过随机重复采样少数类别样本来构建平衡的数据集；</p>
+</li>
+<li><p>随机降采样</p>
+<p>通过随机删除多数类别的样本来构建平衡的数据集；</p>
+</li>
+<li><p>类别平衡采样</p>
+<p>首先对类别进行统一采样，即每个类别被采样的概率都一样（下式中$q=0$的情况）；然后从每个类别中有放回地随机采样实例，从而构建一个平衡的数据集；</p>
+<p><img src="https://pic3.zhimg.com/80/v2-e84b9c6de6aaaf3a8abe54e940464d76_1440w.png" alt="p5-6"></p>
+<blockquote>
+<p>该式中$p_j$表示从数据集中随机采样一个样本，其来自类别$j$的概率。</p>
+</blockquote>
+</li>
+<li><p>平方根采样</p>
+<p>上式中$q=1/2$的情况。</p>
+</li>
+<li><p>逐步平衡采样</p>
+<p>先对多个epochs进行实例平衡采样（上式q=1，也就是没有任何平衡操作的采样），然后在剩下的epochs中进行类别平衡采样。这种采样方法需要设置一个超参数来调整从哪一个epoch开始变换采样方式。也可以使用更软的阈值，即随着epoch的增加逐渐调整实例平衡采样（IB）和类别平衡采样（CB）所占的比例，如下面公式所示。</p>
+<img src="https://pic2.zhimg.com/80/v2-08cca45c383db36611a2a661b2e4018d_1440w.jpg" alt="p5-7" style="zoom:50%;" /></li>
+</ul>
+<p>对re-sampling方法进行实验：</p>
+<img src="https://pic4.zhimg.com/80/v2-822747e0022057ae010f4af245314673_1440w.jpg" alt="p5-8" style="zoom:60%;" />
+
+<p>从实验结果可以看出，直接将重采样用于训练过程得到了轻微的改进.</p>
+<h5 id="3-Mix-up-training"><a href="#3-Mix-up-training" class="headerlink" title="3.Mix-up training"></a>3.Mix-up training</h5><p>现有的mixup方法：</p>
+<ul>
+<li><p>Input mixup（输入混合）</p>
+<p>通过下式对训练样本进行数据增强。其中$(x_i,y_i)、(x_j,y_j)$​是随机采样的两个样本，$\lambda$是一个从beta分布中随机采样得到的0到1之间的数值。在训练时使用$(\hat{x},\hat{y})$作为输入。​</p>
+<img src="https://pic3.zhimg.com/80/v2-50b1546a3007637715ebe8fa020a266e_1440w.jpg" alt="p5-9" style="zoom:67%;" /></li>
+<li><p>Manifold mixup（流形混合）</p>
+<p>首先将随机采样的两个样本$(x_i,y_i)、(x_j,y_j)$​输入网络，在网络的第$k$​层得到输出$(g_k(x_i),y_i)、(g_k(x_j),y_j)$​​，随后通过下式对两个训练样本的中间输出进行混合，$\lambda$​是一个从beta分布中随机采样得到的0到1之间的数值。在训练时使用$(\hat{g_k},\hat{y})$​​作为输入。​在本文中只是使用了一层网络进行manifold mixup。</p>
+<img src="https://pic4.zhimg.com/80/v2-0138d7a0e10a2243a273f08009253723_1440w.jpg" alt="p5-10" style="zoom:67%;" /></li>
+</ul>
+<p>在mixup 训练后进行fine-tuning：</p>
+<p>前人已经证明在mixup训练的后面几个epochs去掉mixup，所得的结果会有明显的提升[3]。在本文中，为获得进一步提升，先使用mixup训练，然后用源数据集对mixup训练后的模型进行了微调。</p>
+<p>对<em>mixup training</em>方法进行实验：</p>
+<img src="https://pic2.zhimg.com/80/v2-726bf1d857c720981575c4eba5fce58d_1440w.jpg" alt="p5-11" style="zoom:50%;" />
+
+<p>从表中可以看出Input mixup和Manifold mixup的方法相对于baseline都有一定的提升；当设置$\alpha=1$且混合位置设置为pooling layer时Input mixup和Manifold mixup的结果相当。</p>
+<p>对“<em>先mixup 训练、再进行fine-tuning</em>”的方法进行实验：</p>
+<img src="https://pic1.zhimg.com/80/v2-fa38f8c6a4fdec8d6881237dc9215a2c_1440w.jpg" alt="p5-12" style="zoom:50%;" />
+
+<p>从表中可以看出Input mixup训练后进行微调可以得到进一步的提升，但Manifold mixup训练后进行微调效果反而变差了。</p>
+<h5 id="4-Two-stage-training"><a href="#4-Two-stage-training" class="headerlink" title="4.Two-stage training"></a>4.Two-stage training</h5><p>在不平衡训练后进行平衡微调：</p>
+<p>从长尾分布的数据集中模型可以学到高质量的特征表示，但是在尾部类中的识别准确率很低。现有的两阶段方法的两个阶段可以归纳为：首先在不平衡的数据集中对模型进行训练、然后使用重采样（DRS，实际上就是RS，论文中换了一种说法：延迟重采样，下同）或重加权（DRW）的方法对模型的分类器进行微调。</p>
+<p>本文提出的基于CAM的DRS方法：</p>
+<p><img src="https://pic4.zhimg.com/80/v2-98ec63cf01fba7a50d7a515892086fef_1440w.jpg" alt="p5-13"></p>
+<p>该方法首先对长尾分布数据集进行重采样得到平衡数据集，然后对于每张采样到的图片，使用在第一个训练阶段得到的参数化模型，根据其真实标签和相应地全连接层权重生成CAM（具体方法参考[4]），之后根据CAM地平均值对图片前景和背景进行分割，最后对前景进行变换（对每张图片随机选取“水平翻转、平移、旋转和缩放”中的一种进行变换），同时保持背景不变，生成新的图片作为训练集。</p>
+<p>对于前面说的重采样方法，本文将CAM和现有的重采样方法（降采样、过采样、类别平衡采样、平方根采样、逐步平衡采样）进行了结合，命名为“CAM-based xx-sampling”。</p>
+<p>对<em>Two-stage training</em>方法进行实验：</p>
+<p>第二阶段采用重采样方法的实验结果：</p>
+<img src="https://pic2.zhimg.com/80/v2-8e7fd8f99bbc46344a907b9da81bdd0d_1440w.jpg" alt="p5-14" style="zoom:80%;" />
+
+<p>从表中可以得出：</p>
+<p>1）两阶段（第二阶段重采样）的方法相比直接重采样的方法结果有所提升；</p>
+<p>2）基于CAM的采样方法可以让结果更好；</p>
+<p>3）基于CAM的类别平衡采样得到了最佳的结果；</p>
+<p>4）加入了只进行图像变换（即水平翻转、平移、旋转或缩放）的方法作为对比，证明了CAM的有效性。（<em>我觉得这个对比实验加的很不错，给读者一种实验很严谨、很充分的感觉</em>）</p>
+<p>第二阶段采用重加权方法的实验结果：</p>
+<img src="https://pic3.zhimg.com/80/v2-48c6b52c634e3990bf78b5ad8b1897fa_1440w.jpg" alt="p5-15" style="zoom:80%;" />
+
+<p>从表中可以看出，两阶段（第二阶段重加权）的方法相比直接重加权的方法结果有所提升，且CS_CE方法的效果最好。</p>
+<h4 id="5-2-Trick包"><a href="#5-2-Trick包" class="headerlink" title="5.2 Trick包"></a>5.2 Trick包</h4><p>本文通过实验探索了怎么样组合Trick可以得到最佳的准确率，得到了如下的结果：</p>
+<img src="https://pic3.zhimg.com/80/v2-00345b0173620a5601e8b02d3a1b6332_1440w.jpg" alt="p5-16" style="zoom:50%;" />
+
+<p>最终得出了最佳的Trick组合：<strong>输入混合（Input mixup）+用本文提出的基于CAM重采样方法进行两阶段训练+在mixup training之后进行微调</strong>。</p>
+<p>我把它们按照训练时的顺序进行一个总结（我自己的理解）：</p>
+<p>第一阶段：用输入混合（Input mixup）方法对数据集进行增强，然后在开始的几个epochs用增强的数据集训练模型，接下来的几个epochs用未增强的数据集对模型进行fine-tuning；</p>
+<p>第二阶段：用本文提出的基于CAM重采样方法对数据集进行平衡采样，之后用平衡数据集对模型的分类器进行重新训练。</p>
+
+        </div>
+
+        
+            <section class="post-copyright">
+                
+                    <p class="copyright-item">
+                        <span>Author:</span>
+                        <span>Jorwnpay</span>
+                    </p>
+                
+                
+                
+                    <p class="copyright-item">
+                        <span>License:</span>
+                        <span>Copyright (c) 2019 <a target="_blank" rel="noopener" href="http://creativecommons.org/licenses/by-nc/4.0/">CC-BY-NC-4.0</a> LICENSE</span>
+                    </p>
+                
+                
+                     <p class="copyright-item">
+                         <span>Slogan:</span>
+                         <span>I think it is possible for ordinary people to choose to be extraordinary.</span>
+                     </p>
+                
+
+            </section>
+        
+        <section class="post-tags">
+            <div>
+                <span>Tag(s):</span>
+                <span class="tag">
+                    
+                    
+                        <a href="/tags/%E9%95%BF%E5%B0%BE%E5%AD%A6%E4%B9%A0/"># 长尾学习</a>
+                    
+                        
+                </span>
+            </div>
+            <div>
+                <a href="javascript:window.history.back();">back</a>
+                <span>· </span>
+                <a href="/">home</a>
+            </div>
+        </section>
+        <section class="post-nav">
+            
+                <a class="prev" rel="prev" href="/2021/10/03/%E9%95%BF%E5%B0%BE%E5%88%86%E5%B8%83%E8%AE%BA%E6%96%87%EF%BC%88%E4%BA%8C%EF%BC%89%EF%BC%9AAdaptive%20Class%20Suppression%20Loss%20for%20Long-Tail%20Object%20Detection/">长尾分布论文（二）：Adaptive Class Suppression Loss for Long-Tail Object Detection</a>
+            
+            
+            <a class="next" rel="next" href="/2021/03/16/LaTeX%E5%BC%95%E7%94%A8%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE%E6%96%B9%E6%B3%95%E8%AE%B0%E5%BD%95/">LaTeX引用参考文献方法记录</a>
+            
+        </section>
+
+
+    </article>
+</div>
+
+            </div>
+            <footer id="footer" class="footer">
+    <div class="copyright">
+        <span>© Jorwnpay | Powered by <a href="https://hexo.io" target="_blank">Hexo</a> & <a href="https://github.com/Siricee/hexo-theme-Chic" target="_blank">Chic</a></span>
+    </div>
+</footer>
+
+    </div>
+</body>
+
+</html>

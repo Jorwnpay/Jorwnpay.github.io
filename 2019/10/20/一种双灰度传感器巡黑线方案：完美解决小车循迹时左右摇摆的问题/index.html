@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <meta name="author" content="Jorwnpay">
+
+
+
+
+
+<title>一种双灰度传感器巡黑线方案：完美解决小车循迹时左右摇摆的问题 | Mr.Duck</title>
+
+
+
+    <link rel="icon" href="/icon.png">
+
+
+
+
+    <!-- stylesheets list from _config.yml -->
+    
+    <link rel="stylesheet" href="/css/style.css">
+    
+
+
+
+    <!-- scripts list from _config.yml -->
+    
+    <script src="/js/script.js"></script>
+    
+    <script src="/js/tocbot.min.js"></script>
+    
+
+
+
+    
+    
+        <!-- MathJax配置，可通过单美元符号书写行内公式等 -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+    "HTML-CSS": {
+        preferredFont: "TeX",
+        availableFonts: ["STIX","TeX"],
+        linebreaks: { automatic:true },
+        EqnChunk: (MathJax.Hub.Browser.isMobile ? 10 : 50)
+    },
+    tex2jax: {
+        inlineMath: [ ["$", "$"], ["\\(","\\)"] ],
+        processEscapes: true,
+        ignoreClass: "tex2jax_ignore|dno",
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    },
+    TeX: {
+        equationNumbers: { autoNumber: "AMS" },
+        noUndefined: { attributes: { mathcolor: "red", mathbackground: "#FFEEEE", mathsize: "90%" } },
+        Macros: { href: "{}" }
+    },
+    messageStyle: "none"
+    });
+</script>
+<!-- 给MathJax元素添加has-jax class -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for(i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+<!-- 通过连接CDN加载MathJax的js代码 -->
+<script type="text/javascript" async
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+
+
+    
+
+
+<meta name="generator" content="Hexo 5.4.1"></head>
+
+<body>
+    <script>
+        // this function is used to check current theme before page loaded.
+        (() => {
+            const currentTheme = window.localStorage && window.localStorage.getItem('theme') || '';
+            const isDark = currentTheme === 'dark';
+            const pagebody = document.getElementsByTagName('body')[0]
+            if (isDark) {
+                pagebody.classList.add('dark-theme');
+                // mobile
+                document.getElementById("mobile-toggle-theme").innerText = "· Dark"
+            } else {
+                pagebody.classList.remove('dark-theme');
+                // mobile
+                document.getElementById("mobile-toggle-theme").innerText = "· Light"
+            }
+        })();
+    </script>
+
+
+    <div class="wrapper">
+        <header>
+    <nav class="navbar">
+        <div class="container">
+            <div class="navbar-header header-logo"><a href="/">Jorwnpay&#39;s Blog</a></div>
+            <div class="menu navbar-right">
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                    <a class="menu-item" href="/category">Categories</a>
+                
+                    <a class="menu-item" href="/tag">Tags</a>
+                
+                    <a class="menu-item" href="/about">About</a>
+                
+                <input id="switch_default" type="checkbox" class="switch_default">
+                <label for="switch_default" class="toggleBtn"></label>
+            </div>
+        </div>
+    </nav>
+
+    
+    <nav class="navbar-mobile" id="nav-mobile">
+        <div class="container">
+            <div class="navbar-header">
+                <div>
+                    <a href="/">Jorwnpay&#39;s Blog</a><a id="mobile-toggle-theme">·&nbsp;Light</a>
+                </div>
+                <div class="menu-toggle" onclick="mobileBtn()">&#9776; Menu</div>
+            </div>
+            <div class="menu" id="mobile-menu">
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                    <a class="menu-item" href="/category">Categories</a>
+                
+                    <a class="menu-item" href="/tag">Tags</a>
+                
+                    <a class="menu-item" href="/about">About</a>
+                
+            </div>
+        </div>
+    </nav>
+
+</header>
+<script>
+    var mobileBtn = function f() {
+        var toggleMenu = document.getElementsByClassName("menu-toggle")[0];
+        var mobileMenu = document.getElementById("mobile-menu");
+        if(toggleMenu.classList.contains("active")){
+           toggleMenu.classList.remove("active")
+            mobileMenu.classList.remove("active")
+        }else{
+            toggleMenu.classList.add("active")
+            mobileMenu.classList.add("active")
+        }
+    }
+</script>
+            <div class="main">
+                <div class="container">
+    
+    
+        <div class="post-toc">
+    <div class="tocbot-list">
+    </div>
+    <div class="tocbot-list-menu">
+        <a class="tocbot-toc-expand" onclick="expand_toc()">Expand all</a>
+        <a onclick="go_top()">Back to top</a>
+        <a onclick="go_bottom()">Go to bottom</a>
+    </div>
+</div>
+
+<script>
+    document.ready(
+        function () {
+            tocbot.init({
+                tocSelector: '.tocbot-list',
+                contentSelector: '.post-content',
+                headingSelector: 'h1, h2, h3, h4, h5',
+                collapseDepth: 1,
+                orderedList: false,
+                scrollSmooth: true,
+            })
+        }
+    )
+
+    function expand_toc() {
+        var b = document.querySelector(".tocbot-toc-expand");
+        tocbot.init({
+            tocSelector: '.tocbot-list',
+            contentSelector: '.post-content',
+            headingSelector: 'h1, h2, h3, h4, h5',
+            collapseDepth: 6,
+            orderedList: false,
+            scrollSmooth: true,
+        });
+        b.setAttribute("onclick", "collapse_toc()");
+        b.innerHTML = "Collapse all"
+    }
+
+    function collapse_toc() {
+        var b = document.querySelector(".tocbot-toc-expand");
+        tocbot.init({
+            tocSelector: '.tocbot-list',
+            contentSelector: '.post-content',
+            headingSelector: 'h1, h2, h3, h4, h5',
+            collapseDepth: 1,
+            orderedList: false,
+            scrollSmooth: true,
+        });
+        b.setAttribute("onclick", "expand_toc()");
+        b.innerHTML = "Expand all"
+    }
+
+    function go_top() {
+        window.scrollTo(0, 0);
+    }
+
+    function go_bottom() {
+        window.scrollTo(0, document.body.scrollHeight);
+    }
+
+</script>
+    
+
+    
+    <article class="post-wrap">
+        <header class="post-header">
+            <h1 class="post-title">一种双灰度传感器巡黑线方案：完美解决小车循迹时左右摇摆的问题</h1>
+            
+                <div class="post-meta">
+                    
+                        Author: <a itemprop="author" rel="author" href="/">Jorwnpay</a>
+                    
+
+                    
+                        <span class="post-time">
+                        Date: <a href="#">October 20, 2019&nbsp;&nbsp;9:58:57</a>
+                        </span>
+                    
+                    
+                        <span class="post-category">
+                    Category:
+                            
+                                <a href="/categories/%E5%AE%9E%E8%B7%B5%E7%AC%94%E8%AE%B0/">实践笔记</a>
+                            
+                        </span>
+                    
+                </div>
+            
+        </header>
+
+        <div class="post-content">
+            <h3 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h3><p>在使用灰度传感器制作巡迹小车时，传统循迹方法通常采用三灰度循迹，即在小车车体的左中右三个位置分别放置三个灰度传感器，根据传感器是否触发或是传感器返回的数值大小来判断车体的三种位置状态：中正、偏左、偏右，但是这样的循迹方式有一个很大的缺点，<strong>当车体发生一次歪斜之后，继续巡线过程中车体左右摇摆严重</strong>，非常影响小车前进速度以及前进方向的稳定。<br>本文提出一种双灰度传感器巡黑线的方案，经过实际验证，该方案很好的解决了上述问题。</p>
+<h3 id="传统的三灰度循迹传感器放置方案"><a href="#传统的三灰度循迹传感器放置方案" class="headerlink" title="传统的三灰度循迹传感器放置方案"></a>传统的三灰度循迹传感器放置方案</h3><p><strong>注意：</strong> 在下面的图中，棕色的方形块和四个蓝色的圆柱表示一个小车的车体，眼睛表示灰度传感器，黑色的半透明阴影表示黑色的循迹线。<br><strong>图1.直行状态（从底部向上看）</strong><br><img src="https://img-blog.csdnimg.cn/20191019214929236.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQxNzQ4OTAw,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"><br><strong>图2.左偏状态（从底部向上看）</strong><br>通常情况下，当车体歪斜一个不小的角度时，小车右边的传感器才能检测到黑色，然后执行右转的代码，使车体回正，如下图所示；<br><img src="https://img-blog.csdnimg.cn/20191019215301219.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQxNzQ4OTAw,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"><br><strong>图3.执行回正代码后小车状态（从底部向上看）</strong><br>在回正的过程中，代码逻辑是要小车转向直到中间传感器检测到黑色，完成转向后，小车的状态通常是这样；此时中间传感器检测到黑线，判断为中正，保持直行，但是这样走一小段距离，小车左边传感器就检测到了黑线，又要往左转向，然后车体再次歪斜，再往右转向；如此周而复始，就造成了小车循迹过程中左右摇摆的现象。<br><img src="https://img-blog.csdnimg.cn/20191020084207482.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQxNzQ4OTAw,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"><br><strong>图4.传统循迹方法下的小车轨迹</strong><br><img src="https://img-blog.csdnimg.cn/20191020093725513.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQxNzQ4OTAw,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<h3 id="尝试新的传感器放置方案"><a href="#尝试新的传感器放置方案" class="headerlink" title="尝试新的传感器放置方案"></a>尝试新的传感器放置方案</h3><p>为解决上述问题，我想了很多种方案，比如：</p>
+<ul>
+<li>在车体前部两侧放置两个传感器</li>
+<li><em>图5.双灰度并排两侧放置（从底部向上看）</em>*<br><img src="https://img-blog.csdnimg.cn/20191020085152724.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQxNzQ4OTAw,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></li>
+<li>在车体前部放置五个传感器</li>
+<li><em>图6.五灰度并排放置（从底部向上看）</em>*<br><img src="https://img-blog.csdnimg.cn/20191020085415325.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQxNzQ4OTAw,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></li>
+<li>在车体前部中间放一个传感器，后面两侧放两个传感器</li>
+<li><em>图7.三灰度三角形放置（从底部向上看）</em>*<br><img src="https://img-blog.csdnimg.cn/20191020085652930.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQxNzQ4OTAw,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></li>
+<li>在车体前部中间放一个传感器，中部两侧放两个传感器，后部中间放一个传感器</li>
+<li><em>图8.四灰度四边形放置（从底部向上看）</em>*<br><img src="https://img-blog.csdnimg.cn/20191020085853498.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQxNzQ4OTAw,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"><br>以上方案经过测试，都没有很好的解决左右摇摆的问题。<br>最终在测试中，发现了下面的双灰度传感器并排中置方案，经过实际测试，发现巡线效果大幅提升，车体运行十分平稳。<h3 id="双灰度传感器并排中置方案"><a href="#双灰度传感器并排中置方案" class="headerlink" title="双灰度传感器并排中置方案"></a>双灰度传感器并排中置方案</h3></li>
+<li><em>注意：</em>* 在下面的图中，棕色的方形块和四个蓝色的圆柱表示一个小车的车体，两个眼睛表示两个灰度传感器，黑色的半透明阴影表示黑色的线。</li>
+<li>如图9所示，两个灰度传感器均能检测到黑色，此时车体中正，保持直行。</li>
+<li><em>图9.直行状态（从底部向上看）</em>*<br><img src="https://img-blog.csdnimg.cn/20191020092811421.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQxNzQ4OTAw,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></li>
+<li><em>图10：对应的俯视图</em>*<br><img src="https://img-blog.csdnimg.cn/20191020095628272.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQxNzQ4OTAw,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></li>
+<li>如图11所示，小车右边的传感器（对应仰视图的左边）检测不到黑线，而左边传感器（对应仰视图的右边）检测到了黑线，此时小车向右偏，应该左转。</li>
+<li><em>图11.左转状态（从底部向上看）</em>*<br><img src="https://img-blog.csdnimg.cn/20191020093045203.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQxNzQ4OTAw,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></li>
+<li><em>图12.对应的俯视图</em>*<br><img src="https://img-blog.csdnimg.cn/20191020093348222.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQxNzQ4OTAw,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></li>
+<li>如图13所示，小车左边的传感器（对应仰视图的右边）检测不到黑线，而右边传感器（对应仰视图的左边）检测到了黑线，此时小车向左偏，应该右转。</li>
+<li><em>图13.右转状态（从底部向上看）</em>*<br><img src="https://img-blog.csdnimg.cn/20191020094538867.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQxNzQ4OTAw,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></li>
+<li><em>图14.对应的俯视图</em>*<br><img src="https://img-blog.csdnimg.cn/20191020094814946.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQxNzQ4OTAw,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"><br>由于两传感器距离黑线边界较近，且传感器位置放置在车头处，车体稍稍发生一点偏斜，就立即触发转向程序，因而能及时纠正车体位置，不至于当车体偏离很大的角度后才触发转向，避免了左右摇摆的现象。</li>
+<li><em>图15.循迹效果示意</em>*<br><img src="https://img-blog.csdnimg.cn/20191020094027516.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQxNzQ4OTAw,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></li>
+</ul>
+<hr>
+<p>2019.11.23 完善<br><strong>注：</strong> 这里其实只提出了一个思路，因为是软硬件结合的，不同的硬件结构的代码也完全不一样，在实际操作的时候还是会遇到很多问题；<br>比如这种循迹方法只能巡直线和弯度不大的转弯，如果要过直角弯还需要增加两个灰度传感器进行辅助判断；<br>反正，就是具体问题具体解决嘛。。。<br>这里给出我的代码，仅供参考：） 希望能帮到你~</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br></pre></td><td class="code"><pre><span class="line">#include &lt;Servo.h&gt;</span><br><span class="line"></span><br><span class="line">int sensor_pin[4] = &#123;A0,A4,A2,A3&#125;;</span><br><span class="line">int sensor_value[4] = &#123;0,0,0,0&#125;;</span><br><span class="line">const int LEFT = 0;//normal left</span><br><span class="line">const int RIGHT = 1;//normal right</span><br><span class="line">const int LEFT_RightAngle = 2;//right angle left</span><br><span class="line">const int RIGHT_RightAngle = 3;//right angle right</span><br><span class="line">const int STRAIGHT = 4;</span><br><span class="line">const int BlackLimit_ML = 680;</span><br><span class="line">const int BlackLimit_MR = 550;</span><br><span class="line">const int BlackLimit_L = 500;</span><br><span class="line">const int BlackLimit_R = 500;</span><br><span class="line">const int HIGH_RIGHT = 234;</span><br><span class="line">Servo myservo;</span><br><span class="line">boolean isobstacle = 0;</span><br><span class="line"></span><br><span class="line">void setup()&#123;</span><br><span class="line">  pinMode(5,OUTPUT);//motor out</span><br><span class="line">  pinMode(6,OUTPUT);</span><br><span class="line">  pinMode(9,OUTPUT);//motor out</span><br><span class="line">  pinMode(10,OUTPUT);</span><br><span class="line">  pinMode(8,INPUT);//touch sensor</span><br><span class="line">  </span><br><span class="line">  myservo.attach(11);</span><br><span class="line">  Serial.begin(9600);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">//judge whether an obstacle in front of us,return true when it is </span><br><span class="line">boolean is_obstacle()&#123;</span><br><span class="line">  isobstacle = digitalRead(8);</span><br><span class="line">  return isobstacle;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">//read sensor value</span><br><span class="line">void read_value()&#123;</span><br><span class="line">  for(int i = 0;i &lt; 4;i++)&#123;</span><br><span class="line">    sensor_value[i] = analogRead(sensor_pin[i]);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">//turn to a direction</span><br><span class="line">void turn(const int direction_)&#123;</span><br><span class="line">  switch(direction_)&#123;</span><br><span class="line">    case LEFT:</span><br><span class="line">      analogWrite(5,LOW);</span><br><span class="line">      digitalWrite(6,HIGH_RIGHT);//right wheel</span><br><span class="line">      digitalWrite(9,LOW);</span><br><span class="line">      digitalWrite(10,LOW);//left wheel</span><br><span class="line">      while(sensor_value[2] &gt; BlackLimit_MR)&#123;//sensor_value[1] &gt; BlackLimit_M     </span><br><span class="line">        read_value();</span><br><span class="line">        delay(5);</span><br><span class="line">      &#125;</span><br><span class="line">      break;</span><br><span class="line">    case RIGHT:</span><br><span class="line">      digitalWrite(5,LOW);</span><br><span class="line">      analogWrite(6,LOW);//right wheel</span><br><span class="line">      digitalWrite(9,LOW);</span><br><span class="line">      digitalWrite(10,HIGH);//left wheel</span><br><span class="line">      while(sensor_value[1] &gt; BlackLimit_ML)&#123;//sensor_value[1] &gt; BlackLimit_M        </span><br><span class="line">        read_value();</span><br><span class="line">        delay(5);</span><br><span class="line">      &#125;</span><br><span class="line">      break;</span><br><span class="line">    case LEFT_RightAngle:</span><br><span class="line">      digitalWrite(5,LOW);</span><br><span class="line">      analogWrite(6,HIGH_RIGHT);//right wheel</span><br><span class="line">      digitalWrite(9,HIGH);</span><br><span class="line">      digitalWrite(10,LOW);//left wheel</span><br><span class="line">      while(sensor_value[1] &gt; BlackLimit_ML)&#123;//sensor_value[1] &gt; BlackLimit_M        </span><br><span class="line">        read_value();</span><br><span class="line">        if(sensor_value[3] &lt; BlackLimit_R)</span><br><span class="line">           break;</span><br><span class="line">        delay(5);</span><br><span class="line">      &#125;</span><br><span class="line">      break;</span><br><span class="line">    case RIGHT_RightAngle:</span><br><span class="line">      digitalWrite(5,HIGH_RIGHT);</span><br><span class="line">      analogWrite(6,LOW);//right wheel</span><br><span class="line">      digitalWrite(9,LOW);</span><br><span class="line">      digitalWrite(10,HIGH);//left wheel</span><br><span class="line">      while(sensor_value[2] &gt; BlackLimit_MR)&#123;//sensor_value[1] &gt; BlackLimit_M        </span><br><span class="line">        read_value();</span><br><span class="line">        if(sensor_value[0] &lt; BlackLimit_L)</span><br><span class="line">           break;</span><br><span class="line">        delay(5);</span><br><span class="line">      &#125;</span><br><span class="line">      break;</span><br><span class="line">    case STRAIGHT:</span><br><span class="line">      digitalWrite(5,LOW);</span><br><span class="line">      analogWrite(6,HIGH_RIGHT);//right wheel</span><br><span class="line">      digitalWrite(9,LOW);</span><br><span class="line">      digitalWrite(10,HIGH);//left wheel</span><br><span class="line">      break;</span><br><span class="line">    default:</span><br><span class="line">      digitalWrite(5,LOW);</span><br><span class="line">      analogWrite(6,HIGH_RIGHT);//right wheel</span><br><span class="line">      digitalWrite(9,LOW);</span><br><span class="line">      digitalWrite(10,HIGH);//left wheel</span><br><span class="line">      break;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">//judge what direction to turn with sensor value</span><br><span class="line">void judge_turn()&#123;</span><br><span class="line">  read_value();</span><br><span class="line">  if(sensor_value[0] &lt; BlackLimit_L &amp;&amp; sensor_value[3] &gt; BlackLimit_R)&#123;//turn left right tangle</span><br><span class="line">    Serial.println(LEFT_RightAngle); </span><br><span class="line">    turn(LEFT_RightAngle);</span><br><span class="line">  &#125;</span><br><span class="line">  else if(sensor_value[0] &gt; BlackLimit_L &amp;&amp; sensor_value[3] &lt; BlackLimit_R)&#123;//turn right right tangle</span><br><span class="line">    Serial.println(RIGHT_RightAngle);</span><br><span class="line">    turn(RIGHT_RightAngle);</span><br><span class="line">  &#125;</span><br><span class="line">  else if(sensor_value[1] &gt; BlackLimit_ML &amp;&amp; sensor_value[2] &lt; BlackLimit_MR)&#123;</span><br><span class="line">    Serial.println(RIGHT); </span><br><span class="line">    turn(RIGHT);</span><br><span class="line">  &#125;</span><br><span class="line">  else if(sensor_value[1] &lt; BlackLimit_ML &amp;&amp; sensor_value[2] &gt; BlackLimit_MR)&#123;</span><br><span class="line">    Serial.println(LEFT); </span><br><span class="line">    turn(LEFT);</span><br><span class="line">  &#125;</span><br><span class="line">  else&#123;</span><br><span class="line">    Serial.println(STRAIGHT);</span><br><span class="line">    turn(STRAIGHT);   </span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">void run()&#123;</span><br><span class="line">   judge_turn();</span><br><span class="line">   delay(10);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">void loop()&#123;</span><br><span class="line"> run();  </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+        </div>
+
+        
+            <section class="post-copyright">
+                
+                    <p class="copyright-item">
+                        <span>Author:</span>
+                        <span>Jorwnpay</span>
+                    </p>
+                
+                
+                
+                    <p class="copyright-item">
+                        <span>License:</span>
+                        <span>Copyright (c) 2019 <a target="_blank" rel="noopener" href="http://creativecommons.org/licenses/by-nc/4.0/">CC-BY-NC-4.0</a> LICENSE</span>
+                    </p>
+                
+                
+                     <p class="copyright-item">
+                         <span>Slogan:</span>
+                         <span>I think it is possible for ordinary people to choose to be extraordinary.</span>
+                     </p>
+                
+
+            </section>
+        
+        <section class="post-tags">
+            <div>
+                <span>Tag(s):</span>
+                <span class="tag">
+                    
+                    
+                        <a href="/tags/arduino/"># arduino</a>
+                    
+                        <a href="/tags/idea/"># idea</a>
+                    
+                        
+                </span>
+            </div>
+            <div>
+                <a href="javascript:window.history.back();">back</a>
+                <span>· </span>
+                <a href="/">home</a>
+            </div>
+        </section>
+        <section class="post-nav">
+            
+                <a class="prev" rel="prev" href="/2019/11/01/8086CPU%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%EF%BC%9A8086%E7%9A%84%E5%AF%BB%E5%9D%80%E6%96%B9%E5%BC%8F/">8086CPU学习笔记：8086的寻址方式</a>
+            
+            
+            <a class="next" rel="next" href="/2019/10/06/arduino%E8%A7%A6%E9%A1%BB%E4%BC%A0%E6%84%9F%E5%99%A8%E4%BD%BF%E7%94%A8%E6%96%B9%E6%B3%95/">arduino触须传感器使用方法</a>
+            
+        </section>
+
+
+    </article>
+</div>
+
+            </div>
+            <footer id="footer" class="footer">
+    <div class="copyright">
+        <span>© Jorwnpay | Powered by <a href="https://hexo.io" target="_blank">Hexo</a> & <a href="https://github.com/Siricee/hexo-theme-Chic" target="_blank">Chic</a></span>
+    </div>
+</footer>
+
+    </div>
+</body>
+
+</html>

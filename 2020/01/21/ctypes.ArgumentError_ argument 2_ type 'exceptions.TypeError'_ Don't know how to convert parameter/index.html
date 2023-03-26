@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <meta name="author" content="Jorwnpay">
+
+
+
+
+
+<title>ctypes.ArgumentError：argument 2：type &#39;exceptions.TypeError&#39; | Mr.Duck</title>
+
+
+
+    <link rel="icon" href="/icon.png">
+
+
+
+
+    <!-- stylesheets list from _config.yml -->
+    
+    <link rel="stylesheet" href="/css/style.css">
+    
+
+
+
+    <!-- scripts list from _config.yml -->
+    
+    <script src="/js/script.js"></script>
+    
+    <script src="/js/tocbot.min.js"></script>
+    
+
+
+
+    
+    
+        <!-- MathJax配置，可通过单美元符号书写行内公式等 -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+    "HTML-CSS": {
+        preferredFont: "TeX",
+        availableFonts: ["STIX","TeX"],
+        linebreaks: { automatic:true },
+        EqnChunk: (MathJax.Hub.Browser.isMobile ? 10 : 50)
+    },
+    tex2jax: {
+        inlineMath: [ ["$", "$"], ["\\(","\\)"] ],
+        processEscapes: true,
+        ignoreClass: "tex2jax_ignore|dno",
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    },
+    TeX: {
+        equationNumbers: { autoNumber: "AMS" },
+        noUndefined: { attributes: { mathcolor: "red", mathbackground: "#FFEEEE", mathsize: "90%" } },
+        Macros: { href: "{}" }
+    },
+    messageStyle: "none"
+    });
+</script>
+<!-- 给MathJax元素添加has-jax class -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for(i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+<!-- 通过连接CDN加载MathJax的js代码 -->
+<script type="text/javascript" async
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+
+
+    
+
+
+<meta name="generator" content="Hexo 5.4.1"></head>
+
+<body>
+    <script>
+        // this function is used to check current theme before page loaded.
+        (() => {
+            const currentTheme = window.localStorage && window.localStorage.getItem('theme') || '';
+            const isDark = currentTheme === 'dark';
+            const pagebody = document.getElementsByTagName('body')[0]
+            if (isDark) {
+                pagebody.classList.add('dark-theme');
+                // mobile
+                document.getElementById("mobile-toggle-theme").innerText = "· Dark"
+            } else {
+                pagebody.classList.remove('dark-theme');
+                // mobile
+                document.getElementById("mobile-toggle-theme").innerText = "· Light"
+            }
+        })();
+    </script>
+
+
+    <div class="wrapper">
+        <header>
+    <nav class="navbar">
+        <div class="container">
+            <div class="navbar-header header-logo"><a href="/">Jorwnpay&#39;s Blog</a></div>
+            <div class="menu navbar-right">
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                    <a class="menu-item" href="/category">Categories</a>
+                
+                    <a class="menu-item" href="/tag">Tags</a>
+                
+                    <a class="menu-item" href="/about">About</a>
+                
+                <input id="switch_default" type="checkbox" class="switch_default">
+                <label for="switch_default" class="toggleBtn"></label>
+            </div>
+        </div>
+    </nav>
+
+    
+    <nav class="navbar-mobile" id="nav-mobile">
+        <div class="container">
+            <div class="navbar-header">
+                <div>
+                    <a href="/">Jorwnpay&#39;s Blog</a><a id="mobile-toggle-theme">·&nbsp;Light</a>
+                </div>
+                <div class="menu-toggle" onclick="mobileBtn()">&#9776; Menu</div>
+            </div>
+            <div class="menu" id="mobile-menu">
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                    <a class="menu-item" href="/category">Categories</a>
+                
+                    <a class="menu-item" href="/tag">Tags</a>
+                
+                    <a class="menu-item" href="/about">About</a>
+                
+            </div>
+        </div>
+    </nav>
+
+</header>
+<script>
+    var mobileBtn = function f() {
+        var toggleMenu = document.getElementsByClassName("menu-toggle")[0];
+        var mobileMenu = document.getElementById("mobile-menu");
+        if(toggleMenu.classList.contains("active")){
+           toggleMenu.classList.remove("active")
+            mobileMenu.classList.remove("active")
+        }else{
+            toggleMenu.classList.add("active")
+            mobileMenu.classList.add("active")
+        }
+    }
+</script>
+            <div class="main">
+                <div class="container">
+    
+    
+        <div class="post-toc">
+    <div class="tocbot-list">
+    </div>
+    <div class="tocbot-list-menu">
+        <a class="tocbot-toc-expand" onclick="expand_toc()">Expand all</a>
+        <a onclick="go_top()">Back to top</a>
+        <a onclick="go_bottom()">Go to bottom</a>
+    </div>
+</div>
+
+<script>
+    document.ready(
+        function () {
+            tocbot.init({
+                tocSelector: '.tocbot-list',
+                contentSelector: '.post-content',
+                headingSelector: 'h1, h2, h3, h4, h5',
+                collapseDepth: 1,
+                orderedList: false,
+                scrollSmooth: true,
+            })
+        }
+    )
+
+    function expand_toc() {
+        var b = document.querySelector(".tocbot-toc-expand");
+        tocbot.init({
+            tocSelector: '.tocbot-list',
+            contentSelector: '.post-content',
+            headingSelector: 'h1, h2, h3, h4, h5',
+            collapseDepth: 6,
+            orderedList: false,
+            scrollSmooth: true,
+        });
+        b.setAttribute("onclick", "collapse_toc()");
+        b.innerHTML = "Collapse all"
+    }
+
+    function collapse_toc() {
+        var b = document.querySelector(".tocbot-toc-expand");
+        tocbot.init({
+            tocSelector: '.tocbot-list',
+            contentSelector: '.post-content',
+            headingSelector: 'h1, h2, h3, h4, h5',
+            collapseDepth: 1,
+            orderedList: false,
+            scrollSmooth: true,
+        });
+        b.setAttribute("onclick", "expand_toc()");
+        b.innerHTML = "Expand all"
+    }
+
+    function go_top() {
+        window.scrollTo(0, 0);
+    }
+
+    function go_bottom() {
+        window.scrollTo(0, document.body.scrollHeight);
+    }
+
+</script>
+    
+
+    
+    <article class="post-wrap">
+        <header class="post-header">
+            <h1 class="post-title">ctypes.ArgumentError：argument 2：type &#39;exceptions.TypeError&#39;</h1>
+            
+                <div class="post-meta">
+                    
+                        Author: <a itemprop="author" rel="author" href="/">Jorwnpay</a>
+                    
+
+                    
+                        <span class="post-time">
+                        Date: <a href="#">January 21, 2020&nbsp;&nbsp;13:35:52</a>
+                        </span>
+                    
+                    
+                        <span class="post-category">
+                    Category:
+                            
+                                <a href="/categories/%E9%97%AE%E9%A2%98%E8%AE%B0%E5%BD%95/">问题记录</a>
+                            
+                        </span>
+                    
+                </div>
+            
+        </header>
+
+        <div class="post-content">
+            <h3 id="错误描述"><a href="#错误描述" class="headerlink" title="错误描述"></a>错误描述</h3><p>我在用python的ctypes库调用c++的.so文件时候,出现了下面的错误：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">ctypes.ArgumentError: argument 2: &lt;type &#x27;exceptions.TypeError&#x27;&gt;: Don&#x27;t know how to convert parameter 2</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p><img src="https://img-blog.csdnimg.cn/2020012113054376.png" alt="在这里插入图片描述"><br>下面对我遇到这个问题时的情况做一下说明：<br>C++源文件中的函数需要传入的第二个参数是double型：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">double</span> <span class="title">a_mov</span><span class="params">(<span class="type">int</span> ctrl, <span class="type">double</span> pos_x, <span class="type">double</span> pos_y)</span></span>&#123;</span><br><span class="line">	a._pos._x = pos_x;</span><br><span class="line">	a._pos._y = pos_y;</span><br><span class="line">	a._pos._x = op_pos_x;</span><br><span class="line">	a._pos._y = op_pos_y;</span><br><span class="line"></span><br><span class="line">	a0.<span class="built_in">cal_next_pos</span>(b0._pos, des_pos, W_O, W_T, W_D, W_C, P_O, P_T, P_D, P_C);</span><br><span class="line">	<span class="keyword">if</span>(ctrl == <span class="number">0</span>)</span><br><span class="line">		<span class="keyword">return</span> a0._next_pos._x;</span><br><span class="line">	<span class="keyword">else</span></span><br><span class="line">		<span class="keyword">return</span> a0._next_pos._y;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>python程序：<br>在调用之前，我先用下面的程序（注释1处）将函数返回类型设置为c_double<br>并在（注释2处）将变量last_a_x，last_a_y设置为c_double类型，<br>运行结果是：只成功输出了一次，输出第二次时出现了错误<br>按理说，a_x变量（注释3处）的类型应该是c_double，但是我输出它的类型进行测试（注释4处）时发现，它的类型是float：<br><img src="https://img-blog.csdnimg.cn/20200121132851976.png" alt="在这里插入图片描述"><br>也即是说，（注释1处）的修改只是将函数的返回类型修改为了ctypes里的c_double，在python对应为float类型。（c、ctypes和python之间的对应关系详见参考资料【2】）</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> ctypes <span class="keyword">import</span> *</span><br><span class="line">pos = CDLL(<span class="string">&#x27;./angleStreategy.so&#x27;</span>)</span><br><span class="line">pos.init()</span><br><span class="line"></span><br><span class="line">a_mov = pos.a_mov</span><br><span class="line">a_mov.restype = c_double  <span class="comment">#----------1</span></span><br><span class="line"></span><br><span class="line">last_a_x = c_double(<span class="number">0.0</span>)</span><br><span class="line">last_a_y = c_double(<span class="number">0.0</span>) <span class="comment">#----------2</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">0</span>,<span class="number">10</span>):</span><br><span class="line">	a_x = pos.a_mov(<span class="number">0</span>,last_a_x,last_a_y)</span><br><span class="line">	a_y = pos.a_mov(<span class="number">1</span>,last_a_x,last_a_y) <span class="comment">#----------3</span></span><br><span class="line">	<span class="built_in">print</span>(<span class="built_in">type</span>(a_x)) <span class="comment">#-----------4</span></span><br><span class="line">	last_a_x = a_x</span><br><span class="line">	last_a_y = a_y <span class="comment">#----------5</span></span><br><span class="line">	<span class="built_in">print</span>(a_x)</span><br><span class="line">	<span class="built_in">print</span>(a_y)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<h3 id="解决方法"><a href="#解决方法" class="headerlink" title="解决方法"></a>解决方法</h3><p>将（注释5处）修改为</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">last_a_x = c_double(a_x)</span><br><span class="line">last_a_y = c_double(a_y)</span><br></pre></td></tr></table></figure>
+<p>问题解决！<br>（问题比较特殊，所以说的比较详细，这样才有参考价值<br>参考资料：</p>
+<p>【1】<a target="_blank" rel="noopener" href="https://blog.csdn.net/BigBoySunshine/article/details/89566012">python调用c/c++代码以及解决ctypes.ArgumentError: argument 1: class ‘TypeError’: Don’t know how to convert</a><br>【2】<a target="_blank" rel="noopener" href="https://blog.csdn.net/runner668/article/details/80340683">python中运用ctypes库实现c风格变量的定义和调用</a></p>
+
+        </div>
+
+        
+            <section class="post-copyright">
+                
+                    <p class="copyright-item">
+                        <span>Author:</span>
+                        <span>Jorwnpay</span>
+                    </p>
+                
+                
+                
+                    <p class="copyright-item">
+                        <span>License:</span>
+                        <span>Copyright (c) 2019 <a target="_blank" rel="noopener" href="http://creativecommons.org/licenses/by-nc/4.0/">CC-BY-NC-4.0</a> LICENSE</span>
+                    </p>
+                
+                
+                     <p class="copyright-item">
+                         <span>Slogan:</span>
+                         <span>I think it is possible for ordinary people to choose to be extraordinary.</span>
+                     </p>
+                
+
+            </section>
+        
+        <section class="post-tags">
+            <div>
+                <span>Tag(s):</span>
+                <span class="tag">
+                    
+                    
+                        <a href="/tags/python/"># python</a>
+                    
+                        <a href="/tags/ctypes/"># ctypes</a>
+                    
+                        
+                </span>
+            </div>
+            <div>
+                <a href="javascript:window.history.back();">back</a>
+                <span>· </span>
+                <a href="/">home</a>
+            </div>
+        </section>
+        <section class="post-nav">
+            
+                <a class="prev" rel="prev" href="/2020/02/18/%E6%8B%9C%E8%AF%BB%E8%BF%91%E4%BA%94%E5%B9%B4UT%20Austin%20Villa%E5%8F%91%E8%A1%A8%E7%9A%84RoboCup%E4%BB%BF%E7%9C%9F3D%E8%AE%BA%E6%96%87/">拜读近五年UT Austin Villa发表的RoboCup仿真3D论文</a>
+            
+            
+            <a class="next" rel="next" href="/2020/01/20/PyTorch%E4%B8%ADsqueeze()%E5%92%8Cunsqueeze()%E5%87%BD%E6%95%B0%E7%90%86%E8%A7%A3/">PyTorch中squeeze()和unsqueeze()函数理解</a>
+            
+        </section>
+
+
+    </article>
+</div>
+
+            </div>
+            <footer id="footer" class="footer">
+    <div class="copyright">
+        <span>© Jorwnpay | Powered by <a href="https://hexo.io" target="_blank">Hexo</a> & <a href="https://github.com/Siricee/hexo-theme-Chic" target="_blank">Chic</a></span>
+    </div>
+</footer>
+
+    </div>
+</body>
+
+</html>

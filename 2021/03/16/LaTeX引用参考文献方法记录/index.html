@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <meta name="author" content="Jorwnpay">
+
+
+
+
+
+<title>LaTeX引用参考文献方法记录 | Mr.Duck</title>
+
+
+
+    <link rel="icon" href="/icon.png">
+
+
+
+
+    <!-- stylesheets list from _config.yml -->
+    
+    <link rel="stylesheet" href="/css/style.css">
+    
+
+
+
+    <!-- scripts list from _config.yml -->
+    
+    <script src="/js/script.js"></script>
+    
+    <script src="/js/tocbot.min.js"></script>
+    
+
+
+
+    
+    
+        <!-- MathJax配置，可通过单美元符号书写行内公式等 -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+    "HTML-CSS": {
+        preferredFont: "TeX",
+        availableFonts: ["STIX","TeX"],
+        linebreaks: { automatic:true },
+        EqnChunk: (MathJax.Hub.Browser.isMobile ? 10 : 50)
+    },
+    tex2jax: {
+        inlineMath: [ ["$", "$"], ["\\(","\\)"] ],
+        processEscapes: true,
+        ignoreClass: "tex2jax_ignore|dno",
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    },
+    TeX: {
+        equationNumbers: { autoNumber: "AMS" },
+        noUndefined: { attributes: { mathcolor: "red", mathbackground: "#FFEEEE", mathsize: "90%" } },
+        Macros: { href: "{}" }
+    },
+    messageStyle: "none"
+    });
+</script>
+<!-- 给MathJax元素添加has-jax class -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for(i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+<!-- 通过连接CDN加载MathJax的js代码 -->
+<script type="text/javascript" async
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+
+
+    
+
+
+<meta name="generator" content="Hexo 5.4.1"></head>
+
+<body>
+    <script>
+        // this function is used to check current theme before page loaded.
+        (() => {
+            const currentTheme = window.localStorage && window.localStorage.getItem('theme') || '';
+            const isDark = currentTheme === 'dark';
+            const pagebody = document.getElementsByTagName('body')[0]
+            if (isDark) {
+                pagebody.classList.add('dark-theme');
+                // mobile
+                document.getElementById("mobile-toggle-theme").innerText = "· Dark"
+            } else {
+                pagebody.classList.remove('dark-theme');
+                // mobile
+                document.getElementById("mobile-toggle-theme").innerText = "· Light"
+            }
+        })();
+    </script>
+
+
+    <div class="wrapper">
+        <header>
+    <nav class="navbar">
+        <div class="container">
+            <div class="navbar-header header-logo"><a href="/">Jorwnpay&#39;s Blog</a></div>
+            <div class="menu navbar-right">
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                    <a class="menu-item" href="/category">Categories</a>
+                
+                    <a class="menu-item" href="/tag">Tags</a>
+                
+                    <a class="menu-item" href="/about">About</a>
+                
+                <input id="switch_default" type="checkbox" class="switch_default">
+                <label for="switch_default" class="toggleBtn"></label>
+            </div>
+        </div>
+    </nav>
+
+    
+    <nav class="navbar-mobile" id="nav-mobile">
+        <div class="container">
+            <div class="navbar-header">
+                <div>
+                    <a href="/">Jorwnpay&#39;s Blog</a><a id="mobile-toggle-theme">·&nbsp;Light</a>
+                </div>
+                <div class="menu-toggle" onclick="mobileBtn()">&#9776; Menu</div>
+            </div>
+            <div class="menu" id="mobile-menu">
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                    <a class="menu-item" href="/category">Categories</a>
+                
+                    <a class="menu-item" href="/tag">Tags</a>
+                
+                    <a class="menu-item" href="/about">About</a>
+                
+            </div>
+        </div>
+    </nav>
+
+</header>
+<script>
+    var mobileBtn = function f() {
+        var toggleMenu = document.getElementsByClassName("menu-toggle")[0];
+        var mobileMenu = document.getElementById("mobile-menu");
+        if(toggleMenu.classList.contains("active")){
+           toggleMenu.classList.remove("active")
+            mobileMenu.classList.remove("active")
+        }else{
+            toggleMenu.classList.add("active")
+            mobileMenu.classList.add("active")
+        }
+    }
+</script>
+            <div class="main">
+                <div class="container">
+    
+    
+        <div class="post-toc">
+    <div class="tocbot-list">
+    </div>
+    <div class="tocbot-list-menu">
+        <a class="tocbot-toc-expand" onclick="expand_toc()">Expand all</a>
+        <a onclick="go_top()">Back to top</a>
+        <a onclick="go_bottom()">Go to bottom</a>
+    </div>
+</div>
+
+<script>
+    document.ready(
+        function () {
+            tocbot.init({
+                tocSelector: '.tocbot-list',
+                contentSelector: '.post-content',
+                headingSelector: 'h1, h2, h3, h4, h5',
+                collapseDepth: 1,
+                orderedList: false,
+                scrollSmooth: true,
+            })
+        }
+    )
+
+    function expand_toc() {
+        var b = document.querySelector(".tocbot-toc-expand");
+        tocbot.init({
+            tocSelector: '.tocbot-list',
+            contentSelector: '.post-content',
+            headingSelector: 'h1, h2, h3, h4, h5',
+            collapseDepth: 6,
+            orderedList: false,
+            scrollSmooth: true,
+        });
+        b.setAttribute("onclick", "collapse_toc()");
+        b.innerHTML = "Collapse all"
+    }
+
+    function collapse_toc() {
+        var b = document.querySelector(".tocbot-toc-expand");
+        tocbot.init({
+            tocSelector: '.tocbot-list',
+            contentSelector: '.post-content',
+            headingSelector: 'h1, h2, h3, h4, h5',
+            collapseDepth: 1,
+            orderedList: false,
+            scrollSmooth: true,
+        });
+        b.setAttribute("onclick", "expand_toc()");
+        b.innerHTML = "Expand all"
+    }
+
+    function go_top() {
+        window.scrollTo(0, 0);
+    }
+
+    function go_bottom() {
+        window.scrollTo(0, document.body.scrollHeight);
+    }
+
+</script>
+    
+
+    
+    <article class="post-wrap">
+        <header class="post-header">
+            <h1 class="post-title">LaTeX引用参考文献方法记录</h1>
+            
+                <div class="post-meta">
+                    
+                        Author: <a itemprop="author" rel="author" href="/">Jorwnpay</a>
+                    
+
+                    
+                        <span class="post-time">
+                        Date: <a href="#">March 16, 2021&nbsp;&nbsp;0:00:00</a>
+                        </span>
+                    
+                    
+                        <span class="post-category">
+                    Category:
+                            
+                                <a href="/categories/%E7%BB%8F%E9%AA%8C%E6%80%BB%E7%BB%93/">经验总结</a>
+                            
+                        </span>
+                    
+                </div>
+            
+        </header>
+
+        <div class="post-content">
+            <p>本文使用BibTex的引用方法，环境为texlive2019，编辑器为texworks。<br>本文只关注使用latex引用参考文献及在过程中遇到的问题，默认读者已经掌握了latex基本的语言和编辑器的基本操作。这里有篇非常不错的文章：<a target="_blank" rel="noopener" href="https://liam.page/2014/09/08/latex-introduction/">一份其实很短的 LaTeX 入门文档。</a></p>
+<h4 id="1-首先要有一个-tex文件和一个-bib文件"><a href="#1-首先要有一个-tex文件和一个-bib文件" class="headerlink" title="1.首先要有一个.tex文件和一个.bib文件"></a>1.首先要有一个.tex文件和一个.bib文件</h4><p>例如：<br>test1.tex内容如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">\documentclass&#123;article&#125;</span><br><span class="line"></span><br><span class="line">\begin&#123;document&#125;</span><br><span class="line">	Hello \LaTeX&#123;&#125;.</span><br><span class="line">	this is article 1 ~\cite&#123;mckay2017s&#125;</span><br><span class="line">	this is article 2 ~\cite&#123;huo2020underwater&#125;</span><br><span class="line">	</span><br><span class="line">	\bibliographystyle&#123;IEEEtran&#125;</span><br><span class="line">	\bibliography&#123;IEEEabrv,test1&#125;</span><br><span class="line">\end&#123;document&#125;</span><br></pre></td></tr></table></figure>
+<p>test1.bib文件内容如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">@inproceedings&#123;mckay2017s,</span><br><span class="line">  title=&#123;What&#x27;s mine is yours: Pretrained CNNs for limited training sonar ATR&#125;,</span><br><span class="line">  author=&#123;McKay, John and Gerg, Isaac and Monga, Vishal and Raj, Raghu G&#125;,</span><br><span class="line">  booktitle=&#123;OCEANS 2017-Anchorage&#125;,</span><br><span class="line">  pages=&#123;1--7&#125;,</span><br><span class="line">  year=&#123;2017&#125;,</span><br><span class="line">  organization=&#123;IEEE&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">@article&#123;huo2020underwater,</span><br><span class="line">  title=&#123;Underwater Object Classification in Sidescan Sonar Images Using Deep Transfer Learning and Semisynthetic Training Data&#125;,</span><br><span class="line">  author=&#123;Huo, Guanying and Wu, Ziyin and Li, Jiabiao&#125;,</span><br><span class="line">  journal=&#123;IEEE Access&#125;,</span><br><span class="line">  volume=&#123;8&#125;,</span><br><span class="line">  pages=&#123;47407--47418&#125;,</span><br><span class="line">  year=&#123;2020&#125;,</span><br><span class="line">  publisher=&#123;IEEE&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="2-删除所有的中间文件（如果有的话）"><a href="#2-删除所有的中间文件（如果有的话）" class="headerlink" title="2.删除所有的中间文件（如果有的话）"></a>2.删除所有的中间文件（如果有的话）</h4><p>如下图，红框里的都删除；<br><img src="https://img-blog.csdnimg.cn/20210316163937701.png" alt="在这里插入图片描述"></p>
+<h4 id="3-编译-tex文件"><a href="#3-编译-tex文件" class="headerlink" title="3.编译.tex文件"></a>3.编译.tex文件</h4><p>选择pdfLaTeX，点击绿色按钮进行编译。<br><img src="https://img-blog.csdnimg.cn/20210316164437207.png" alt="在这里插入图片描述"><br>编译成功之后，自动弹出pdf窗口如下：<br><img src="https://img-blog.csdnimg.cn/20210316164607514.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQxNzQ4OTAw,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<h4 id="4-编译-bib文件"><a href="#4-编译-bib文件" class="headerlink" title="4.编译.bib文件"></a>4.编译.bib文件</h4><p>需要注意以下三点：</p>
+<ul>
+<li><strong>文件名不允许带空格！</strong></li>
+<li>文件名要与.tex文件中引用的参考文献库名一致，如下图所示；<br><img src="https://img-blog.csdnimg.cn/20210316164937411.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQxNzQ4OTAw,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></li>
+<li>编译选项选择BibTeX<br><img src="https://img-blog.csdnimg.cn/20210316165345943.png" alt="在这里插入图片描述"></li>
+</ul>
+<p>编译后，成功的标志应当为没有报错；</p>
+<h4 id="5-删除辅助（中间）文件后编译-tex文件"><a href="#5-删除辅助（中间）文件后编译-tex文件" class="headerlink" title="5.删除辅助（中间）文件后编译.tex文件"></a>5.删除辅助（中间）文件后编译.tex文件</h4><p>依次点击“文件 -&gt; 删除辅助文件…”，弹出如下窗口，点击删除<br><img src="https://img-blog.csdnimg.cn/20210316165554473.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQxNzQ4OTAw,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"><br>编译完.tex文件之后，文末应出现参考文献列表，但文中的引用序号为[<strong>?</strong>]，如下图<br><img src="https://img-blog.csdnimg.cn/20210316165719971.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQxNzQ4OTAw,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<h4 id="6-再次编译-tex文件，这次所有序号应当正常显示"><a href="#6-再次编译-tex文件，这次所有序号应当正常显示" class="headerlink" title="6.再次编译.tex文件，这次所有序号应当正常显示"></a>6.再次编译.tex文件，这次所有序号应当正常显示</h4><p>不需要删除中间文件，编译完结果如下所示。<br><img src="https://img-blog.csdnimg.cn/20210316165905791.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQxNzQ4OTAw,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+
+        </div>
+
+        
+            <section class="post-copyright">
+                
+                    <p class="copyright-item">
+                        <span>Author:</span>
+                        <span>Jorwnpay</span>
+                    </p>
+                
+                
+                
+                    <p class="copyright-item">
+                        <span>License:</span>
+                        <span>Copyright (c) 2019 <a target="_blank" rel="noopener" href="http://creativecommons.org/licenses/by-nc/4.0/">CC-BY-NC-4.0</a> LICENSE</span>
+                    </p>
+                
+                
+                     <p class="copyright-item">
+                         <span>Slogan:</span>
+                         <span>I think it is possible for ordinary people to choose to be extraordinary.</span>
+                     </p>
+                
+
+            </section>
+        
+        <section class="post-tags">
+            <div>
+                <span>Tag(s):</span>
+                <span class="tag">
+                    
+                    
+                        <a href="/tags/LaTeX/"># LaTeX</a>
+                    
+                        
+                </span>
+            </div>
+            <div>
+                <a href="javascript:window.history.back();">back</a>
+                <span>· </span>
+                <a href="/">home</a>
+            </div>
+        </section>
+        <section class="post-nav">
+            
+                <a class="prev" rel="prev" href="/2021/10/02/%E9%95%BF%E5%B0%BE%E5%88%86%E5%B8%83%E8%AE%BA%E6%96%87%EF%BC%88%E4%B8%80%EF%BC%89%EF%BC%9ABag%20of%20Tricks%20for%20Long-Tailed%20Visual%20Recognition%20with%20Deep%20Convolutional%20Neural%20Networks/">长尾分布论文（一）：Bag of Tricks for Long-Tailed Visual Recognition</a>
+            
+            
+            <a class="next" rel="next" href="/2021/01/18/keras%E4%B8%8B%E8%BD%BD%E7%9A%84%E9%A2%84%E8%AE%AD%E7%BB%83%E6%9D%83%E9%87%8D%E7%9A%84%E7%BC%93%E5%AD%98%E4%BD%8D%E7%BD%AE/">keras下载的预训练权重的缓存位置</a>
+            
+        </section>
+
+
+    </article>
+</div>
+
+            </div>
+            <footer id="footer" class="footer">
+    <div class="copyright">
+        <span>© Jorwnpay | Powered by <a href="https://hexo.io" target="_blank">Hexo</a> & <a href="https://github.com/Siricee/hexo-theme-Chic" target="_blank">Chic</a></span>
+    </div>
+</footer>
+
+    </div>
+</body>
+
+</html>

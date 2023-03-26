@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <meta name="author" content="Jorwnpay">
+
+
+
+
+
+<title>常见问题解决方法汇总——十四届恩智浦智能车室外电磁越野组 | Mr.Duck</title>
+
+
+
+    <link rel="icon" href="/icon.png">
+
+
+
+
+    <!-- stylesheets list from _config.yml -->
+    
+    <link rel="stylesheet" href="/css/style.css">
+    
+
+
+
+    <!-- scripts list from _config.yml -->
+    
+    <script src="/js/script.js"></script>
+    
+    <script src="/js/tocbot.min.js"></script>
+    
+
+
+
+    
+    
+        <!-- MathJax配置，可通过单美元符号书写行内公式等 -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+    "HTML-CSS": {
+        preferredFont: "TeX",
+        availableFonts: ["STIX","TeX"],
+        linebreaks: { automatic:true },
+        EqnChunk: (MathJax.Hub.Browser.isMobile ? 10 : 50)
+    },
+    tex2jax: {
+        inlineMath: [ ["$", "$"], ["\\(","\\)"] ],
+        processEscapes: true,
+        ignoreClass: "tex2jax_ignore|dno",
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    },
+    TeX: {
+        equationNumbers: { autoNumber: "AMS" },
+        noUndefined: { attributes: { mathcolor: "red", mathbackground: "#FFEEEE", mathsize: "90%" } },
+        Macros: { href: "{}" }
+    },
+    messageStyle: "none"
+    });
+</script>
+<!-- 给MathJax元素添加has-jax class -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for(i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+<!-- 通过连接CDN加载MathJax的js代码 -->
+<script type="text/javascript" async
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+
+
+    
+
+
+<meta name="generator" content="Hexo 5.4.1"></head>
+
+<body>
+    <script>
+        // this function is used to check current theme before page loaded.
+        (() => {
+            const currentTheme = window.localStorage && window.localStorage.getItem('theme') || '';
+            const isDark = currentTheme === 'dark';
+            const pagebody = document.getElementsByTagName('body')[0]
+            if (isDark) {
+                pagebody.classList.add('dark-theme');
+                // mobile
+                document.getElementById("mobile-toggle-theme").innerText = "· Dark"
+            } else {
+                pagebody.classList.remove('dark-theme');
+                // mobile
+                document.getElementById("mobile-toggle-theme").innerText = "· Light"
+            }
+        })();
+    </script>
+
+
+    <div class="wrapper">
+        <header>
+    <nav class="navbar">
+        <div class="container">
+            <div class="navbar-header header-logo"><a href="/">Jorwnpay&#39;s Blog</a></div>
+            <div class="menu navbar-right">
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                    <a class="menu-item" href="/category">Categories</a>
+                
+                    <a class="menu-item" href="/tag">Tags</a>
+                
+                    <a class="menu-item" href="/about">About</a>
+                
+                <input id="switch_default" type="checkbox" class="switch_default">
+                <label for="switch_default" class="toggleBtn"></label>
+            </div>
+        </div>
+    </nav>
+
+    
+    <nav class="navbar-mobile" id="nav-mobile">
+        <div class="container">
+            <div class="navbar-header">
+                <div>
+                    <a href="/">Jorwnpay&#39;s Blog</a><a id="mobile-toggle-theme">·&nbsp;Light</a>
+                </div>
+                <div class="menu-toggle" onclick="mobileBtn()">&#9776; Menu</div>
+            </div>
+            <div class="menu" id="mobile-menu">
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                    <a class="menu-item" href="/category">Categories</a>
+                
+                    <a class="menu-item" href="/tag">Tags</a>
+                
+                    <a class="menu-item" href="/about">About</a>
+                
+            </div>
+        </div>
+    </nav>
+
+</header>
+<script>
+    var mobileBtn = function f() {
+        var toggleMenu = document.getElementsByClassName("menu-toggle")[0];
+        var mobileMenu = document.getElementById("mobile-menu");
+        if(toggleMenu.classList.contains("active")){
+           toggleMenu.classList.remove("active")
+            mobileMenu.classList.remove("active")
+        }else{
+            toggleMenu.classList.add("active")
+            mobileMenu.classList.add("active")
+        }
+    }
+</script>
+            <div class="main">
+                <div class="container">
+    
+    
+        <div class="post-toc">
+    <div class="tocbot-list">
+    </div>
+    <div class="tocbot-list-menu">
+        <a class="tocbot-toc-expand" onclick="expand_toc()">Expand all</a>
+        <a onclick="go_top()">Back to top</a>
+        <a onclick="go_bottom()">Go to bottom</a>
+    </div>
+</div>
+
+<script>
+    document.ready(
+        function () {
+            tocbot.init({
+                tocSelector: '.tocbot-list',
+                contentSelector: '.post-content',
+                headingSelector: 'h1, h2, h3, h4, h5',
+                collapseDepth: 1,
+                orderedList: false,
+                scrollSmooth: true,
+            })
+        }
+    )
+
+    function expand_toc() {
+        var b = document.querySelector(".tocbot-toc-expand");
+        tocbot.init({
+            tocSelector: '.tocbot-list',
+            contentSelector: '.post-content',
+            headingSelector: 'h1, h2, h3, h4, h5',
+            collapseDepth: 6,
+            orderedList: false,
+            scrollSmooth: true,
+        });
+        b.setAttribute("onclick", "collapse_toc()");
+        b.innerHTML = "Collapse all"
+    }
+
+    function collapse_toc() {
+        var b = document.querySelector(".tocbot-toc-expand");
+        tocbot.init({
+            tocSelector: '.tocbot-list',
+            contentSelector: '.post-content',
+            headingSelector: 'h1, h2, h3, h4, h5',
+            collapseDepth: 1,
+            orderedList: false,
+            scrollSmooth: true,
+        });
+        b.setAttribute("onclick", "expand_toc()");
+        b.innerHTML = "Expand all"
+    }
+
+    function go_top() {
+        window.scrollTo(0, 0);
+    }
+
+    function go_bottom() {
+        window.scrollTo(0, document.body.scrollHeight);
+    }
+
+</script>
+    
+
+    
+    <article class="post-wrap">
+        <header class="post-header">
+            <h1 class="post-title">常见问题解决方法汇总——十四届恩智浦智能车室外电磁越野组</h1>
+            
+                <div class="post-meta">
+                    
+                        Author: <a itemprop="author" rel="author" href="/">Jorwnpay</a>
+                    
+
+                    
+                        <span class="post-time">
+                        Date: <a href="#">July 31, 2019&nbsp;&nbsp;15:08:33</a>
+                        </span>
+                    
+                    
+                        <span class="post-category">
+                    Category:
+                            
+                                <a href="/categories/%E7%BB%8F%E9%AA%8C%E6%80%BB%E7%BB%93/">经验总结</a>
+                            
+                        </span>
+                    
+                </div>
+            
+        </header>
+
+        <div class="post-content">
+            <h1 id="调车经验总结"><a href="#调车经验总结" class="headerlink" title="调车经验总结"></a>调车经验总结</h1><p><strong>电感值逐渐衰减：</strong> 可能是变阻器松了，换个变阻器试试；<br><strong>电感值没有变化：</strong> 肖特基管烧坏或线没接紧，可以换个肖特基管试试<br><strong>主板上的芯片发烫：</strong> 轻微发热是正常的，但是烫手就肯定出了问题，可能是传感器上的引脚悬空，检查引脚的是否接触上了；<br><strong>检查引脚的是否接触上的方法：</strong> 用电表的短路挡，对照电路图，测量电路上连在一起的两个点是否是短路；<br><strong>电机一卡一卡：</strong> pwm接线松动；<br><strong>电感值全是4095：</strong> 接线松动(VCC，GND)；<br><strong>舵机打角不到位：</strong> 机械结构不紧，检查传动杆；<br><strong>电感值都不变且很小：</strong> 赛道电磁线没开或断了;漆包铜线注意要刮开外面的绝缘层才会导电；<br><strong>编码器读数全是0：</strong> 使用山外的核心板需要给编码器的out口加4.7k的上拉电阻到3.3v；<br><strong>k60烧写常见问题：</strong> 见我的另一篇博客  <a target="_blank" rel="noopener" href="https://blog.csdn.net/qq_41748900/article/details/91848766?spm=1001.2014.3001.5502">烧写调试遇到的问题总结</a>；<br><strong>电感值胡乱变化：</strong> 可能是电感之间的互感作用，检查是否有离得较近且相互平行的两个电感，转下角度试试；<br><strong>电磁传感器放大倍数不够：</strong> LM358芯片放大倍数不够，换用OPA2350；<br><strong>oled显示屏不亮：</strong> 接线不紧；</p>
+<h1 id="焊接经验总结"><a href="#焊接经验总结" class="headerlink" title="焊接经验总结"></a>焊接经验总结</h1><p>这个比赛我们焊了2000多块钱的板子，被磨练到焊接技术一流，焊接经验十足，以下是些小技巧：</p>
+<ul>
+<li>0805封装的贴片电阻等：先用焊枪沾上一点锡（一个芝麻粒大小），一手拿着尖嘴镊子夹住小器件固定好，另一手拿着焊枪把锡点在小器件一侧，待锡水凝固，小器件被固定住之后，再在器件另一端直接用锡丝焊上锡，最后给之前的一端用锡丝补上锡，以确保有效接触；</li>
+<li>焊接时不要用焊枪的尖端融化锡丝，应使用尖端后面一点的锥面，这样融化的更快；</li>
+<li>焊错了可以用吸锡器把焊点吸掉，很好用；</li>
+<li>先焊矮小的器件，再焊高大的器件；</li>
+<li>多脚芯片先固定住对角的两个引脚，再焊每一个引脚，焊完用电表检查每个引脚有没有连接上；</li>
+<li>插针式器件比较好焊，放在最后焊。排插这样的多引脚插针式器件，先焊上一个脚，然后一手融化焊点，一手调整器件位置、角度，避免焊歪；</li>
+<li>led、肖特基管、电解电容等器件需要区分正负极。贴片led正面带绿色的一端是负极，反面有绿色三角或绿色T形，若是三角形则尖端为负，若是T形也是尖端为负；肖特基管通常有横杠的一端为负；电解电容长脚为正；</li>
+</ul>
+<h1 id="比赛经验总结"><a href="#比赛经验总结" class="headerlink" title="比赛经验总结"></a>比赛经验总结</h1><ul>
+<li>尽量减少杜邦线的使用，能在板子设计时候完成的就不要引线出来，杜邦线很容易松动，会造成很多恶心的问题；</li>
+<li>比赛时尽量使用拨码开关进行调试，现场烧代码很浪费时间；</li>
+<li>机械结构很重要。比如我们L车的转弯半径很大，但是有些学校改了后轮，大大减小了转弯半径，这在控制上非常有利；</li>
+<li>临比赛千万不要动代码。经验告诉我们，没有经过完整测试的代码一定有bug；</li>
+<li>不必过度纠结于一种技术含量很高的方法，只要能很好地解决问题无论技术含量高低就都是好方法，有时候一个简单的方法要比很复杂的推导更有效；</li>
+<li>发车前检查赛道的信号发生器是否连上；</li>
+</ul>
+<p>以上只是我们遇到的部分问题及原因，仅作参考。<br>我队友写了一篇带详细步骤的博客，欢迎前去打扰：<a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_42870380/article/details/98449049">第十四届恩智浦智能车室外电磁比赛总结</a></p>
+
+        </div>
+
+        
+            <section class="post-copyright">
+                
+                    <p class="copyright-item">
+                        <span>Author:</span>
+                        <span>Jorwnpay</span>
+                    </p>
+                
+                
+                
+                    <p class="copyright-item">
+                        <span>License:</span>
+                        <span>Copyright (c) 2019 <a target="_blank" rel="noopener" href="http://creativecommons.org/licenses/by-nc/4.0/">CC-BY-NC-4.0</a> LICENSE</span>
+                    </p>
+                
+                
+                     <p class="copyright-item">
+                         <span>Slogan:</span>
+                         <span>I think it is possible for ordinary people to choose to be extraordinary.</span>
+                     </p>
+                
+
+            </section>
+        
+        <section class="post-tags">
+            <div>
+                <span>Tag(s):</span>
+                <span class="tag">
+                    
+                    
+                        <a href="/tags/%E6%81%A9%E6%99%BA%E6%B5%A6%E6%99%BA%E8%83%BD%E8%BD%A6/"># 恩智浦智能车</a>
+                    
+                        
+                </span>
+            </div>
+            <div>
+                <a href="javascript:window.history.back();">back</a>
+                <span>· </span>
+                <a href="/">home</a>
+            </div>
+        </section>
+        <section class="post-nav">
+            
+                <a class="prev" rel="prev" href="/2019/08/02/RoboCup%E4%BB%BF%E7%9C%9F3D%E5%BA%95%E5%B1%82%E9%80%9A%E4%BF%A1%E6%A8%A1%E5%9D%97%E4%BB%8B%E7%BB%8D%EF%BC%88%E4%B8%80%EF%BC%89/">RoboCup仿真3D底层通信模块介绍（一）</a>
+            
+            
+            <a class="next" rel="next" href="/2019/07/15/%E7%BE%8E%E5%8C%96Clion%EF%BC%9A%E5%A5%BD%E7%9C%8B%E7%9A%84%E4%BB%A3%E7%A0%81%E9%A2%9C%E8%89%B2%E5%92%8CIDE%E7%95%8C%E9%9D%A2/">美化Clion：好看的代码颜色和IDE界面</a>
+            
+        </section>
+
+
+    </article>
+</div>
+
+            </div>
+            <footer id="footer" class="footer">
+    <div class="copyright">
+        <span>© Jorwnpay | Powered by <a href="https://hexo.io" target="_blank">Hexo</a> & <a href="https://github.com/Siricee/hexo-theme-Chic" target="_blank">Chic</a></span>
+    </div>
+</footer>
+
+    </div>
+</body>
+
+</html>

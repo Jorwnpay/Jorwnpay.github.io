@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <meta name="author" content="Jorwnpay">
+
+
+
+
+
+<title>RoboCup仿真3D底层通信模块介绍(二) | Mr.Duck</title>
+
+
+
+    <link rel="icon" href="/icon.png">
+
+
+
+
+    <!-- stylesheets list from _config.yml -->
+    
+    <link rel="stylesheet" href="/css/style.css">
+    
+
+
+
+    <!-- scripts list from _config.yml -->
+    
+    <script src="/js/script.js"></script>
+    
+    <script src="/js/tocbot.min.js"></script>
+    
+
+
+
+    
+    
+        <!-- MathJax配置，可通过单美元符号书写行内公式等 -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+    "HTML-CSS": {
+        preferredFont: "TeX",
+        availableFonts: ["STIX","TeX"],
+        linebreaks: { automatic:true },
+        EqnChunk: (MathJax.Hub.Browser.isMobile ? 10 : 50)
+    },
+    tex2jax: {
+        inlineMath: [ ["$", "$"], ["\\(","\\)"] ],
+        processEscapes: true,
+        ignoreClass: "tex2jax_ignore|dno",
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    },
+    TeX: {
+        equationNumbers: { autoNumber: "AMS" },
+        noUndefined: { attributes: { mathcolor: "red", mathbackground: "#FFEEEE", mathsize: "90%" } },
+        Macros: { href: "{}" }
+    },
+    messageStyle: "none"
+    });
+</script>
+<!-- 给MathJax元素添加has-jax class -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for(i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+<!-- 通过连接CDN加载MathJax的js代码 -->
+<script type="text/javascript" async
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+
+
+    
+
+
+<meta name="generator" content="Hexo 5.4.1"></head>
+
+<body>
+    <script>
+        // this function is used to check current theme before page loaded.
+        (() => {
+            const currentTheme = window.localStorage && window.localStorage.getItem('theme') || '';
+            const isDark = currentTheme === 'dark';
+            const pagebody = document.getElementsByTagName('body')[0]
+            if (isDark) {
+                pagebody.classList.add('dark-theme');
+                // mobile
+                document.getElementById("mobile-toggle-theme").innerText = "· Dark"
+            } else {
+                pagebody.classList.remove('dark-theme');
+                // mobile
+                document.getElementById("mobile-toggle-theme").innerText = "· Light"
+            }
+        })();
+    </script>
+
+
+    <div class="wrapper">
+        <header>
+    <nav class="navbar">
+        <div class="container">
+            <div class="navbar-header header-logo"><a href="/">Jorwnpay&#39;s Blog</a></div>
+            <div class="menu navbar-right">
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                    <a class="menu-item" href="/category">Categories</a>
+                
+                    <a class="menu-item" href="/tag">Tags</a>
+                
+                    <a class="menu-item" href="/about">About</a>
+                
+                <input id="switch_default" type="checkbox" class="switch_default">
+                <label for="switch_default" class="toggleBtn"></label>
+            </div>
+        </div>
+    </nav>
+
+    
+    <nav class="navbar-mobile" id="nav-mobile">
+        <div class="container">
+            <div class="navbar-header">
+                <div>
+                    <a href="/">Jorwnpay&#39;s Blog</a><a id="mobile-toggle-theme">·&nbsp;Light</a>
+                </div>
+                <div class="menu-toggle" onclick="mobileBtn()">&#9776; Menu</div>
+            </div>
+            <div class="menu" id="mobile-menu">
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                    <a class="menu-item" href="/category">Categories</a>
+                
+                    <a class="menu-item" href="/tag">Tags</a>
+                
+                    <a class="menu-item" href="/about">About</a>
+                
+            </div>
+        </div>
+    </nav>
+
+</header>
+<script>
+    var mobileBtn = function f() {
+        var toggleMenu = document.getElementsByClassName("menu-toggle")[0];
+        var mobileMenu = document.getElementById("mobile-menu");
+        if(toggleMenu.classList.contains("active")){
+           toggleMenu.classList.remove("active")
+            mobileMenu.classList.remove("active")
+        }else{
+            toggleMenu.classList.add("active")
+            mobileMenu.classList.add("active")
+        }
+    }
+</script>
+            <div class="main">
+                <div class="container">
+    
+    
+        <div class="post-toc">
+    <div class="tocbot-list">
+    </div>
+    <div class="tocbot-list-menu">
+        <a class="tocbot-toc-expand" onclick="expand_toc()">Expand all</a>
+        <a onclick="go_top()">Back to top</a>
+        <a onclick="go_bottom()">Go to bottom</a>
+    </div>
+</div>
+
+<script>
+    document.ready(
+        function () {
+            tocbot.init({
+                tocSelector: '.tocbot-list',
+                contentSelector: '.post-content',
+                headingSelector: 'h1, h2, h3, h4, h5',
+                collapseDepth: 1,
+                orderedList: false,
+                scrollSmooth: true,
+            })
+        }
+    )
+
+    function expand_toc() {
+        var b = document.querySelector(".tocbot-toc-expand");
+        tocbot.init({
+            tocSelector: '.tocbot-list',
+            contentSelector: '.post-content',
+            headingSelector: 'h1, h2, h3, h4, h5',
+            collapseDepth: 6,
+            orderedList: false,
+            scrollSmooth: true,
+        });
+        b.setAttribute("onclick", "collapse_toc()");
+        b.innerHTML = "Collapse all"
+    }
+
+    function collapse_toc() {
+        var b = document.querySelector(".tocbot-toc-expand");
+        tocbot.init({
+            tocSelector: '.tocbot-list',
+            contentSelector: '.post-content',
+            headingSelector: 'h1, h2, h3, h4, h5',
+            collapseDepth: 1,
+            orderedList: false,
+            scrollSmooth: true,
+        });
+        b.setAttribute("onclick", "expand_toc()");
+        b.innerHTML = "Expand all"
+    }
+
+    function go_top() {
+        window.scrollTo(0, 0);
+    }
+
+    function go_bottom() {
+        window.scrollTo(0, document.body.scrollHeight);
+    }
+
+</script>
+    
+
+    
+    <article class="post-wrap">
+        <header class="post-header">
+            <h1 class="post-title">RoboCup仿真3D底层通信模块介绍(二)</h1>
+            
+                <div class="post-meta">
+                    
+                        Author: <a itemprop="author" rel="author" href="/">Jorwnpay</a>
+                    
+
+                    
+                        <span class="post-time">
+                        Date: <a href="#">August 3, 2019&nbsp;&nbsp;11:37:11</a>
+                        </span>
+                    
+                    
+                        <span class="post-category">
+                    Category:
+                            
+                                <a href="/categories/%E7%BB%8F%E9%AA%8C%E6%80%BB%E7%BB%93/">经验总结</a>
+                            
+                        </span>
+                    
+                </div>
+            
+        </header>
+
+        <div class="post-content">
+            <h1 id="server和agent之间通信的msg格式-amp-agent的效应器"><a href="#server和agent之间通信的msg格式-amp-agent的效应器" class="headerlink" title="server和agent之间通信的msg格式 &amp; agent的效应器"></a>server和agent之间通信的msg格式 &amp; agent的效应器</h1><hr>
+<p>@[toc]</p>
+<hr>
+<p>效应器用于在仿真中起作用，它们被发送到server以改变比赛状态。即通过效应器来控制机器人的action。</p>
+<h2 id="一、General-Effectors（一般效应器）"><a href="#一、General-Effectors（一般效应器）" class="headerlink" title="一、General Effectors（一般效应器）"></a>一、General Effectors（一般效应器）</h2><h3 id="1-Create-Effector（创造效应器）"><a href="#1-Create-Effector（创造效应器）" class="headerlink" title="1.Create Effector（创造效应器）"></a>1.Create Effector（创造效应器）</h3><p>机器人最初连接到server时是不可见的，不能影响仿真器。它只拥有一个所谓的创造效应器。机器人用这个效应器来建议server根据一个传递参数的场景描述文件去创建它。这个文件被用来创建物理表示和所有进一步的效应器和传感器。<br><strong>消息格式：</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Message format: (scene &lt;filename&gt;)</span><br><span class="line">Example message: (scene rsg/agent/nao/nao.rsg)</span><br></pre></td></tr></table></figure>
+<h3 id="2-HingeJoint-Effector-（铰链关节效应器）"><a href="#2-HingeJoint-Effector-（铰链关节效应器）" class="headerlink" title="2.HingeJoint Effector （铰链关节效应器）"></a>2.HingeJoint Effector （铰链关节效应器）</h3><p>第一个参数是铰链关节效应器的名字。第二个参数为指定的关节每个周期角度变化的度数。如果要求的角度变化超出力的最大值所能提供的角速度，则会使用角速度的最大值（7.035deg/cycle）。<br><strong>消息格式：</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Message format: (&lt;name&gt; &lt;ax&gt;)</span><br><span class="line">&lt;name&gt; - the name of the corresponding hinge joint</span><br><span class="line">&lt;ax&gt; - the angular change rate in deg/cycle (max joint speed 7.035deg/cycle)</span><br><span class="line">Example message: (lae3 5.3)</span><br></pre></td></tr></table></figure>
+<h3 id="3-UniversalJoint-Effector（万向关节效应器）"><a href="#3-UniversalJoint-Effector（万向关节效应器）" class="headerlink" title="3.UniversalJoint Effector（万向关节效应器）"></a>3.UniversalJoint Effector（万向关节效应器）</h3><p>万向关节效应器可以沿着两个特定的自由轴转动。第一个参数是万向关节效应器的名字，第二、三个参数是两个自由度关节转动的角速度。同样，如果要求的角度变化超出力的最大值所能提供的角速度，则会使用角速度的最大值（7.035deg/cycle）。<br><strong>消息格式：</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Message format: (&lt;name&gt; &lt;ax1&gt; &lt;ax2&gt;)</span><br><span class="line">&lt;name&gt; - the name of the corresponding universal joint</span><br><span class="line">&lt;ax1&gt; &lt;ax2&gt; - the angular change rates in deg/cycle (max joint speed 7.035deg/cycle)</span><br><span class="line">Example message: (lae1 2 -2.3 1.2)</span><br></pre></td></tr></table></figure>
+<h2 id="二、Soccer-Effectors（足球仿真比赛专用效应器）"><a href="#二、Soccer-Effectors（足球仿真比赛专用效应器）" class="headerlink" title="二、Soccer Effectors（足球仿真比赛专用效应器）"></a>二、Soccer Effectors（足球仿真比赛专用效应器）</h2><h3 id="1-Init-Effector（初始化效应器）"><a href="#1-Init-Effector（初始化效应器）" class="headerlink" title="1.Init Effector（初始化效应器）"></a>1.Init Effector（初始化效应器）</h3><p>对每个机器人来说初始化命令只在创建效应器发送过场景命令后发送一次。它用合规的队伍和合规的号码将这个机器人注册为一个成员。一个队伍的所有球员必须使用相同的队名和不同的编号。如果机器人发送0作为球员编号，这个号码会被server自动分配为下一个空闲号码。球队开场上在哪边取决于哪只球队先连接上。<br><strong>消息格式：</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Message format: (init (unum &lt;playernumber&gt;)(teamname &lt;yourteamname&gt;))</span><br><span class="line">&lt;playernumber&gt; - the player number of the player</span><br><span class="line">&lt;yourteamname&gt; - the name of the player’s team</span><br><span class="line">Example message: (init (unum 1)(teamname FHO))</span><br></pre></td></tr></table></figure>
+<h3 id="2-Beam-Effector（传送效应器）"><a href="#2-Beam-Effector（传送效应器）" class="headerlink" title="2.Beam Effector（传送效应器）"></a>2.Beam Effector（传送效应器）</h3><p>传送效应器允许球员在开场之前和进球之后把自己定位到球场上。x、y坐标定义了球场上的坐标，rot的值允许定义球员的水平角度。0度是指x轴正向，90度指y轴正向。<br><strong>消息格式：</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Message format: (beam &lt;x&gt; &lt;y&gt; &lt;rot&gt;)</span><br><span class="line">&lt;x&gt; &lt;y&gt; - target position on the soccer field in meter</span><br><span class="line">&lt;rot&gt; - Z-rotation angle on target position in degrees</span><br><span class="line">Example message: (beam 10.0 -10.0 0.0)</span><br></pre></td></tr></table></figure>
+<h3 id="3-Say-Effector（喊话效应器）"><a href="#3-Say-Effector（喊话效应器）" class="headerlink" title="3.Say Effector（喊话效应器）"></a>3.Say Effector（喊话效应器）</h3><p>喊话效应器允许球员之间通过广播交流。<br><strong>消息格式：</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Message format: (say &lt;message&gt;)</span><br><span class="line">&lt;message&gt; - up to 20 characters, which may be taken from the ASCII printing character subset</span><br><span class="line">[0x20, 0x7E] except the white space character (t) and the normal brackets ( and )</span><br><span class="line">Example message: (say helloworld)</span><br></pre></td></tr></table></figure>
+
+        </div>
+
+        
+            <section class="post-copyright">
+                
+                    <p class="copyright-item">
+                        <span>Author:</span>
+                        <span>Jorwnpay</span>
+                    </p>
+                
+                
+                
+                    <p class="copyright-item">
+                        <span>License:</span>
+                        <span>Copyright (c) 2019 <a target="_blank" rel="noopener" href="http://creativecommons.org/licenses/by-nc/4.0/">CC-BY-NC-4.0</a> LICENSE</span>
+                    </p>
+                
+                
+                     <p class="copyright-item">
+                         <span>Slogan:</span>
+                         <span>I think it is possible for ordinary people to choose to be extraordinary.</span>
+                     </p>
+                
+
+            </section>
+        
+        <section class="post-tags">
+            <div>
+                <span>Tag(s):</span>
+                <span class="tag">
+                    
+                    
+                        <a href="/tags/RoboCup3D/"># RoboCup3D</a>
+                    
+                        
+                </span>
+            </div>
+            <div>
+                <a href="javascript:window.history.back();">back</a>
+                <span>· </span>
+                <a href="/">home</a>
+            </div>
+        </section>
+        <section class="post-nav">
+            
+                <a class="prev" rel="prev" href="/2019/08/11/%E8%AE%B0%E5%BD%95%E4%B8%8B%E4%B8%80%E4%BA%9B%E5%A5%BD%E6%96%87%E7%AB%A0/">记录下一些好文章</a>
+            
+            
+            <a class="next" rel="next" href="/2019/08/02/RoboCup%E4%BB%BF%E7%9C%9F3D%E5%BA%95%E5%B1%82%E9%80%9A%E4%BF%A1%E6%A8%A1%E5%9D%97%E4%BB%8B%E7%BB%8D%EF%BC%88%E4%B8%80%EF%BC%89/">RoboCup仿真3D底层通信模块介绍（一）</a>
+            
+        </section>
+
+
+    </article>
+</div>
+
+            </div>
+            <footer id="footer" class="footer">
+    <div class="copyright">
+        <span>© Jorwnpay | Powered by <a href="https://hexo.io" target="_blank">Hexo</a> & <a href="https://github.com/Siricee/hexo-theme-Chic" target="_blank">Chic</a></span>
+    </div>
+</footer>
+
+    </div>
+</body>
+
+</html>
