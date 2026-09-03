@@ -261,7 +261,7 @@
 </blockquote>
 <h2 id="前言：8086汇编指令概述"><a href="#前言：8086汇编指令概述" class="headerlink" title="前言：8086汇编指令概述"></a>前言：8086汇编指令概述</h2><p>计算机的指令通常包含操作码和操作数两部分。指令有单操作数、双操作数和无操作数三种，其中双操作数的两个操作数要用逗号隔开，逗号左边是目的操作数，逗号右边是源操作数。<br><strong>例如:</strong>  MOV AX,CX<br>该指令将CX寄存器中的数值放到AX寄存器中，其中MOV为操作码，AX为目的操作数，CX为源操作数。</p>
 <p>@[toc]</p>
-<h2 id="1-立即寻址方式"><a href="#1-立即寻址方式" class="headerlink" title="1.立即寻址方式"></a>1.立即寻址方式</h2><p>在立即寻址方式下，操作数直接包含在指令中，即源操作数是立即数。<br>立即数：8位或16位的常数。<br><strong>例1：</strong> MOV AL,26H<br>该指令将一个8位立即数26H送到AL寄存器中。<br><strong>例2：</strong> MOV CX,2A50H<br>该指令将一个16位立即数2A50H送到CX寄存器中。其中2AH为高8位，放在高位地址；50H为低8位，放在低位地址。<br>如下图所示.(代码段从上到下地址越来越高)<br><img src="https://img-blog.csdnimg.cn/20191101193638592.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQxNzQ4OTAw,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"><br><strong>注意：</strong></p>
+<h2 id="1-立即寻址方式"><a href="#1-立即寻址方式" class="headerlink" title="1.立即寻址方式"></a>1.立即寻址方式</h2><p>在立即寻址方式下，操作数直接包含在指令中，即源操作数是立即数。<br>立即数：8位或16位的常数。<br><strong>例1：</strong> MOV AL,26H<br>该指令将一个8位立即数26H送到AL寄存器中。<br><strong>例2：</strong> MOV CX,2A50H<br>该指令将一个16位立即数2A50H送到CX寄存器中。其中2AH为高8位，放在高位地址；50H为低8位，放在低位地址。<br>如下图所示.(代码段从上到下地址越来越高)<br><img src="https://i-blog.csdnimg.cn/20191101193638592.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQxNzQ4OTAw,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"><br><strong>注意：</strong></p>
 <ul>
 <li>在所有的指令中，立即数只能作源操作数，不能作目的操作数。</li>
 <li>以A~F开头的数字出现在指令中时，前面要加一个数字0，以免与其它符号相混淆。例如，MOV AX,0FF00H</li>
@@ -269,7 +269,7 @@
 <h2 id="2-寄存器寻址方式"><a href="#2-寄存器寻址方式" class="headerlink" title="2.寄存器寻址方式"></a>2.寄存器寻址方式</h2><p>在寄存器寻址方式下，操作数包含在寄存器中，由指令指定寄存器的名称，即源操作数是寄存器。对于16位源操作数，寄存器可以是AX、BX、CX、DX、SI、DI、SP、和BP；对于8位操作数，寄存器可以是AH、AL、BH、BL、CH、CL、DH、DL。</p>
 <blockquote>
 <ul>
-<li>插一个知识点：8086CPU内部的寄存器们<br>左边是我为了记住这几种寄存器编出来的方法，死（si）对应S、吧（ba）对应B。。。<del>话糙理不糙。</del><br><img src="https://img-blog.csdnimg.cn/20191101195000719.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQxNzQ4OTAw,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></li>
+<li>插一个知识点：8086CPU内部的寄存器们<br>左边是我为了记住这几种寄存器编出来的方法，死（si）对应S、吧（ba）对应B。。。<del>话糙理不糙。</del><br><img src="https://i-blog.csdnimg.cn/20191101195000719.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQxNzQ4OTAw,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></li>
 </ul>
 </blockquote>
 <p><strong>例1：</strong> MOV DX,AX<br>该指令将AX寄存器里存放的16位数据送到DX寄存器中。<br><strong>例2：</strong> MOV DL,AH<br>该指令将AH寄存器里存放的8位数据送到DL寄存器中。<br><strong>注意：</strong></p>
@@ -298,7 +298,7 @@
 <li>MOV AX, [BX][SI]<br>这个就相当于把上一种方式里的COUNT换成了[BX]。<br>设BX=400H，那么该指令就是将DS:[2000H+400H]地址处存放的数据送给AX。<h3 id="（5）相对基址变址寻址方式"><a href="#（5）相对基址变址寻址方式" class="headerlink" title="（5）相对基址变址寻址方式"></a>（5）相对基址变址寻址方式</h3>像贪吃蛇一样，再给源操作数加上一节。。。</li>
 <li>MOV AX,COUNT[BX][SI]<br>猜也能猜出来，这条指令的作用是：将DS:[COUNT+BX+SI]地址处存放的数据送给AX。<br>设COUNT=40H，BX=2000H，SI=400H，那么该指令就是将DS:[2000H+400H+40H]地址处存放的数据送给AX。</li>
 </ul>
-<p><strong>大注意：</strong> 以上五种方式在使用中要注意<br><img src="https://img-blog.csdnimg.cn/20191101220456178.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQxNzQ4OTAw,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"><img src="https://img-blog.csdnimg.cn/20191101220822835.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQxNzQ4OTAw,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<p><strong>大注意：</strong> 以上五种方式在使用中要注意<br><img src="https://i-blog.csdnimg.cn/20191101220456178.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQxNzQ4OTAw,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"><img src="https://i-blog.csdnimg.cn/20191101220822835.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQxNzQ4OTAw,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
 <h2 id="4-其他寻址方式"><a href="#4-其他寻址方式" class="headerlink" title="4.其他寻址方式"></a>4.其他寻址方式</h2><h3 id="（1）隐含寻址"><a href="#（1）隐含寻址" class="headerlink" title="（1）隐含寻址"></a>（1）隐含寻址</h3><p>指令中不指明操作数，但隐含规定的寻址方式。例如指令DAA，它的含义是对寄存器AL中的数据进行十进制数调整，结果仍留在AL中。</p>
 <h3 id="（2）I-O端口寻址"><a href="#（2）I-O端口寻址" class="headerlink" title="（2）I/O端口寻址"></a>（2）I/O端口寻址</h3><p>8086有直接端口和间接端口两种寻址方式。</p>
 <ul>
