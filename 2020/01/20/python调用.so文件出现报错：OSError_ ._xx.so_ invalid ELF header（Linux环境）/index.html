@@ -258,9 +258,9 @@
         <div class="post-content">
             <h3 id="问题描述："><a href="#问题描述：" class="headerlink" title="问题描述："></a>问题描述：</h3><p>我在使用python调用c++程序时，先用g++把我的.hpp文件编译成.so文件，在运行python程序时出现下面的错误：</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">Traceback (most recent call last):</span><br><span class="line">  File &quot;pos.py&quot;, line 2, in &lt;module&gt;</span><br><span class="line">    pos = CDLL(&#x27;./position.so&#x27;)</span><br><span class="line">  File &quot;/usr/lib/python2.7/ctypes/__init__.py&quot;, line 362, in __init__</span><br><span class="line">    self._handle = _dlopen(self._name, mode)</span><br><span class="line">OSError: ./position.so: invalid ELF header</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-<p><img src="https://img-blog.csdnimg.cn/20200120204025999.png" alt="在这里插入图片描述"></p>
-<h3 id="解决方法："><a href="#解决方法：" class="headerlink" title="解决方法："></a>解决方法：</h3><p>我的c++源文件原来的后缀名是.hpp，一开始在网上没有找到答案，然后突然想到我的程序是在windows上写的，写完搬到了Linux上，可能是.hpp文件后缀的问题<br><img src="https://img-blog.csdnimg.cn/20200120204350467.png" alt="在这里插入图片描述"><br>把它改成.cpp或者.cc之后再重新编译，然后再运行python程序就没问题啦：<br><img src="https://img-blog.csdnimg.cn/20200120204550390.png" alt="在这里插入图片描述"></p>
-<p><img src="https://img-blog.csdnimg.cn/20200120204513288.png" alt="在这里插入图片描述"></p>
+<p><img src="https://i-blog.csdnimg.cn/20200120204025999.png" alt="在这里插入图片描述"></p>
+<h3 id="解决方法："><a href="#解决方法：" class="headerlink" title="解决方法："></a>解决方法：</h3><p>我的c++源文件原来的后缀名是.hpp，一开始在网上没有找到答案，然后突然想到我的程序是在windows上写的，写完搬到了Linux上，可能是.hpp文件后缀的问题<br><img src="https://i-blog.csdnimg.cn/20200120204350467.png" alt="在这里插入图片描述"><br>把它改成.cpp或者.cc之后再重新编译，然后再运行python程序就没问题啦：<br><img src="https://i-blog.csdnimg.cn/20200120204550390.png" alt="在这里插入图片描述"></p>
+<p><img src="https://i-blog.csdnimg.cn/20200120204513288.png" alt="在这里插入图片描述"></p>
 
         </div>
 
