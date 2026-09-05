@@ -262,7 +262,8 @@
             <p>Agent 最后把相似度计算方法写成了 Recall。</p>
             <p>这个选择甚至说得通。只看那句 Plan，很难指着它说，你怎么能这样理解。麻烦也正在这里。程序运行正常，结果落在 0 到 1 之间，函数名和变量名都像那么回事。测试若由同一个 Agent 顺手补上，也很容易通过。<strong>但这就是错的。</strong></p>
             <p>用一个很小的例子就能看出差别。</p>
-            <pre><code class="language-text">reference  = [A, B]
+            <pre><code class="language-text">
+            reference  = [A, B]
             prediction = [A, B, C, D]
             overlap    = 2
 
@@ -378,8 +379,8 @@
             <p>```text
             reference  = [A, B]
             prediction = [A, B, C, D]
-            threshold  = 0.8
-            precision = 0.50
+            threshold  = 0.8</p>
+            <p>precision = 0.50
             recall    = 1.00
             F1        ≈ 0.667
             ```</p>
