@@ -377,11 +377,11 @@
             <h4 id="recall">专门卡住 Recall 的例子</h4>
             <p>```text
             reference  = [A, B]
-prediction = [A, B, C, D]
-threshold  = 0.8</p>
-<p>precision = 0.50
-recall    = 1.00
-F1        ≈ 0.667
+            prediction = [A, B, C, D]
+            threshold  = 0.8
+            precision = 0.50
+            recall    = 1.00
+            F1        ≈ 0.667
             ```</p>
             <h4 id="_5">一直应该成立的关系</h4>
             <p>两条相同路径得分为 1。交换 prediction 和 reference 后，F1 保持不变。Overlap 不变时，只给 prediction 增加无关节点，F1 不能上升。得分始终落在 0 和 1 之间，空路径组合按照约定返回确定值。</p>
